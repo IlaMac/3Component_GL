@@ -1,4 +1,4 @@
-project(default-name CXX)
+project(GL_3components CXX)
 cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -235,7 +235,7 @@ message(STATUS "Settings -- flags   : ${SETTINGS_INFO_OPT}")
 ##################################################################
 file(GLOB_RECURSE SOURCES "source/*.cpp")
 file(GLOB_RECURSE HEADERS "source/*.h")
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} source/initialization.cpp source/initialization.h source/measures.cpp source/measures.h source/o3.h)
 
 
 ##################################################################
