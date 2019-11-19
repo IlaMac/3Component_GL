@@ -10,7 +10,6 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
     double acc_rate=0.5, acc_l=0., acc_A=0.; //acc_theta=0., acc_rho=0.,
     struct O2 NewPsi;
     struct O2 OldPsi;
-    double h2=(Hp.h*Hp.h);
     double NewA=0.;
     double newE=0., oldE=0., minus_deltaE=0.;
 
@@ -41,8 +40,7 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                             Site[ix + Lx * (iy + iz * Ly)].Psi[alpha] = OldPsi;
                         }
                     }
-                }
-                for (alpha = 0; alpha < 3; alpha++) {
+
                     //Update of A
                     rand=rand_sym(MCp.rng);
                     d_A=((MCp.lbox_A)*rand);
@@ -136,9 +134,6 @@ double F_2(double newA, unsigned int vec, unsigned int ix, unsigned int iy, unsi
     for(m=0; m<3; m++){
         if(m != vec){
             F_A=(Site[ix+ Lx*(iy+ iz*Ly)].A[m] + Site[nn(ix, iy, iz, m, 1)].A[vec] - Site[nn(ix, iy, iz, vec, 1)].A[m] - newA);
-            //printf("x %d y%d z%d \n", ix, iy, iz);
-            //printf("nnx %d nny%d nnz%d \n", (int)nn(ix, iy, iz, m, 1)%Lx, (int)(nn(ix, iy, iz, m, 1)/Lx)%Ly, (int)nn(ix, iy, iz, m, 1)/(Lx*Ly));
-
             F2_A+=(F_A*F_A);
         }
     }

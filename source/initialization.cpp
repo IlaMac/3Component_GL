@@ -19,7 +19,7 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
         Hp.eta=1;
         Hp.e=0.5;
         Hp.h= 5.0;
-        Hp.beta=10.2265;
+        Hp.beta=0.285;
     }
 
 }
@@ -35,8 +35,8 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
         }
     }else{
         MCp.rnd_seed=1;
-        MCp.tau=10;
-        MCp.nmisu=1000;
+        MCp.tau=20;
+        MCp.nmisu=5000;
         MCp.n_autosave=1000;
         MCp.lbox_l=1.0;
         MCp.lbox_rho=0.5;

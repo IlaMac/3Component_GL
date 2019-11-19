@@ -55,13 +55,76 @@ void energy(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
     mis.E=(double) h_tot/N;
 }
 
-void dual_stiffness(std::ofstream &file, struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
+void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
+
+    double qx_min=C_TWO_PI/(Lx*Hp.h);
+    double invNorm= 1./((C_TWO_PI)*(C_TWO_PI)*N);
+    unsigned int ix, iy, iz;
+    double Re_rhoz=0.;
+    double Im_rhoz=0.;
+    double Dx_Ay=0., Dy_Ax=0.;
+
+    for(ix=0; ix<Lx;ix++){
+        for(iy=0; iy<Ly;iy++){
+            for(iz=0; iz<Lx;iz++){
+                Dx_Ay=(Site[nn(ix, iy, iz, 0, 1)].A[1]- Site[ix + Lx*(iy+ Ly*iz)].A[1])/Hp.h;
+                Dy_Ax=(Site[nn(ix, iy, iz, 1, 1)].A[0]- Site[ix + Lx*(iy+ Ly*iz)].A[0])/Hp.h;
+                Re_rhoz+=(cos((double)qx_min*ix)*(Dx_Ay -Dy_Ax));
+                Im_rhoz+=(sin((double)qx_min*ix)*(Dx_Ay -Dy_Ax));
+            }
+        }
+    }
+    mis.d_rhoz=invNorm*((Re_rhoz*Re_rhoz) +(Im_rhoz*Im_rhoz));
+}
+
+void magnetization(struct Measures &mis, struct Node* Site){
+    //The Ising parameter m(x,y)=+/-1 indicates the chirality of the three phases. If the phases are ordered as: phi_1, phi_2, phi_3 then m=1; otherwise if the order is phi_1, phi_3, phi_2 then m=-1.
+    unsigned ix, iy, iz, alpha;
+    double *phi_shifted;
+
+    phi_shifted=(double *) calloc(3, sizeof(double));
+
+    for(ix=0; ix<Lx;ix++) {
+        for (iy = 0; iy < Ly; iy++) {
+            for (iz = 0; iz < Lx; iz++) {
+                for(alpha=0; alpha<3; alpha++){
+                    phi_shifted[alpha]=Site[ix +Lx*(iy+Ly*iz)].Psi[alpha].t - Site[ix +Lx*(iy+Ly*iz)].Psi[0].t;
+                    while(phi_shifted[alpha] >= C_TWO_PI){ phi_shifted[alpha]-= C_TWO_PI;}
+                    while(phi_shifted[alpha]< 0){ phi_shifted[alpha]+=C_TWO_PI;}
+                }
+                if(phi_shifted[1]>=phi_shifted[2]){
+                    mis.m+=1;
+                }else{
+                    mis.m+=(-1);
+                }
+            }
+        }
+    }
+    mis.m=mis.m/N;
+}
+
+void density_psi(struct Measures &mis, struct Node* Site){
+
+    unsigned ix, iy, iz, alpha;
+
+    for(ix=0; ix<Lx;ix++) {
+        for (iy = 0; iy < Ly; iy++) {
+            for (iz = 0; iz < Lx; iz++) {
+                for (alpha = 0; alpha < 3; alpha++) {
+                    mis.density_psi[alpha]+=(Site[ix+Lx*(iy +Ly*iz)].Psi[alpha].r);
+                }
+            }
+        }
+    }
+
+    for (alpha = 0; alpha < 3; alpha++) {
+        mis.density_psi[alpha]/=N;
+    }
+
 
 }
 
-void magnetization( std::ofstream &file, struct Measures &mis, struct Node* Site){
 
-}
 
 void measures_init(struct Measures &mis){
     //Initialization
@@ -72,6 +135,18 @@ void measures_init(struct Measures &mis){
     mis.E_kin=0.;
     mis.E_Josephson=0.;
     mis.E_B=0.;
+    mis.density_psi=(double *) calloc(3, sizeof(double));
 }
 
+void measures_reset(struct Measures &mis){
+    //Initialization
+    mis.d_rhoz=(double)0.0;
+    mis.m=(double)0.0;
+    mis.E=(double)0.0;
+    mis.E_pot=(double)0.0;
+    mis.E_kin=(double)0.0;
+    mis.E_Josephson=(double)0.0;
+    mis.E_B=(double)0.0;
+    memset(mis.density_psi, 0, 3*sizeof(double));
+}
 

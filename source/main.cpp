@@ -58,19 +58,35 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     std::ofstream Energy_file;
     std::ofstream Magnetization_file;
     std::ofstream DualStiff_file;
+    std::ofstream DensityPsi_file;
+
+    //  fs::path energy_file = directory_write / "Energy.txt"; Use this sintax to send the path of the file to the measures function so that the writing to a file would occur there.
+
     char Efile_name[256];
     char Mfile_name[256];
     char DSfile_name[256];
+    char DPsi_name[256];
 
     sprintf(Efile_name, "%s/Energy.txt", directory_write.c_str());
     sprintf(Mfile_name, "%s/Magnetization.txt", directory_write.c_str());
     sprintf(DSfile_name, "%s/Dual_Stiffness.txt", directory_write.c_str());
+    sprintf(DPsi_name, "%s/Psi_density.txt", directory_write.c_str());
+
 
     Energy_file.open(Efile_name, std::ios::out);
     Energy_file.close();
     Energy_file.open(Efile_name, std::ios::app);
-    Magnetization_file.open(Mfile_name, std::ios::app);
+    DualStiff_file.open(DSfile_name, std::ios::out);
+    DualStiff_file.close();
     DualStiff_file.open(DSfile_name, std::ios::app);
+    Magnetization_file.open(Mfile_name, std::ios::out);
+    Magnetization_file.close();
+    Magnetization_file.open(Mfile_name, std::ios::app);
+    DensityPsi_file.open(DPsi_name, std::ios::out);
+    DensityPsi_file.close();
+    DensityPsi_file.open(DPsi_name, std::ios::app);
+
+    measures_init(mis);
 
     for (n = 0; n<MCp.nmisu; n++) {
 
@@ -78,9 +94,15 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
             metropolis(Site, MCp, Hp);
         }
         //Measures
-        measures_init(mis);
+        measures_reset(mis);
         energy(mis, Hp, Site);
         Energy_file<<n<<"\t"<< mis.E<< "\t"<< mis.E_pot<< "\t"<< mis.E_kin<< "\t"<< mis.E_Josephson<< "\t"<< mis.E_B<<  std::endl;
+        dual_stiffness(mis, Hp, Site);
+        DualStiff_file<<n<<"\t"<<mis.d_rhoz<<std::endl;
+        magnetization(mis, Site);
+        Magnetization_file<<n<<"\t"<<mis.m<<"\t"<<(mis.m*mis.m)<<"\t"<<(mis.m*mis.m*mis.m*mis.m)<<std::endl;
+        density_psi(mis, Site);
+        DensityPsi_file<<n<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
 
 
         if ((n % MCp.n_autosave) == 0) {
