@@ -88,6 +88,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
     measures_init(mis);
 
+
     for (n = 0; n<MCp.nmisu; n++) {
 
         for (t = 0; t < MCp.tau; t++) {
@@ -107,17 +108,25 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
         if ((n % MCp.n_autosave) == 0) {
             //Save a configuration for the restarting
-        }
+            save_lattice(Site, directory_write, std::string("n") + std::to_string(n) );
+            }
 
     }
+    save_lattice(Site, directory_write, std::string("final"));
     Energy_file.close();
     Magnetization_file.close();
     DualStiff_file.close();
 }
 
-unsigned int nn(unsigned int ix, unsigned int iy, unsigned int iz, unsigned int coord, int dir){
+unsigned int nn(unsigned int i, unsigned int coord, int dir){
 
+    unsigned int ix, iy, iz;
     int ix_new=0, iy_new=0, iz_new=0;
+
+    ix=i%Lx;
+    iy=(i/Lx)%Ly;
+    iz=(i/(Lx*Ly));
+
     if(coord==0){
         ix_new= ix + (int)dir/sqrt(dir*dir);
         if(ix_new==Lx){ ix_new=0;}

@@ -19,7 +19,7 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
         Hp.eta=1;
         Hp.e=0.5;
         Hp.h= 5.0;
-        Hp.beta=0.285;
+        Hp.beta=0.244;
     }
 
 }
@@ -36,8 +36,8 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
     }else{
         MCp.rnd_seed=1;
         MCp.tau=20;
-        MCp.nmisu=5000;
-        MCp.n_autosave=1000;
+        MCp.nmisu=100000;
+        MCp.n_autosave=20000;
         MCp.lbox_l=1.0;
         MCp.lbox_rho=0.5;
         MCp.lbox_theta=C_PI;
@@ -52,18 +52,13 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
 
     fs::path psi_init_file = directory_read / "Psi_init.txt";
     fs::path a_init_file = directory_read / "A_init.txt";
-    unsigned int i=0, alpha=0;
-    double psi_x=0., psi_y=0., vec_A=0.;
+    unsigned int i=0;
 
     if(fs::exists(psi_init_file)){
         FILE *fPsi= nullptr;
         if((fPsi=fopen(psi_init_file.c_str(), "r"))) {
             for (i = 0; i < N; i++) {
-                for (alpha = 0; alpha < 3; alpha++) {
-                    fscanf(fPsi, "%lf %lf", &psi_x, &psi_y);
-                    Site[i].Psi[alpha].x = psi_x;
-                    Site[i].Psi[alpha].y = psi_y;
-                }
+                fread(Site[i].Psi, sizeof(struct O2), 3, fPsi);
             }
             fclose(fPsi);
         }
@@ -73,14 +68,11 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
         FILE *fA= nullptr;
         if((fA=fopen(a_init_file.c_str(), "r"))) {
             for (i = 0; i < N; i++) {
-                for (alpha = 0; alpha < 3; alpha++) {
-                    fscanf(fA, "%lf", &vec_A);
-                    Site[i].A[alpha] = vec_A;
-                }
+                fread(Site[i].A, sizeof(struct O2), 3, fA);
             }
             fclose(fA);
         }
     }
 
-
 }
+

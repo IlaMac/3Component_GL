@@ -31,6 +31,7 @@ void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* 
 void magnetization(struct Measures &mis, struct Node* Site);
 void energy(struct Measures &mis, struct H_parameters &Hp, struct Node* Site);
 void density_psi(struct Measures &mis, struct Node* Site);
+void save_lattice(struct Node* Site, const fs::path & directory_write, std::string configuration);
 
 
 #endif //MEASURES_H

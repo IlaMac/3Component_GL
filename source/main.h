@@ -16,13 +16,13 @@ namespace fs = std::filesystem;
 
 
 /*Temporary defined as global variables here*/
-#define Lx 8
-#define Ly 8
-#define Lz 8
+#define Lx 16
+#define Ly 16
+#define Lz 16
 
 #define N (Lx*Ly*Lz)
 
 void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp,  const fs::path & directory_write);
-unsigned int nn(unsigned int ix, unsigned int iy, unsigned int iz, unsigned int coord, int dir);
+unsigned int nn(unsigned int i, unsigned int coord, int dir);
 void myhelp(int argd, char** argu);
 #endif
