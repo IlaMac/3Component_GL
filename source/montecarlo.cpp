@@ -6,10 +6,11 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
     std::uniform_real_distribution<double> dis_rand(0, 1);
     std::uniform_real_distribution<double> dis_l(0, MCp.lbox_l);
     std::uniform_real_distribution<double> dis_phi(0, C_TWO_PI);
+    std::uniform_real_distribution<double> dis_theta(-MCp.lbox_theta, MCp.lbox_theta);
     std::uniform_real_distribution<double> dis_A(-MCp.lbox_A, MCp.lbox_A);
-    double l, phi, d_A,rand;
-    unsigned int ix=0, iy=0, iz=0, alpha=0, i, imz, ipz;
-    double acc_rate=0.5, acc_l=0., acc_A=0.; //acc_theta=0., acc_rho=0.,
+    double l, phi, d_theta, d_A,rand;
+    unsigned int ix=0, iy=0, iz=0, alpha=0, i;
+    double acc_rate=0.5, acc_l=0., acc_A=0., acc_theta=0.; // acc_rho=0.,
     struct O2 NewPsi{};
     struct O2 OldPsi{};
     double NewA, OldA;
@@ -20,11 +21,10 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
         for (iy = 0; iy < Ly; iy++) {
             for (iz = 0; iz < Lz; iz++) {
                 i=ix + Lx * (iy + iz * Ly);
-
+                /*************PSI UPDATE: move in the plane ImPsi, RePsi**********/
                 for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];
                     oldE = local_HPsi(OldPsi, ix, iy, iz, alpha, Hp, Site);
-                    //Update of Psi: move in the plane ImPsi, RePsi
                     l = dis_l(MCp.rng);
                     phi = dis_phi(MCp.rng);
                     NewPsi.x = OldPsi.x + (l * cos(phi));
@@ -42,17 +42,42 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                             Site[i].Psi[alpha] = NewPsi;
                             acc_l++;
                         } else {
-                            Site[i].Psi[alpha] = OldPsi;
+                            //Site[i].Psi[alpha] = OldPsi;
                         }
                     }
                 }
+                /*******PHASE ONLY UPDATE**************/
+                for (alpha = 0; alpha < 3; alpha++) {
+                    OldPsi = Site[i].Psi[alpha];
+                    oldE = local_Htheta(OldPsi, ix, iy, iz, alpha, Hp, Site);
+                    d_theta = dis_theta(MCp.rng);
+                    NewPsi.t = OldPsi.t + d_theta;
+                    NewPsi.r= OldPsi.r;
+                    polar_to_cartesian(NewPsi);
+                    newE = local_Htheta(NewPsi, ix, iy, iz, alpha, Hp, Site);
+                    minus_deltaE = h3*(oldE - newE);
+                    if (minus_deltaE > 0) {
+                        Site[i].Psi[alpha] = NewPsi;
+                        acc_theta++;
+                    } else {
+                        rand = dis_rand(MCp.rng);
+                        //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
+                        if (rand < exp(Hp.beta * minus_deltaE)) {
+                            Site[i].Psi[alpha] = NewPsi;
+                            acc_theta++;
+                        } else {
+                         //   Site[i].Psi[alpha] = OldPsi;
+                        }
+                    }
+                }
+                /**********VECTOR POTENTIAL UPDATE********/
                 for (alpha = 0; alpha < 3; alpha++) {
                     //Update of A
-                    d_A=dis_A(MCp.rng);
                     OldA=Site[i].A[alpha];
+                    oldE = local_HA(OldA, ix, iy, iz, alpha, Hp, Site);
+                    d_A=dis_A(MCp.rng);
                     NewA= OldA + d_A;
                     newE = local_HA(NewA, ix, iy, iz, alpha, Hp, Site);
-                    oldE = local_HA(OldA, ix, iy, iz, alpha, Hp, Site);
                     minus_deltaE=h3*(oldE -newE);
                     if(minus_deltaE>0.){
                         Site[i].A[alpha]=NewA;
@@ -64,7 +89,7 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                             Site[i].A[alpha] = NewA;
                             acc_A++;
                         }else{
-                            Site[i].A[alpha] = OldA;
+                            //Site[i].A[alpha] = OldA;
                         }
                     }
                 }
@@ -73,9 +98,11 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
     }
 
 
-    acc_l= (double) acc_l/(3*N);
-    acc_A= (double) acc_A/(3*N);
+    acc_l=(double) acc_l/(3*N);
+    acc_theta=(double) acc_theta/(3*N);
+    acc_A=(double) acc_A/(3*N);
     MCp.lbox_l= MCp.lbox_l*(acc_l/acc_rate);
+    MCp.lbox_theta= MCp.lbox_theta*(acc_theta/acc_rate);
     MCp.lbox_A= MCp.lbox_A*(acc_A/acc_rate);
 }
 
@@ -96,7 +123,7 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
     //Kinetic= -(1/h²)*\sum_k=1,2,3 (|Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) + (|Psi_{alpha}(r-k)||Psi_{alpha}(r)|* cos(theta_{alpha}(r) - theta_{alpha}(r-k) +h*e*A_k(r-k)))
     for(vec=0; vec<3; vec++){
         h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*cos(Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec]);
-        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos(Site[nn(i, vec, -1)].Psi[alpha].t - Psi.t - Hp.h*Hp.e*Site[i].A[vec]);
+        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos( Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
     }
 
     //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beta}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
@@ -108,6 +135,33 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
     }
 
     h_tot= h_Potential + h_Kinetic + h_Josephson;
+    return h_tot;
+}
+
+double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int iz, unsigned int alpha,  struct H_parameters &Hp, struct Node* Site){
+
+    double h_Kinetic=0., h_Josephson=0., h_tot;
+    double h2=(Hp.h*Hp.h);
+    unsigned int beta=0, vec=0, i;
+
+    i=ix +Lx*(iy+Ly*iz);
+    //We need to compute just the part of the Hamiltonian involving Psi.t
+
+    //Kinetic= -(1/h²)*\sum_k=1,2,3 (|Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) + (|Psi_{alpha}(r-k)||Psi_{alpha}(r)|* cos(theta_{alpha}(r) - theta_{alpha}(r-k) +h*e*A_k(r-k)))
+    for(vec=0; vec<3; vec++){
+        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*cos(Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec]);
+        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos( Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
+    }
+
+    //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beta}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
+    for(beta=0; beta<3; beta++){
+        if(beta != alpha) {
+            h_Josephson+=(Hp.eta*Psi.r*Site[i].Psi[beta].r*cos(Psi.t - Site[i].Psi[beta].t));
+//            h_Josephson += (Hp.eta * O2prod(Psi, Site[i].Psi[beta]));
+        }
+    }
+
+    h_tot= h_Kinetic + h_Josephson;
     return h_tot;
 }
 

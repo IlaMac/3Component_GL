@@ -34,8 +34,8 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
             fclose(fin);
         }
     }else{
-        MCp.rnd_seed=1;
-        MCp.tau=20;
+        MCp.rnd_seed=2;
+        MCp.tau=10;
         MCp.nmisu=100000;
         MCp.n_autosave=20000;
         MCp.lbox_l=1.0;

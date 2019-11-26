@@ -26,7 +26,6 @@ int main(int argc, char *argv[]){
         directory_read  = argv[1];
         directory_write = argv[2];
         directory_parameters = argv[3];
-
     }
 
     //Declaration of structure Lattice
@@ -72,7 +71,6 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     sprintf(DSfile_name, "%s/Dual_Stiffness.txt", directory_write.c_str());
     sprintf(DPsi_name, "%s/Psi_density.txt", directory_write.c_str());
 
-
     Energy_file.open(Efile_name, std::ios::out);
     Energy_file.close();
     Energy_file.open(Efile_name, std::ios::app);
@@ -90,7 +88,6 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
 
     for (n = 0; n<MCp.nmisu; n++) {
-
         for (t = 0; t < MCp.tau; t++) {
             metropolis(Site, MCp, Hp);
         }
@@ -104,13 +101,10 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         Magnetization_file<<n<<"\t"<<mis.m<<"\t"<<(mis.m*mis.m)<<"\t"<<(mis.m*mis.m*mis.m*mis.m)<<std::endl;
         density_psi(mis, Site);
         DensityPsi_file<<n<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
-
-
         if ((n % MCp.n_autosave) == 0) {
             //Save a configuration for the restarting
             save_lattice(Site, directory_write, std::string("n") + std::to_string(n) );
             }
-
     }
     save_lattice(Site, directory_write, std::string("final"));
     Energy_file.close();
@@ -152,7 +146,6 @@ unsigned int nn(unsigned int i, unsigned int coord, int dir){
 }
 
 void myhelp(int argd, char** argu) {
-
     int i;
     fprintf(stderr,"Errore nei parametri su linea di comando; hai scritto:\n");
     for (i=0;i<argd;i++) fprintf(stderr," %s",argu[i]);
@@ -160,5 +153,4 @@ void myhelp(int argd, char** argu) {
     fprintf(stderr,"%s <DIRECTORY_READ> <DIRECTORY_WRTE> <DIRECTORY_PARAMETERS> \n",argu[0]);
     exit(1);
     return;
-
 }
