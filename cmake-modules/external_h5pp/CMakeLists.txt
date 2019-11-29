@@ -4,7 +4,7 @@ project(external-h5pp)
 include(ExternalProject)
 ExternalProject_Add(external_h5pp
         GIT_REPOSITORY https://github.com/DavidAce/h5pp.git
-        GIT_TAG master
+        GIT_TAG v0.3.2
         GIT_PROGRESS 1
         PREFIX      ${BUILD_DIR}/h5pp
         INSTALL_DIR ${INSTALL_DIR}/h5pp

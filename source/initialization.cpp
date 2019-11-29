@@ -10,8 +10,14 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
     if(fs::exists(hp_init_file)){
         FILE *fin= nullptr;
         if((fin=fopen(hp_init_file.c_str(), "r"))) {
-            fscanf(fin, "%d \n %d \n %d \n %lf \n %lf \n %lf", &Hp.a, &Hp.b, &Hp.eta, &Hp.e, &Hp.h, &Hp.beta);
+            fscanf(fin, "%d" , &Hp.a);
+            fscanf(fin, "%d" , &Hp.b);
+            fscanf(fin, "%d" , &Hp.eta);
+	    fscanf(fin, "%lf" , &Hp.e);
+	    fscanf(fin, "%lf" , &Hp.h);
+	    fscanf(fin, "%lf" , &Hp.beta);
             fclose(fin);
+            printf("Initialization:\n a %d \n b %d \n eta %d \n e %lf \n h %lf \n beta %lf", Hp.a, Hp.b, Hp.eta, Hp.e, Hp.h, Hp.beta);
         }
     }else{
         Hp.a=0;
@@ -30,8 +36,16 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
     if(fs::exists(mc_init_file)){
         FILE *fin= nullptr;
         if((fin=fopen(mc_init_file.c_str(), "r"))) {
-            fscanf(fin, "%d \n %d \n %d \n %d \n %lf \n %lf \n %lf \n %lf", &MCp.rnd_seed, &MCp.tau, &MCp.nmisu, &MCp.n_autosave, &MCp.lbox_l, &MCp.lbox_rho, &MCp.lbox_theta, &MCp.lbox_A);
+            fscanf(fin, "%d", &MCp.rnd_seed);
+	    fscanf(fin, "%d", &MCp.tau);
+            fscanf(fin, "%d", &MCp.nmisu);
+            fscanf(fin, "%d", &MCp.n_autosave);
+            fscanf(fin, "%lf", &MCp.lbox_l);
+            fscanf(fin, "%lf", &MCp.lbox_rho);
+	    fscanf(fin, "%lf", &MCp.lbox_theta);
+            fscanf(fin, "%lf", &MCp.lbox_A);
             fclose(fin);
+            printf("Initialization:\n %d \n %d \n %d \n %d \n %lf \n %lf \n %lf \n %lf", MCp.rnd_seed, MCp.tau, MCp.nmisu, MCp.n_autosave, MCp.lbox_l, MCp.lbox_rho, MCp.lbox_theta, MCp.lbox_A);
         }
     }else{
         MCp.rnd_seed=2;
@@ -50,8 +64,8 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
 
 void initialize_lattice(struct Node* Site, const fs::path & directory_read){
 
-    fs::path psi_init_file = directory_read / "Psi_init.txt";
-    fs::path a_init_file = directory_read / "A_init.txt";
+    fs::path psi_init_file = directory_read / "Psi_final.txt";
+    fs::path a_init_file = directory_read / "A_final.txt";
     unsigned int i=0;
 
     if(fs::exists(psi_init_file)){
