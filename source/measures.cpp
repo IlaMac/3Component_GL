@@ -4,7 +4,7 @@
 
 #include "measures.h"
 
-void energy(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
+void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struct Node* Site){
 
     unsigned int i, ix, iy, iz, alpha, vec;
     double h_Potential=0., h_Kinetic=0., h_Josephson=0., h_B=0., h_tot=0.;
@@ -36,13 +36,13 @@ void energy(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
         }
     }
 
-    mis.E_kin=(double) Hp.beta*h_Kinetic/N;
-    mis.E_pot=(double)Hp.beta* h_Potential/N;
-    mis.E_Josephson=(double) Hp.beta*h_Josephson/N;
-    mis.E_B=(double)Hp.beta* h_B/N;
+    mis.E_kin=(double)my_beta*h_Kinetic/N;
+    mis.E_pot=(double)my_beta* h_Potential/N;
+    mis.E_Josephson=(double) my_beta*h_Josephson/N;
+    mis.E_B=(double)my_beta* h_B/N;
     h_tot= h_Potential + h_Kinetic +  h_Josephson +h_B;
     //to compute the heat capacity it is important to consider the total physical energy which is h_tot*h³
-    mis.E=(double) Hp.beta* h_tot/(N);
+    mis.E=(double) my_beta* h_tot/(N);
 }
 
 void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){

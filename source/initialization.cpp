@@ -13,11 +13,13 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
             fscanf(fin, "%d" , &Hp.a);
             fscanf(fin, "%d" , &Hp.b);
             fscanf(fin, "%d" , &Hp.eta);
-	    fscanf(fin, "%lf" , &Hp.e);
-	    fscanf(fin, "%lf" , &Hp.h);
-	    fscanf(fin, "%lf" , &Hp.beta);
+            fscanf(fin, "%lf" , &Hp.e);
+            fscanf(fin, "%lf" , &Hp.h);
+            fscanf(fin, "%lf" , &Hp.b_low);
+            fscanf(fin, "%lf" , &Hp.b_high);
             fclose(fin);
-            printf("Initialization:\n a %d \n b %d \n eta %d \n e %lf \n h %lf \n beta %lf", Hp.a, Hp.b, Hp.eta, Hp.e, Hp.h, Hp.beta);
+            //With this modification Hp.beta in not anymore part of the Hamiltonian parameters list
+            printf("Initialization:\n a %d \n b %d \n eta %d \n e %lf \n h %lf \n b_low %lf \n b_high %lf", Hp.a, Hp.b, Hp.eta, Hp.e, Hp.h, Hp.b_low, Hp.b_high);
         }
     }else{
         Hp.a=0;
@@ -25,7 +27,8 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
         Hp.eta=1;
         Hp.e=0.5;
         Hp.h= 5.0;
-        Hp.beta=0.244;
+        Hp.b_low=0.224;
+        Hp.b_high=0.2265;
     }
 
 }
@@ -36,29 +39,25 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
     if(fs::exists(mc_init_file)){
         FILE *fin= nullptr;
         if((fin=fopen(mc_init_file.c_str(), "r"))) {
-            fscanf(fin, "%d", &MCp.rnd_seed);
-	    fscanf(fin, "%d", &MCp.tau);
             fscanf(fin, "%d", &MCp.nmisu);
+            fscanf(fin, "%d", &MCp.tau);
             fscanf(fin, "%d", &MCp.n_autosave);
             fscanf(fin, "%lf", &MCp.lbox_l);
             fscanf(fin, "%lf", &MCp.lbox_rho);
-	    fscanf(fin, "%lf", &MCp.lbox_theta);
+	        fscanf(fin, "%lf", &MCp.lbox_theta);
             fscanf(fin, "%lf", &MCp.lbox_A);
             fclose(fin);
-            printf("Initialization:\n %d \n %d \n %d \n %d \n %lf \n %lf \n %lf \n %lf", MCp.rnd_seed, MCp.tau, MCp.nmisu, MCp.n_autosave, MCp.lbox_l, MCp.lbox_rho, MCp.lbox_theta, MCp.lbox_A);
+            printf("Initialization:\n %d \n %d \n %d \n %lf \n %lf \n %lf \n %lf", MCp.tau, MCp.nmisu, MCp.n_autosave, MCp.lbox_l, MCp.lbox_rho, MCp.lbox_theta, MCp.lbox_A);
         }
     }else{
-        MCp.rnd_seed=2;
-        MCp.tau=10;
         MCp.nmisu=100000;
+        MCp.tau=10;
         MCp.n_autosave=20000;
         MCp.lbox_l=1.0;
         MCp.lbox_rho=0.5;
         MCp.lbox_theta=C_PI;
         MCp.lbox_A=0.1;
     }
-
-    MCp.rng.seed(MCp.rnd_seed);
 
 }
 
@@ -90,3 +89,25 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
 
 }
 
+void initialize_PTarrays(struct PT_parameters PTp, struct PTroot_parameters PTroot, struct H_parameters &Hp){
+    int p;
+    double  beta_low, beta_high, delta_beta;
+
+    if(Hp.b_high>Hp.b_low){ //Paranoic check
+        beta_low=Hp.b_low;
+        beta_high=Hp.b_high;
+    }else{
+        beta_low=Hp.b_high;
+        beta_high=Hp.b_low;
+    }
+    PTroot.beta = (double *) calloc(PTp.np, sizeof(double));
+    PTroot.All_Energies = (double *) calloc(PTp.np, sizeof(double));
+    PTroot.ind_to_rank = (int *) calloc(PTp.np, sizeof(int));
+    PTroot.rank_to_ind = (int *) calloc(PTp.np, sizeof(int));
+    delta_beta=(beta_high-beta_low)/(PTp.np-1);
+    for(p=0; p<PTp.np; p++){
+        PTroot.rank_to_ind[p]=p;
+        PTroot.ind_to_rank[p]=p;
+        PTroot.beta[p]=beta_low + p*delta_beta;
+    }
+};

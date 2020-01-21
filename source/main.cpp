@@ -3,14 +3,23 @@
 #include "main.h"
 #include "initialization.h"
 #include "measures.h"
+#include "rng.h"
+
 
 int main(int argc, char *argv[]){
 
     struct Node* Lattice;
     struct H_parameters Hp;
     struct MC_parameters MCp;
+    struct PT_parameters PTp;
+    struct PTroot_parameters PTroot;
     unsigned int i;
+    long int seednumber=-1; /*by default it is a negative number which means that rng will use random_device*/
+
+    double my_beta=0.226;
+
     std::string directory_read;
+    std::string directory_read_rank;
     std::string directory_write;
     std::string directory_parameters;
 
@@ -18,15 +27,22 @@ int main(int argc, char *argv[]){
         printf("Too many arguments!");
         myhelp(argc, argv);
     }
-    else if(argc < 4){
+    else if(argc < 3){
         printf("Not enough arguments --> Default Initialization. \n");
         directory_write = "/home/ilaria/Desktop/Multi_Components_GL/source";
     }
-    else if(argc ==4) {
+    else if(argc ==3) {
         directory_read  = argv[1];
-        directory_write = argv[2];
-        directory_parameters = argv[3];
+        directory_parameters = argv[2];
     }
+    else if(argc == 4){
+        directory_read  = argv[1];
+        directory_parameters = argv[2];
+        seednumber= reinterpret_cast<long> (argv[3]);
+    }
+
+    //initialization of the random number generator
+    rn::seed(seednumber);
 
     //Declaration of structure Lattice
     Lattice=(struct Node*)calloc(N,sizeof(struct Node));
@@ -37,22 +53,38 @@ int main(int argc, char *argv[]){
 
     //Initialize H_parameters: file "H_init.txt"
     initialize_Hparameters(Hp, directory_parameters);
-    printf("beta %lf T %lf \n", Hp.beta, 1./Hp.beta);
     printf("a %d b %d eta %d h %lf e %lf \n", Hp.a, Hp.b, Hp.eta, Hp.h, Hp.e);
-
     //Initialize MC_parameters: file "MC_init.txt"
     initialize_MCparameters(MCp, directory_parameters);
-    //Initialize Lattice: files "Psi_init.txt" and "A_init.txt" in the directory DIRECTORY_READ
-    initialize_lattice(Lattice, directory_read);
+
+    MPI_Status status;
+    MPI_Init(NULL, NULL); /* START MPI */
+/*DETERMINE RANK OF THIS PROCESSOR*/
+    MPI_Comm_rank(MPI_COMM_WORLD, &PTp.rank);
+/*DETERMINE TOTAL NUMBER OF PROCESSORS*/
+    MPI_Comm_size(MPI_COMM_WORLD, &PTp.np);
+
+    if(PTp.rank == PTp.root) {
+        //Initialization ranks arrays
+        initialize_PTarrays( PTp, PTroot, Hp);
+    }
+    MPI_Scatter(PTroot.beta, 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+
+    directory_write=directory_parameters+"/rank_"+std::to_string(PTp.rank);
+    directory_read_rank=directory_read+"/rank_"+std::to_string(PTp.rank);
+
+    //Initialize Lattice: files "Psi_init.txt" and "A_init.txt" in the directory DIRECTORY_READ  which depends on the rank!!!!!I HAVE TO INITIALIZE ALSO MY_BETA FROM THE SAME FOLDER!!!!!!!
+    initialize_lattice(Lattice, directory_read_rank);
     //Mainloop
-    mainloop(Lattice, MCp, Hp, directory_write);
+    mainloop(Lattice, MCp, Hp, my_beta, PTp, PTroot, directory_write);
 
     return 0;
 }
 
-void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp,  const fs::path & directory_write) {
+void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp, double my_beta, struct PT_parameters PTp, struct PTroot_parameters PTroot, const fs::path & directory_write) {
 
     int n = 0, t = 0;
+    /*Measurements*/
     struct Measures mis;
     std::ofstream Energy_file;
     std::ofstream Magnetization_file;
@@ -60,7 +92,6 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     std::ofstream DensityPsi_file;
 
     //  fs::path energy_file = directory_write / "Energy.txt"; Use this sintax to send the path of the file to the measures function so that the writing to a file would occur there.
-
     char Efile_name[256];
     char Mfile_name[256];
     char DSfile_name[256];
@@ -86,21 +117,23 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
     measures_init(mis);
 
-
     for (n = 0; n<MCp.nmisu; n++) {
         for (t = 0; t < MCp.tau; t++) {
-            metropolis(Site, MCp, Hp);
+            metropolis(Site, MCp, Hp,  my_beta);
         }
         //Measures
         measures_reset(mis);
-        energy(mis, Hp, Site);
-        Energy_file<<n<<"\t"<< mis.E<< "\t"<< mis.E_pot<< "\t"<< mis.E_kin<< "\t"<< mis.E_Josephson<< "\t"<< mis.E_B<<  std::endl;
+        energy(mis, Hp, my_beta, Site);
+        Energy_file<<n<<"\t"<<my_beta<<"\t"<< mis.E<< "\t"<< mis.E_pot<< "\t"<< mis.E_kin<< "\t"<< mis.E_Josephson<< "\t"<< mis.E_B<<  std::endl;
         dual_stiffness(mis, Hp, Site);
-        DualStiff_file<<n<<"\t"<<mis.d_rhoz<<std::endl;
+        DualStiff_file<<n<<"\t"<<my_beta<<"\t"<<mis.d_rhoz<<std::endl;
         magnetization(mis, Site);
-        Magnetization_file<<n<<"\t"<<mis.m<<"\t"<<(mis.m*mis.m)<<"\t"<<(mis.m*mis.m*mis.m*mis.m)<<std::endl;
+        Magnetization_file<<n<<"\t"<<my_beta<<"\t"<<mis.m<<"\t"<<(mis.m*mis.m)<<"\t"<<(mis.m*mis.m*mis.m*mis.m)<<std::endl;
         density_psi(mis, Site);
-        DensityPsi_file<<n<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
+        DensityPsi_file<<n<<"\t"<<my_beta<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
+        //Parallel Tempering swap
+        parallel_temp(mis.E, my_beta, PTp, PTroot);
+
         if ((n % MCp.n_autosave) == 0) {
             //Save a configuration for the restarting
             save_lattice(Site, directory_write, std::string("n") + std::to_string(n) );
@@ -111,6 +144,51 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     Magnetization_file.close();
     DualStiff_file.close();
 }
+
+void parallel_temp(double my_E , double my_beta, struct PT_parameters PTp, struct PTroot_parameters PTroot){
+
+    double coin;
+    double n_rand=0., delta_E, delta_beta;
+    double beta_lower, beta_higher;
+    int p, i=0, nn=0;
+
+    MPI_Gather(&my_E, 1, MPI_DOUBLE, PTroot.All_Energies, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+    if (PTp.rank == PTp.root) { //Root forms the pairs and decides (given the energies and the betas) which pairs will swap
+        //Pair Formation
+        coin = rn::uniform_real_box(0,1);
+        if(coin < 0.5) { //each even rank wil be paired with its right neighbour
+            nn= +1;
+        }else if(coin >= 0.5){ //each even rank wil be paired with its left neighbour
+            nn=-1;
+        }
+        while (i < PTp.np) {
+            n_rand=rn::uniform_real_box(0,1);
+            delta_E = PTroot.All_Energies[PTroot.ind_to_rank[i]] - PTroot.All_Energies[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]];
+            printf("rank %d b1 %lf rank2 %d b2 %lf \n", PTroot.ind_to_rank[i], PTroot.beta[PTroot.ind_to_rank[i]],
+            PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np], PTroot.beta[PTroot.ind_to_rank[(PTp.np+ i + nn) % PTp.np]]);
+            delta_beta = PTroot.beta[PTroot.ind_to_rank[i]] - PTroot.beta[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]];
+            printf("index %d rand %lf delta_b %lf delta_E %lf exp %lf\n", i, n_rand, delta_beta, delta_E,exp(-delta_beta * delta_E));
+            //swapping condition
+            if (n_rand < exp(-delta_beta * delta_E)) {
+                printf("SWAP i %d and j %d\n", i, (PTp.np + i + nn) % PTp.np);
+                //swap indices
+                PTroot.rank_to_ind[PTroot.ind_to_rank[i]] = (PTp.np + i + nn) % PTp.np;
+                PTroot.rank_to_ind[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]] = i;
+                //swap beta
+                beta_lower= PTroot.beta[PTroot.ind_to_rank[i]];
+                beta_higher= PTroot.beta[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]];
+                PTroot.beta[PTroot.ind_to_rank[i]] = beta_higher;
+                PTroot.beta[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]] = beta_lower;
+                }
+                i+= 2;
+            }
+            for (p = 0; p < PTp.np; p++) {
+                PTroot.ind_to_rank[PTroot.rank_to_ind[p]] = p;
+            }
+        }
+    MPI_Scatter(PTroot.beta, 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+}
+
 
 unsigned int nn(unsigned int i, unsigned int coord, int dir){
 

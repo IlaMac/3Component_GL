@@ -8,12 +8,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake-modules)
 ################################################################
 ### Set options for compilation                              ###
 ################################################################
-option(BUILD_SHARED_LIBS  "Sets shared linking on/off"                                                      OFF)
+#option(BUILD_SHARED_LIBS "Build shared library" ON)
+#option(BUILD_STATIC_LIBS "Build static library" ON)
+option(BUILD_SHARED_LIBS  "Sets shared linking on/off"                                                      ON)
 option(ENABLE_TESTS       "Enable testing"                                                                  ON )
 option(ENABLE_SPDLOG      "Use SpdLog logging library. Guide with -Dspdlog_DIR:PATH=<dir-to-spdlog>"        OFF)
 option(ENABLE_H5PP        "Use h5pp, a C++ front-end to HDF5"                                               OFF)
 option(DOWNLOAD_MISSING   "Download enabled libraries that aren't found"                                    OFF)
-option(ENABLE_OPENMP      "Enable parallelization with OpenMP"                                              OFF)
+option(ENABLE_OPENMP      "Enable parallelization with OpenMP"                                              ON)
 
 
 #################################################################
@@ -37,7 +39,6 @@ endif()
 ### Gives a namespace GIT:: with several git version numbers.###
 ################################################################
 include(cmake-modules/gitversion.cmake)
-
 
 
 ##################################################################
@@ -116,9 +117,8 @@ if(BUILD_SHARED_LIBS)
 else()
     set(CUSTOM_SUFFIX ${CMAKE_STATIC_LIBRARY_SUFFIX})
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${CUSTOM_SUFFIX} ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    list(APPEND COMPILER_LFLAGS -static)        ### Static linkage
+    #list(APPEND COMPILER_LFLAGS -static)        ### Static linkage
 endif()
-
 
 ##################################################################
 ### Compiler-dependent linker flags                            ###
@@ -130,7 +130,6 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     list(APPEND COMPILER_LFLAGS -stdlib=libstdc++)
     list(APPEND COMPILER_LFLAGS -lstdc++fs)        ### For experimental::filesystem
 endif()
-
 
 
 ##################################################################
@@ -187,7 +186,6 @@ endif()
 
 
 
-
 ##################################################################
 ### Apply all settings to helper target                        ###
 ##################################################################
@@ -228,14 +226,12 @@ message(STATUS "Settings -- flags   : ${SETTINGS_INFO_OPT}")
 
 
 
-
-
 ##################################################################
 ### Add all source files recursively                           ###
 ##################################################################
 file(GLOB_RECURSE SOURCES "source/*.cpp")
 file(GLOB_RECURSE HEADERS "source/*.h")
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} source/initialization.cpp source/initialization.h source/measures.cpp source/measures.h source/o3.h)
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} source/initialization.cpp source/initialization.h source/measures.cpp source/measures.h source/o3.h source/rng.cpp source/rng.h)
 
 
 ##################################################################
@@ -243,6 +239,12 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} source/initialization.cpp s
 ##################################################################
 target_link_libraries(${PROJECT_NAME} PUBLIC project-settings)
 
+
+##################################################################
+### MPI Link                                                   ###
+##################################################################
+find_package(MPI REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE MPI::MPI_CXX)
 
 
 ##################################################################
@@ -284,7 +286,6 @@ endif()
 if (TARGET h5pp::h5pp AND TARGET h5pp::deps AND ENABLE_H5PP)
     target_link_libraries(${PROJECT_NAME} PRIVATE h5pp::h5pp h5pp::deps)
 endif()
-
 
 ##################################################################
 ### Print all generated targets for dependencies               ###
