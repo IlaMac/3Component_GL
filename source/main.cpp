@@ -4,6 +4,7 @@
 #include "initialization.h"
 #include "measures.h"
 #include "rng.h"
+#include "memory_check.h"
 
 
 int main(int argc, char *argv[]){
@@ -74,6 +75,10 @@ int main(int argc, char *argv[]){
     initialize_lattice(Lattice, directory_read);
     //Mainloop
     mainloop(Lattice, MCp, Hp, my_beta, PTp, PTroot, directory_write);
+
+    std::cout << "Proccess current resident ram usage: " << process_memory_in_mb("VmRSS") << " MB" << std::endl;
+    std::cout << "Proccess maximum resident ram usage: " << process_memory_in_mb("VmHWM") << " MB" << std::endl;
+    std::cout << "Proccess maximum virtual  ram usage: " << process_memory_in_mb("VmPeak") << " MB" << std::endl;
 
     return 0;
 }
