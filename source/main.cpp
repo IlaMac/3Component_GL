@@ -19,26 +19,23 @@ int main(int argc, char *argv[]){
     double my_beta=0.226;
 
     std::string directory_read;
-    std::string directory_read_rank;
     std::string directory_write;
     std::string directory_parameters;
 
-    if(argc > 4 ){
+    if(argc > 3 ){
         printf("Too many arguments!");
         myhelp(argc, argv);
     }
-    else if(argc < 3){
+    else if(argc < 2){
         printf("Not enough arguments --> Default Initialization. \n");
-        directory_write = "/home/ilaria/Desktop/Multi_Components_GL/source";
+        myhelp(argc, argv);
     }
-    else if(argc ==3) {
-        directory_read  = argv[1];
-        directory_parameters = argv[2];
+    else if(argc ==2) {
+        directory_parameters = argv[1];
     }
-    else if(argc == 4){
-        directory_read  = argv[1];
-        directory_parameters = argv[2];
-        seednumber= reinterpret_cast<long> (argv[3]);
+    else if(argc == 3){
+        directory_parameters = argv[1];
+        seednumber= reinterpret_cast<long> (argv[2]);
     }
 
     //initialization of the random number generator
@@ -71,10 +68,10 @@ int main(int argc, char *argv[]){
     MPI_Scatter(PTroot.beta, 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
 
     directory_write=directory_parameters+"/rank_"+std::to_string(PTp.rank);
-    directory_read_rank=directory_read+"/rank_"+std::to_string(PTp.rank);
+    directory_read=directory_parameters+"/rank_"+std::to_string(PTp.rank);
 
     //Initialize Lattice: files "Psi_init.txt" and "A_init.txt" in the directory DIRECTORY_READ  which depends on the rank!!!!!I HAVE TO INITIALIZE ALSO MY_BETA FROM THE SAME FOLDER!!!!!!!
-    initialize_lattice(Lattice, directory_read_rank);
+    initialize_lattice(Lattice, directory_read);
     //Mainloop
     mainloop(Lattice, MCp, Hp, my_beta, PTp, PTroot, directory_write);
 
@@ -228,7 +225,7 @@ void myhelp(int argd, char** argu) {
     fprintf(stderr,"Errore nei parametri su linea di comando; hai scritto:\n");
     for (i=0;i<argd;i++) fprintf(stderr," %s",argu[i]);
     fprintf(stderr,"\n");
-    fprintf(stderr,"%s <DIRECTORY_READ> <DIRECTORY_WRTE> <DIRECTORY_PARAMETERS> \n",argu[0]);
-    exit(1);
+    fprintf(stderr,"%s <DIRECTORY_PARAMETERS> <SEED> \n",argu[0]);
+    exit (EXIT_FAILURE);
     return;
 }
