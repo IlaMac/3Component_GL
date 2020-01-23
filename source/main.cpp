@@ -15,6 +15,7 @@ int main(int argc, char *argv[]){
     struct PT_parameters PTp;
     struct PTroot_parameters PTroot;
     unsigned int i;
+    int p;
     long int seednumber=-1; /*by default it is a negative number which means that rng will use random_device*/
 
     double my_beta=0.226;
@@ -51,7 +52,6 @@ int main(int argc, char *argv[]){
 
     //Initialize H_parameters: file "H_init.txt"
     initialize_Hparameters(Hp, directory_parameters);
-    printf("a %d b %d eta %d h %lf e %lf \n", Hp.a, Hp.b, Hp.eta, Hp.h, Hp.e);
     //Initialize MC_parameters: file "MC_init.txt"
     initialize_MCparameters(MCp, directory_parameters);
 
@@ -62,11 +62,14 @@ int main(int argc, char *argv[]){
 /*DETERMINE TOTAL NUMBER OF PROCESSORS*/
     MPI_Comm_size(MPI_COMM_WORLD, &PTp.np);
 
+
     if(PTp.rank == PTp.root) {
         //Initialization ranks arrays
         initialize_PTarrays( PTp, PTroot, Hp);
     }
-    MPI_Scatter(PTroot.beta, 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+    MPI_Scatter(PTroot.beta.data(), 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+
+    printf("I'm rank %d and this is my beta %lf\n", PTp.rank, my_beta);
 
     directory_write=directory_parameters+"/rank_"+std::to_string(PTp.rank);
     directory_read=directory_parameters+"/rank_"+std::to_string(PTp.rank);
@@ -154,7 +157,7 @@ void parallel_temp(double my_E , double my_beta, struct PT_parameters PTp, struc
     double beta_lower, beta_higher;
     int p, i=0, nn=0;
 
-    MPI_Gather(&my_E, 1, MPI_DOUBLE, PTroot.All_Energies, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+    MPI_Gather(&my_E, 1, MPI_DOUBLE, PTroot.All_Energies.data(), 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
     if (PTp.rank == PTp.root) { //Root forms the pairs and decides (given the energies and the betas) which pairs will swap
         //Pair Formation
         coin = rn::uniform_real_box(0,1);
@@ -166,13 +169,13 @@ void parallel_temp(double my_E , double my_beta, struct PT_parameters PTp, struc
         while (i < PTp.np) {
             n_rand=rn::uniform_real_box(0,1);
             delta_E = PTroot.All_Energies[PTroot.ind_to_rank[i]] - PTroot.All_Energies[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]];
-            printf("rank %d b1 %lf rank2 %d b2 %lf \n", PTroot.ind_to_rank[i], PTroot.beta[PTroot.ind_to_rank[i]],
-            PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np], PTroot.beta[PTroot.ind_to_rank[(PTp.np+ i + nn) % PTp.np]]);
+//            printf("rank %d b1 %lf rank2 %d b2 %lf \n", PTroot.ind_to_rank[i], PTroot.beta[PTroot.ind_to_rank[i]],
+//            PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np], PTroot.beta[PTroot.ind_to_rank[(PTp.np+ i + nn) % PTp.np]]);
             delta_beta = PTroot.beta[PTroot.ind_to_rank[i]] - PTroot.beta[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]];
-            printf("index %d rand %lf delta_b %lf delta_E %lf exp %lf\n", i, n_rand, delta_beta, delta_E,exp(-delta_beta * delta_E));
+//            printf("index %d rand %lf delta_b %lf delta_E %lf exp %lf\n", i, n_rand, delta_beta, delta_E,exp(-delta_beta * delta_E));
             //swapping condition
             if (n_rand < exp(-delta_beta * delta_E)) {
-                printf("SWAP i %d and j %d\n", i, (PTp.np + i + nn) % PTp.np);
+//                printf("SWAP i %d and j %d\n", i, (PTp.np + i + nn) % PTp.np);
                 //swap indices
                 PTroot.rank_to_ind[PTroot.ind_to_rank[i]] = (PTp.np + i + nn) % PTp.np;
                 PTroot.rank_to_ind[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]] = i;
@@ -188,7 +191,7 @@ void parallel_temp(double my_E , double my_beta, struct PT_parameters PTp, struc
                 PTroot.ind_to_rank[PTroot.rank_to_ind[p]] = p;
             }
         }
-    MPI_Scatter(PTroot.beta, 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+    MPI_Scatter(PTroot.beta.data(), 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
 }
 
 

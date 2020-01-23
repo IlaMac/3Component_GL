@@ -76,7 +76,6 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                         acc_A++;
                     }else{
                         rand= rn::uniform_real_box(0,1);
-                        printf("rand %lf\n", rand);
                         //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
                         if( rand < exp(my_beta*minus_deltaE) ) {
                             Site[i].A[alpha] = NewA;

@@ -43,10 +43,10 @@ struct PT_parameters{
 
 struct PTroot_parameters{
     /*Arrays root needs to handle the swaps*/
-    double*beta=NULL;
-    double *All_Energies=NULL;
-    int *ind_to_rank=NULL;
-    int *rank_to_ind=NULL;
+    std::vector <double> beta;
+    std::vector <double> All_Energies;
+    std::vector <int> ind_to_rank;
+    std::vector <int> rank_to_ind;
 };
 
 struct MC_parameters{
@@ -63,6 +63,6 @@ struct MC_parameters{
 void initialize_lattice(struct Node* Site, const fs::path & directory_read);
 void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_parameters);
 void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directory_parameters);
-void initialize_PTarrays(struct PT_parameters PTp, struct PTroot_parameters PTroot, struct H_parameters &Hp);
+void initialize_PTarrays(struct PT_parameters &PTp, struct PTroot_parameters &PTroot, struct H_parameters &Hp);
 
 #endif //INITIALIZATION_H

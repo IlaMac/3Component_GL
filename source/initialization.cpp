@@ -19,7 +19,6 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
             fscanf(fin, "%lf" , &Hp.b_high);
             fclose(fin);
             //With this modification Hp.beta in not anymore part of the Hamiltonian parameters list
-            printf("Initialization:\n a %d \n b %d \n eta %d \n e %lf \n h %lf \n b_low %lf \n b_high %lf", Hp.a, Hp.b, Hp.eta, Hp.e, Hp.h, Hp.b_low, Hp.b_high);
         }
     }else{
         Hp.a=0;
@@ -47,7 +46,6 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
 	        fscanf(fin, "%lf", &MCp.lbox_theta);
             fscanf(fin, "%lf", &MCp.lbox_A);
             fclose(fin);
-            printf("Initialization:\n %d \n %d \n %d \n %lf \n %lf \n %lf \n %lf", MCp.tau, MCp.nmisu, MCp.n_autosave, MCp.lbox_l, MCp.lbox_rho, MCp.lbox_theta, MCp.lbox_A);
         }
     }else{
         MCp.nmisu=100000;
@@ -89,7 +87,7 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
 
 }
 
-void initialize_PTarrays(struct PT_parameters PTp, struct PTroot_parameters PTroot, struct H_parameters &Hp){
+void initialize_PTarrays(struct PT_parameters &PTp, struct PTroot_parameters &PTroot, struct H_parameters &Hp){
     int p;
     double  beta_low, beta_high, delta_beta;
 
@@ -100,10 +98,10 @@ void initialize_PTarrays(struct PT_parameters PTp, struct PTroot_parameters PTro
         beta_low=Hp.b_high;
         beta_high=Hp.b_low;
     }
-    PTroot.beta = (double *) calloc(PTp.np, sizeof(double));
-    PTroot.All_Energies = (double *) calloc(PTp.np, sizeof(double));
-    PTroot.ind_to_rank = (int *) calloc(PTp.np, sizeof(int));
-    PTroot.rank_to_ind = (int *) calloc(PTp.np, sizeof(int));
+    PTroot.beta.resize(PTp.np, 0.0);
+    PTroot.All_Energies.resize(PTp.np, 0.0);
+    PTroot.ind_to_rank.resize(PTp.np, 0);
+    PTroot.rank_to_ind.resize(PTp.np, 0);
     delta_beta=(beta_high-beta_low)/(PTp.np-1);
     for(p=0; p<PTp.np; p++){
         PTroot.rank_to_ind[p]=p;
