@@ -138,7 +138,6 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         DensityPsi_file<<n<<"\t"<<my_beta<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
         //Parallel Tempering swap
         parallel_temp(mis.E, my_beta, PTp, PTroot);
-        printf("I'm rank %d and this is my beta %lf\n", PTp.rank, my_beta);
 
         if ((n % MCp.n_autosave) == 0) {
             //Save a configuration for the restarting
@@ -151,12 +150,15 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     DualStiff_file.close();
 }
 
-void parallel_temp(double my_E , double &my_beta, struct PT_parameters PTp, struct PTroot_parameters PTroot){
+void parallel_temp(double my_E , double &my_beta, struct PT_parameters &PTp, struct PTroot_parameters &PTroot){
 
     double coin;
     double n_rand=0., delta_E, delta_beta;
-    double beta_lower, beta_higher;
-    int p, i=0, nn=0;
+    double oldbeta_i, oldbeta_nn;
+    int p, i=0, nn=0, ind_nn=0;
+    int oldrank_i=0, oldrank_nn=0;
+    int newrank_i=0, newrank_nn=0;
+
 
     MPI_Gather(&my_E, 1, MPI_DOUBLE, PTroot.All_Energies.data(), 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
     if (PTp.rank == PTp.root) { //Root forms the pairs and decides (given the energies and the betas) which pairs will swap
@@ -169,29 +171,33 @@ void parallel_temp(double my_E , double &my_beta, struct PT_parameters PTp, stru
         }
         while (i < PTp.np) {
             n_rand=rn::uniform_real_box(0,1);
-            delta_E = PTroot.All_Energies[PTroot.ind_to_rank[i]] - PTroot.All_Energies[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]];
-//            printf("rank %d b1 %lf rank2 %d b2 %lf \n", PTroot.ind_to_rank[i], PTroot.beta[PTroot.ind_to_rank[i]],
-//            PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np], PTroot.beta[PTroot.ind_to_rank[(PTp.np+ i + nn) % PTp.np]]);
-            delta_beta = PTroot.beta[PTroot.ind_to_rank[i]] - PTroot.beta[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]];
-//            printf("index %d rand %lf delta_b %lf delta_E %lf exp %lf\n", i, n_rand, delta_beta, delta_E,exp(-delta_beta * delta_E));
+            ind_nn=(PTp.np + i + nn) % PTp.np;
+            oldrank_i=PTroot.ind_to_rank[i];
+            oldrank_nn=PTroot.ind_to_rank[ind_nn];
+            delta_E = PTroot.All_Energies[oldrank_i] - PTroot.All_Energies[oldrank_nn];
+            delta_beta = PTroot.beta[oldrank_i] - PTroot.beta[oldrank_nn];
             //swapping condition
             if (n_rand < exp(-delta_beta * delta_E)) {
-                printf("SWAP i %d and j %d\n", i, (PTp.np + i + nn) % PTp.np);
-                //swap indices
-                PTroot.rank_to_ind[PTroot.ind_to_rank[i]] = (PTp.np + i + nn) % PTp.np;
-                PTroot.rank_to_ind[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]] = i;
+                //swap indices in the rank_to_ind array
+
+                PTroot.rank_to_ind[oldrank_i] = ind_nn;
+                PTroot.rank_to_ind[oldrank_nn] = i;
+
+                //swap indices in the ind_to_rank array
+                newrank_i= oldrank_nn;
+                PTroot.ind_to_rank[i]= newrank_i;
+                newrank_nn=oldrank_i;
+                PTroot.ind_to_rank[ind_nn] =newrank_nn;
                 //swap beta
-                beta_lower= PTroot.beta[PTroot.ind_to_rank[i]];
-                beta_higher= PTroot.beta[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]];
-                PTroot.beta[PTroot.ind_to_rank[i]] = beta_higher;
-                PTroot.beta[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]] = beta_lower;
-                }
+
+                oldbeta_i= PTroot.beta[oldrank_i];
+                oldbeta_nn= PTroot.beta[oldrank_nn];
+                PTroot.beta[oldrank_i] = oldbeta_nn;
+                PTroot.beta[oldrank_nn] = oldbeta_i;
+            }
                 i+= 2;
-            }
-            for (p = 0; p < PTp.np; p++) {
-                PTroot.ind_to_rank[PTroot.rank_to_ind[p]] = p;
-            }
         }
+    }
     MPI_Scatter(PTroot.beta.data(), 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
 }
 
