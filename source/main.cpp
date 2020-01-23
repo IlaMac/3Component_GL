@@ -138,6 +138,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         DensityPsi_file<<n<<"\t"<<my_beta<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
         //Parallel Tempering swap
         parallel_temp(mis.E, my_beta, PTp, PTroot);
+        printf("I'm rank %d and this is my beta %lf\n", PTp.rank, my_beta);
 
         if ((n % MCp.n_autosave) == 0) {
             //Save a configuration for the restarting
@@ -150,7 +151,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     DualStiff_file.close();
 }
 
-void parallel_temp(double my_E , double my_beta, struct PT_parameters PTp, struct PTroot_parameters PTroot){
+void parallel_temp(double my_E , double &my_beta, struct PT_parameters PTp, struct PTroot_parameters PTroot){
 
     double coin;
     double n_rand=0., delta_E, delta_beta;
@@ -175,7 +176,7 @@ void parallel_temp(double my_E , double my_beta, struct PT_parameters PTp, struc
 //            printf("index %d rand %lf delta_b %lf delta_E %lf exp %lf\n", i, n_rand, delta_beta, delta_E,exp(-delta_beta * delta_E));
             //swapping condition
             if (n_rand < exp(-delta_beta * delta_E)) {
-//                printf("SWAP i %d and j %d\n", i, (PTp.np + i + nn) % PTp.np);
+                printf("SWAP i %d and j %d\n", i, (PTp.np + i + nn) % PTp.np);
                 //swap indices
                 PTroot.rank_to_ind[PTroot.ind_to_rank[i]] = (PTp.np + i + nn) % PTp.np;
                 PTroot.rank_to_ind[PTroot.ind_to_rank[(PTp.np + i + nn) % PTp.np]] = i;
