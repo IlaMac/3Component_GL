@@ -15,13 +15,11 @@ int main(int argc, char *argv[]){
     struct PT_parameters PTp;
     struct PTroot_parameters PTroot;
     unsigned int i;
-    int p;
     long int seednumber=-1; /*by default it is a negative number which means that rng will use random_device*/
-
-    double my_beta=0.226;
+    double my_beta=0.;
+    int my_ind=0;
 
     std::string directory_read;
-    std::string directory_write;
     std::string directory_parameters;
 
     if(argc > 3 ){
@@ -62,22 +60,21 @@ int main(int argc, char *argv[]){
 /*DETERMINE TOTAL NUMBER OF PROCESSORS*/
     MPI_Comm_size(MPI_COMM_WORLD, &PTp.np);
 
-
     if(PTp.rank == PTp.root) {
         //Initialization ranks arrays
         initialize_PTarrays( PTp, PTroot, Hp);
     }
     MPI_Scatter(PTroot.beta.data(), 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+    MPI_Scatter(PTroot.rank_to_ind.data(), 1, MPI_INT, &my_ind, 1, MPI_INT, PTp.root, MPI_COMM_WORLD);
 
     printf("I'm rank %d and this is my beta %lf\n", PTp.rank, my_beta);
 
-    directory_write=directory_parameters+"/rank_"+std::to_string(PTp.rank);
-    directory_read=directory_parameters+"/rank_"+std::to_string(PTp.rank);
+    directory_read=directory_parameters+"/beta_"+std::to_string(my_ind);
 
-    //Initialize Lattice: files "Psi_init.txt" and "A_init.txt" in the directory DIRECTORY_READ  which depends on the rank!!!!!I HAVE TO INITIALIZE ALSO MY_BETA FROM THE SAME FOLDER!!!!!!!
+    //Initialize Lattice: files "Psi_init.txt" and "A_init.txt" in the directory DIRECTORY_READ!!! I HAVE TO INITIALIZE PROPERLY!!!!!!!
     initialize_lattice(Lattice, directory_read);
     //Mainloop
-    mainloop(Lattice, MCp, Hp, my_beta, PTp, PTroot, directory_write);
+    mainloop(Lattice, MCp, Hp, my_beta, my_ind, PTp, PTroot, directory_parameters);
 
     std::cout << "Proccess current resident ram usage: " << process_memory_in_mb("VmRSS") << " MB" << std::endl;
     std::cout << "Proccess maximum resident ram usage: " << process_memory_in_mb("VmHWM") << " MB" << std::endl;
@@ -86,39 +83,54 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp, double my_beta, struct PT_parameters PTp, struct PTroot_parameters PTroot, const fs::path & directory_write) {
+void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp, double &my_beta, int &my_ind, struct PT_parameters PTp, struct PTroot_parameters PTroot, std::string directory_parameters) {
 
     int n = 0, t = 0;
+
     /*Measurements*/
     struct Measures mis;
+
+    std::string directory_write;
+    std::string E_fname;
+    std::string M_fname;
+    std::string DS_fname;
+    std::string DPsi_fname;
+    std::string Check;
+
     std::ofstream Energy_file;
     std::ofstream Magnetization_file;
     std::ofstream DualStiff_file;
     std::ofstream DensityPsi_file;
+    std::ofstream Check_file;
 
-    //  fs::path energy_file = directory_write / "Energy.txt"; Use this sintax to send the path of the file to the measures function so that the writing to a file would occur there.
-    char Efile_name[256];
-    char Mfile_name[256];
-    char DSfile_name[256];
-    char DPsi_name[256];
 
-    sprintf(Efile_name, "%s/Energy.txt", directory_write.c_str());
-    sprintf(Mfile_name, "%s/Magnetization.txt", directory_write.c_str());
-    sprintf(DSfile_name, "%s/Dual_Stiffness.txt", directory_write.c_str());
-    sprintf(DPsi_name, "%s/Psi_density.txt", directory_write.c_str());
+    directory_write=directory_parameters+"/beta_"+std::to_string(my_ind);
 
-    Energy_file.open(Efile_name, std::ios::out);
+    E_fname=directory_write+"/Energy.txt";
+    M_fname=directory_write+"/Magnetization.txt";
+    DS_fname=directory_write+"/Dual_Stiffness.txt";
+    DPsi_fname=directory_write+"/Psi_density.txt";
+    Check=directory_write+"/Check_file.txt";
+
+    Energy_file.open(E_fname, std::ios::out);
     Energy_file.close();
-    Energy_file.open(Efile_name, std::ios::app);
-    DualStiff_file.open(DSfile_name, std::ios::out);
-    DualStiff_file.close();
-    DualStiff_file.open(DSfile_name, std::ios::app);
-    Magnetization_file.open(Mfile_name, std::ios::out);
+    Energy_file.open(E_fname, std::ios::app);
+
+    Magnetization_file.open(M_fname, std::ios::out);
     Magnetization_file.close();
-    Magnetization_file.open(Mfile_name, std::ios::app);
-    DensityPsi_file.open(DPsi_name, std::ios::out);
+    Magnetization_file.open(M_fname, std::ios::app);
+
+    DualStiff_file.open(DS_fname, std::ios::out);
+    DualStiff_file.close();
+    DualStiff_file.open(DS_fname, std::ios::app);
+
+    DensityPsi_file.open(DPsi_fname, std::ios::out);
     DensityPsi_file.close();
-    DensityPsi_file.open(DPsi_name, std::ios::app);
+    DensityPsi_file.open(DPsi_fname, std::ios::app);
+
+    Check_file.open(Check, std::ios::out);
+    Check_file.close();
+    Check_file.open(Check, std::ios::app);
 
     measures_init(mis);
 
@@ -126,36 +138,63 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         for (t = 0; t < MCp.tau; t++) {
             metropolis(Site, MCp, Hp,  my_beta);
         }
+
         //Measures
         measures_reset(mis);
         energy(mis, Hp, my_beta, Site);
-        Energy_file<<n<<"\t"<<my_beta<<"\t"<< mis.E<< "\t"<< mis.E_pot<< "\t"<< mis.E_kin<< "\t"<< mis.E_Josephson<< "\t"<< mis.E_B<<  std::endl;
+        Energy_file<<n<<"\t"<<"\t"<< mis.E<< "\t"<< mis.E_pot<< "\t"<< mis.E_kin<< "\t"<< mis.E_Josephson<< "\t"<< mis.E_B<<  std::endl;
         dual_stiffness(mis, Hp, Site);
-        DualStiff_file<<n<<"\t"<<my_beta<<"\t"<<mis.d_rhoz<<std::endl;
+        DualStiff_file<<n<<"\t"<<mis.d_rhoz<<std::endl;
         magnetization(mis, Site);
         Magnetization_file<<n<<"\t"<<my_beta<<"\t"<<mis.m<<"\t"<<(mis.m*mis.m)<<"\t"<<(mis.m*mis.m*mis.m*mis.m)<<std::endl;
         density_psi(mis, Site);
         DensityPsi_file<<n<<"\t"<<my_beta<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
-        //Parallel Tempering swap
-        parallel_temp(mis.E, my_beta, PTp, PTroot);
+        Check_file<<my_beta<<"\t"<<PTp.rank;
+
+        Energy_file.close();
+        Magnetization_file.close();
+        DualStiff_file.close();
+        DensityPsi_file.close();
+        Check_file.close();
 
         if ((n % MCp.n_autosave) == 0) {
             //Save a configuration for the restarting
             save_lattice(Site, directory_write, std::string("n") + std::to_string(n) );
             }
+
+        //Parallel Tempering swap
+        parallel_temp(mis.E, my_beta, my_ind, PTp, PTroot);
+
+        //Files and directory
+        directory_write=directory_parameters+"/beta_"+std::to_string(my_ind);
+        E_fname=directory_write+"/Energy.txt";
+        M_fname=directory_write+"/Magnetization.txt";
+        DS_fname=directory_write+"/Dual_Stiffness.txt";
+        DPsi_fname=directory_write+"/Psi_density.txt";
+        Check=directory_write+"/Check_file.txt";
+
+        Energy_file.open(E_fname, std::ios::app);
+        Magnetization_file.open(M_fname, std::ios::app);
+        DualStiff_file.open(DS_fname, std::ios::app);
+        DensityPsi_file.open(DPsi_fname, std::ios::app);
+        Check_file.open(Check, std::ios::app);
+
     }
     save_lattice(Site, directory_write, std::string("final"));
     Energy_file.close();
     Magnetization_file.close();
     DualStiff_file.close();
+    DensityPsi_file.close();
+    Check_file.close();
+
 }
 
-void parallel_temp(double my_E , double &my_beta, struct PT_parameters &PTp, struct PTroot_parameters &PTroot){
+void parallel_temp(double my_E , double &my_beta, int &my_ind, struct PT_parameters &PTp, struct PTroot_parameters &PTroot){
 
     double coin;
-    double n_rand=0., delta_E, delta_beta;
+    double n_rand, delta_E, delta_beta;
     double oldbeta_i, oldbeta_nn;
-    int p, i=0, nn=0, ind_nn=0;
+    int i=0, nn=0, ind_nn=0;
     int oldrank_i=0, oldrank_nn=0;
     int newrank_i=0, newrank_nn=0;
 
@@ -199,6 +238,8 @@ void parallel_temp(double my_E , double &my_beta, struct PT_parameters &PTp, str
         }
     }
     MPI_Scatter(PTroot.beta.data(), 1, MPI_DOUBLE, &my_beta, 1, MPI_DOUBLE, PTp.root, MPI_COMM_WORLD);
+    MPI_Scatter(PTroot.rank_to_ind.data(), 1, MPI_INT, &my_ind, 1, MPI_INT, PTp.root, MPI_COMM_WORLD);
+
 }
 
 
