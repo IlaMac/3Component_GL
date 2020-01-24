@@ -146,9 +146,10 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         dual_stiffness(mis, Hp, Site);
         DualStiff_file<<n<<"\t"<<mis.d_rhoz<<std::endl;
         magnetization(mis, Site);
-        Magnetization_file<<n<<"\t"<<my_beta<<"\t"<<mis.m<<"\t"<<(mis.m*mis.m)<<"\t"<<(mis.m*mis.m*mis.m*mis.m)<<std::endl;
+        Magnetization_file<<n<<"\t"<<"\t"<<mis.m<<"\t"<<(mis.m*mis.m)<<"\t"<<(mis.m*mis.m*mis.m*mis.m)<<std::endl;
         density_psi(mis, Site);
-        DensityPsi_file<<n<<"\t"<<my_beta<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
+        DensityPsi_file<<n<<"\t"<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
+
         Check_file<<my_beta<<"\t"<<PTp.rank;
 
         Energy_file.close();
