@@ -36,13 +36,13 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
         }
     }
 
-    mis.E_kin=(double)my_beta*h_Kinetic/N;
-    mis.E_pot=(double)my_beta* h_Potential/N;
-    mis.E_Josephson=(double) my_beta*h_Josephson/N;
-    mis.E_B=(double)my_beta* h_B/N;
+    mis.E_kin=(double)h_Kinetic/N;
+    mis.E_pot=(double)h_Potential/N;
+    mis.E_Josephson=(double)h_Josephson/N;
+    mis.E_B= (double)h_B/N;
     h_tot= h_Potential + h_Kinetic +  h_Josephson +h_B;
     //to compute the heat capacity it is important to consider the total physical energy which is h_tot*h³
-    mis.E=(double) my_beta* h_tot/(N);
+    mis.E=(double)h_tot/(N);
 }
 
 void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
