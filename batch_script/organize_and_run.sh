@@ -1,7 +1,6 @@
 #!/bin/bash
 
 BASEDIR=${HOME}/MultiComponents_SC
-EXECUTE_DIR=${BASEDIR}/Multi_Components_GL/build/Release
 SCRIPT_DIR=${BASEDIR}/Multi_Components_GL/batch_script
 
 L=8
@@ -68,14 +67,18 @@ cd ${OUTPUT}
 
 for ((rank=0; rank<${ntasks}; rank++)); do
 
-if [ ! -d ./Srank_${rank} ]; then
-   mkdir -p rank_${rank}
+if [ ! -d ./Sbeta_${rank} ]; then
+   mkdir -p beta_${rank}
 fi
 
 done
 
-DIR_PAR=${OUTPUT}
+cd ${SCRIPT_DIR}
+DIR_PAR="${OUTPUT}"
+
 #SEED= If I want to repeat exactly a simulation I could initialize the random number generator exactly at the same way
+
+EXECUTE_DIR="../build/Release"
 
 echo "#!/bin/bash
 #SBATCH --job-name=${jobname}          # Name of the job
@@ -83,17 +86,20 @@ echo "#!/bin/bash
 #SBATCH --mem-per-cpu=2000              # Memory per allocated cpu
 #SBATCH --nodes=${nnodes}               # Number of nodes
 #SBATCH --ntasks=${ntasks}
-#SBATCH --output=${SCRIPT_DIR}/logs/log_${jobname}.o
-#SBATCH --error=${SCRIPT_DIR}/logs/log_${jobname}.e
-
-mkdir -p ${SCRIPT_DIR}/logs
-
-###srun ${EXECUTE_DIR}/GL_3components ${DIR_PAR} &> ${SCRIPT_DIR}/logs/log_${jobname}.o
+#SBATCH --clusters=draken
+#SBATCH --output=${DIR_PAR}/logs/log_${jobname}.o
+#SBATCH --error=${DIR_PAR}/logs/log_${jobname}.e
 
 
-" >  ${SCRIPT_DIR}/submit_run
+srun ${EXECUTE_DIR}/GL_3components ${DIR_PAR} &> ${DIR_PAR}/logs/log_${jobname}.o
 
+
+" >  submit_run
 
 #Submission of the work --> sbatch submit_runs
 
-sbatch ${SCRIPT_DIR}/submit_run
+mkdir -p ${DIR_PAR}/logs
+
+sbatch submit_run
+
+

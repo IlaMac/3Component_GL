@@ -150,7 +150,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         density_psi(mis, Site);
         DensityPsi_file<<n<<"\t"<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
 
-        Check_file<<my_beta<<"\t"<<PTp.rank;
+        Check_file<<my_beta<<"\t"<<PTp.rank<<std::endl;
 
         Energy_file.close();
         Magnetization_file.close();
