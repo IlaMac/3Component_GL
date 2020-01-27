@@ -10,6 +10,7 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
     double h_Potential=0., h_Kinetic=0., h_Josephson=0., h_B=0., h_tot=0.;
     double F_A=0;
     double h2=(Hp.h*Hp.h);
+    double h3=(Hp.h*Hp.h*Hp.h);
 
     for(ix=0; ix<Lx; ix++){
         for(iy=0; iy<Ly; iy++){
@@ -36,12 +37,12 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
         }
     }
 
-    mis.E_kin=(double)h_Kinetic/N;
-    mis.E_pot=(double)h_Potential/N;
-    mis.E_Josephson=(double)h_Josephson/N;
-    mis.E_B= (double)h_B/N;
-    h_tot= h_Potential + h_Kinetic +  h_Josephson +h_B;
     //to compute the heat capacity it is important to consider the total physical energy which is h_tot*h³
+    mis.E_kin=(double)h3*h_Kinetic/N;
+    mis.E_pot=(double)h3*h_Potential/N;
+    mis.E_Josephson=(double)h3*h_Josephson/N;
+    mis.E_B= (double)h3*h_B/N;
+    h_tot= h_Potential + h_Kinetic +  h_Josephson +h_B;
     mis.E=(double)h_tot/(N);
 }
 

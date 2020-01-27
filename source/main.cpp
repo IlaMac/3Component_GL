@@ -217,6 +217,7 @@ void parallel_temp(double my_E , double &my_beta, int &my_ind, struct PT_paramet
             delta_E = PTroot.All_Energies[oldrank_i] - PTroot.All_Energies[oldrank_nn];
             delta_beta = PTroot.beta[oldrank_i] - PTroot.beta[oldrank_nn];
             //swapping condition
+            //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
             if (n_rand < exp(-delta_beta * delta_E)) {
                 //swap indices in the rank_to_ind array
 
