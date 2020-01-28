@@ -18,7 +18,7 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
             for (iz = 0; iz < Lz; iz++) {
                 i=ix + Lx * (iy + iz * Ly);
                 /*************PSI UPDATE: move in the plane ImPsi, RePsi**********/
-                for (alpha = 0; alpha < 3; alpha++) {
+             /*   for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];
                     oldE = local_HPsi(OldPsi, ix, iy, iz, alpha, Hp, Site);
                     l=rn::uniform_real_box(0, MCp.lbox_l);
@@ -33,13 +33,14 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                         acc_l++;
                     } else {
                         rand= rn::uniform_real_box(0,1);
-                        //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
+                        //Boltzmann weight: exp(-\beta \Delta E) E= h³ \sum_i E(i)
                         if (rand < exp(my_beta * minus_deltaE)) {
                             Site[i].Psi[alpha] = NewPsi;
                             acc_l++;
                         }
                     }
                 }
+             */
                 /*******PHASE ONLY UPDATE**************/
                 for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];

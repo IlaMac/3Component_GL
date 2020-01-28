@@ -19,13 +19,14 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
                     i=ix + Lx * (iy + iz * Ly);
                     //Potential= (a+ 3/h²)*|Psi_{alpha}(r)|² + b/2*|Psi_{alpha}(r)|⁴
                     h_Potential += (O2norm2(Site[i].Psi[alpha]) * ((Hp.a + (3. / h2))+(0.5 * Hp.b *O2norm2(Site[i].Psi[alpha]))));
-                    //Kinetic= -(1/h²)*\sum_k=1,2,3 |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))
+                    //Kinetic= -(1/h²)*\sum_k=1,2,3 |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos( theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))
                     for (vec = 0; vec < 3; vec++) {
                         h_Kinetic -= (1. / h2) * (Site[i].Psi[alpha].r * Site[nn(i, vec, 1)].Psi[alpha].r) *
                                      cos(Site[nn(i, vec, 1)].Psi[alpha].t - Site[i].Psi[alpha].t +
-                                         Hp.h * Hp.e * Site[i].A[vec]);
+                                         (Hp.h * Hp.e * Site[i].A[vec]) );
                     }
-                    for (vec = 0; vec < alpha; vec++) {
+                    for (vec = alpha+1; vec < 3; vec++) {
+                     printf("Check Josephson: alpha %d vec %d\n", alpha, vec);
                             //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beys}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
                             h_Josephson += (Hp.eta*Site[i].Psi[alpha].r*Site[i].Psi[vec].r*cos(Site[i].Psi[alpha].t - Site[i].Psi[vec].t));
                             //F_{alpha,vec}= A_alpha(r_i) + A_vec(ri+alpha) - A_alpha(r_i+vec) - A_vec(ri)

@@ -190,7 +190,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
 }
 
-void parallel_temp(double my_E , double &my_beta, int &my_ind, struct PT_parameters &PTp, struct PTroot_parameters &PTroot){
+void parallel_temp(double &my_E , double &my_beta, int &my_ind, struct PT_parameters &PTp, struct PTroot_parameters &PTroot){
 
     double coin;
     double n_rand, delta_E, delta_beta;
