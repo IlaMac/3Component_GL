@@ -272,7 +272,7 @@ void parallel_temp(double &my_E , double &my_beta, int &my_ind, struct PT_parame
 unsigned int nn(unsigned int i, unsigned int coord, int dir){
 
     unsigned int ix, iy, iz;
-    unsigned int ix_new=0, iy_new=0, iz_new=0;
+    int ix_new=0, iy_new=0, iz_new=0;
 
     ix=i%Lx;
     iy=(i/Lx)%Ly;
