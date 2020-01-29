@@ -22,7 +22,7 @@ namespace fs = std::filesystem;
 //
 //#define N (Lx*Ly*Lz)
 
-extern int Lx, Ly, Lz, N;
+extern unsigned int Lx, Ly, Lz, N;
 
 void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp, double &my_beta, int &my_ind, struct PT_parameters PTp, struct PTroot_parameters PTroot, std::string directory_parameters);
 void parallel_temp(double &my_E , double &my_beta,  int &my_ind, struct PT_parameters &PTp, struct PTroot_parameters &PTroot);

@@ -6,7 +6,7 @@
 #include "rng.h"
 #include "memory_check.h"
 
-int Lx, Ly, Lz, N;
+unsigned int Lx, Ly, Lz, N;
 
 int main(int argc, char *argv[]){
 
