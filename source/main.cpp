@@ -60,7 +60,6 @@ int main(int argc, char *argv[]){
     //Initialize MC_parameters: file "MC_init.txt"
     initialize_MCparameters(MCp, directory_parameters);
 
-    MPI_Status status;
     MPI_Init(NULL, NULL); /* START MPI */
 /*DETERMINE RANK OF THIS PROCESSOR*/
     MPI_Comm_rank(MPI_COMM_WORLD, &PTp.rank);
@@ -273,7 +272,7 @@ void parallel_temp(double &my_E , double &my_beta, int &my_ind, struct PT_parame
 unsigned int nn(unsigned int i, unsigned int coord, int dir){
 
     unsigned int ix, iy, iz;
-    int ix_new=0, iy_new=0, iz_new=0;
+    unsigned int ix_new=0, iy_new=0, iz_new=0;
 
     ix=i%Lx;
     iy=(i/Lx)%Ly;
