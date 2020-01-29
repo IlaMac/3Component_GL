@@ -26,8 +26,8 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
         Hp.eta=1;
         Hp.e=0.5;
         Hp.h= 5.0;
-        Hp.b_low=0.224;
-        Hp.b_high=0.2265;
+        Hp.b_low=0.244;
+        Hp.b_high=0.247;
     }
 
 }
@@ -65,7 +65,7 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
     fs::path a_init_file = directory_read / "A_final.txt";
     unsigned int i=0;
     unsigned int alpha=0;
-/*
+
     if(fs::exists(psi_init_file)){
         FILE *fPsi= nullptr;
         if((fPsi=fopen(psi_init_file.c_str(), "r"))) {
@@ -85,15 +85,16 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
             fclose(fA);
         }
     }
-*/
+
+ /*
     for(i=0; i<N; i++){
         for(alpha=0; alpha<3; alpha++){
-            Site[i].Psi[alpha].r=1./3.;
+            Site[i].Psi[alpha].r=sqrt(1./3.);
             Site[i].Psi[alpha].t=0.;
             polar_to_cartesian(Site[i].Psi[alpha]);
         }
     }
-
+*/
 
 }
 

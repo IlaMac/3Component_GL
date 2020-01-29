@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
     struct PTroot_parameters PTroot;
     unsigned int i;
     long int seednumber=-1; /*by default it is a negative number which means that rng will use random_device*/
-    double my_beta=0.;
+    double my_beta=0.244;
     int my_ind=0;
 
     std::string directory_read;

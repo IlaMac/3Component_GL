@@ -26,7 +26,6 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
                                          (Hp.h * Hp.e * Site[i].A[vec]) );
                     }
                     for (vec = alpha+1; vec < 3; vec++) {
-                     printf("Check Josephson: alpha %d vec %d\n", alpha, vec);
                             //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beys}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
                             h_Josephson += (Hp.eta*Site[i].Psi[alpha].r*Site[i].Psi[vec].r*cos(Site[i].Psi[alpha].t - Site[i].Psi[vec].t));
                             //F_{alpha,vec}= A_alpha(r_i) + A_vec(ri+alpha) - A_alpha(r_i+vec) - A_vec(ri)
@@ -44,25 +43,25 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
     mis.E_Josephson=(double)h3*h_Josephson;
     mis.E_B= (double)h3*h_B;
     h_tot= h_Potential + h_Kinetic +  h_Josephson +h_B;
-    mis.E=(double)h_tot;
+    mis.E=(double)h_tot*h3;
 }
 
 void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
 
     double qx_min=C_TWO_PI/(Lx);
     double invNorm= 1./((C_TWO_PI)*(C_TWO_PI)*N);
-    unsigned int ix, iy, iz;
+    unsigned int i, ix, iy, iz;
     double Re_rhoz=0.;
     double Im_rhoz=0.;
-    double Dx_Ay=0., Dy_Ax=0.;
+    double Dx_Ay, Dy_Ax;
 
     for(ix=0; ix<Lx;ix++){
         for(iy=0; iy<Ly;iy++){
             for(iz=0; iz<Lz;iz++){
-                Dx_Ay=(Site[nn(ix +Lx*(iy+Ly*iz), 0, 1)].A[1]- Site[ix + Lx*(iy+ Ly*iz)].A[1]);
-                ///Hp.h;
-                Dy_Ax=(Site[nn(ix +Lx*(iy+Ly*iz), 1, 1)].A[0]- Site[ix + Lx*(iy+ Ly*iz)].A[0]);
-                ///Hp.h;
+                i=ix +Lx*(iy+Ly*iz);
+                Dx_Ay=(Site[nn(i, 0, 1)].A[1]- Site[i].A[1])/Hp.h;
+                Dy_Ax=(Site[nn(i, 1, 1)].A[0]- Site[i].A[0])/Hp.h;
+
                 Re_rhoz+=(cos((double)qx_min*ix)*(Dx_Ay -Dy_Ax));
                 Im_rhoz+=(sin((double)qx_min*ix)*(Dx_Ay -Dy_Ax));
             }
@@ -73,18 +72,22 @@ void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* 
 
 void magnetization(struct Measures &mis, struct Node* Site){
     //The Ising parameter m(x,y)=+/-1 indicates the chirality of the three phases. If the phases are ordered as: phi_1, phi_2, phi_3 then m=1; otherwise if the order is phi_1, phi_3, phi_2 then m=-1.
-    unsigned ix, iy, iz, alpha;
-    double *phi_shifted;
-
-    phi_shifted=(double *) calloc(3, sizeof(double));
+    unsigned ix, iy, iz, i, alpha;
+    //double *phi_shifted;
+    //phi_shifted=(double *) calloc(3, sizeof(double));
+    std::vector <double> phi_shifted;
+    phi_shifted.resize(3,0.);
 
     for(ix=0; ix<Lx;ix++) {
         for (iy = 0; iy < Ly; iy++) {
             for (iz = 0; iz < Lx; iz++) {
+                i=ix +Lx*(iy+Ly*iz);
                 for(alpha=0; alpha<3; alpha++){
-                    phi_shifted[alpha]=Site[ix +Lx*(iy+Ly*iz)].Psi[alpha].t - Site[ix +Lx*(iy+Ly*iz)].Psi[0].t;
-                    while(phi_shifted[alpha] >= C_TWO_PI){ phi_shifted[alpha]-= C_TWO_PI;}
-                    while(phi_shifted[alpha]< 0){ phi_shifted[alpha]+=C_TWO_PI;}
+                    phi_shifted[alpha]=Site[i].Psi[alpha].t - Site[i].Psi[0].t;
+                    while(phi_shifted[alpha] >= C_TWO_PI){
+                        phi_shifted[alpha]-= C_TWO_PI;}
+                    while(phi_shifted[alpha]< 0){
+                        phi_shifted[alpha]+=C_TWO_PI;}
                 }
                 if(phi_shifted[1]>=phi_shifted[2]){
                     mis.m+=1;
