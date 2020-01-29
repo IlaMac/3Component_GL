@@ -6,6 +6,7 @@
 #include "rng.h"
 #include "memory_check.h"
 
+int Lx, Ly, Lz, N;
 
 int main(int argc, char *argv[]){
 
@@ -18,23 +19,29 @@ int main(int argc, char *argv[]){
     long int seednumber=-1; /*by default it is a negative number which means that rng will use random_device*/
     double my_beta=0.244;
     int my_ind=0;
+    time_t tic, toc;
 
     std::string directory_read;
     std::string directory_parameters;
 
-    if(argc > 3 ){
+    if(argc > 4 ){
         printf("Too many arguments!");
         myhelp(argc, argv);
     }
-    else if(argc < 2){
+    else if(argc < 3){
         printf("Not enough arguments --> Default Initialization. \n");
         myhelp(argc, argv);
     }
-    else if(argc ==2) {
-        directory_parameters = argv[1];
+    else if(argc ==3) {
+        /*Rude way*/
+        Lx=Ly=Lz=std::atoi(argv[1]);
+        N=Lx*Ly*Lz;
+        directory_parameters = argv[2];
     }
-    else if(argc == 3){
-        directory_parameters = argv[1];
+    else if(argc == 4){
+        Lx=Ly=Lz=std::atoi(argv[1]);
+        N=Lx*Ly*Lz;
+        directory_parameters = argv[2];
         seednumber= reinterpret_cast<long> (argv[2]);
     }
 
@@ -61,6 +68,11 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD, &PTp.np);
 
     if(PTp.rank == PTp.root) {
+        //Initial time
+        tic = time(0);
+    }
+
+    if(PTp.rank == PTp.root) {
         //Initialization ranks arrays
         initialize_PTarrays( PTp, PTroot, Hp);
     }
@@ -76,9 +88,22 @@ int main(int argc, char *argv[]){
     //Mainloop
     mainloop(Lattice, MCp, Hp, my_beta, my_ind, PTp, PTroot, directory_parameters);
 
+    if(PTp.rank == PTp.root) {
+        //Final time
+        toc = time(0);
+    }
+
+
     std::cout << "Proccess current resident ram usage: " << process_memory_in_mb("VmRSS") << " MB" << std::endl;
     std::cout << "Proccess maximum resident ram usage: " << process_memory_in_mb("VmHWM") << " MB" << std::endl;
     std::cout << "Proccess maximum virtual  ram usage: " << process_memory_in_mb("VmPeak") << " MB" << std::endl;
+
+    if(PTp.rank == PTp.root) {
+        std::cout << "Total runtime: "
+                  << ((toc - tic) / 3600 > 0 ? std::to_string((toc - tic) / 3600) + " h " : "")
+                  << ((toc - tic) / 60 > 0 ? std::to_string(((toc - tic) % 3600) / 60) + " min " : "")
+                  << (toc - tic) % 60 << " sec" << "\n" << std::endl;
+    }
 
     return 0;
 }

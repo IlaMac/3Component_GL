@@ -73,8 +73,7 @@ void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* 
 void magnetization(struct Measures &mis, struct Node* Site){
     //The Ising parameter m(x,y)=+/-1 indicates the chirality of the three phases. If the phases are ordered as: phi_1, phi_2, phi_3 then m=1; otherwise if the order is phi_1, phi_3, phi_2 then m=-1.
     unsigned ix, iy, iz, i, alpha;
-    //double *phi_shifted;
-    //phi_shifted=(double *) calloc(3, sizeof(double));
+
     std::vector <double> phi_shifted;
     phi_shifted.resize(3,0.);
 
