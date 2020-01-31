@@ -75,22 +75,24 @@ void magnetization(struct Measures &mis, struct Node* Site){
     unsigned ix, iy, iz, i, alpha;
 
     std::vector <double> phi_shifted;
-    phi_shifted.resize(3,0.);
+    phi_shifted.resize(2,0.);
 
     for(ix=0; ix<Lx;ix++) {
         for (iy = 0; iy < Ly; iy++) {
             for (iz = 0; iz < Lx; iz++) {
                 i=ix +Lx*(iy+Ly*iz);
-                for(alpha=0; alpha<3; alpha++){
+                for(alpha=1; alpha<3; alpha++){
                     phi_shifted[alpha]=Site[i].Psi[alpha].t - Site[i].Psi[0].t;
                     while(phi_shifted[alpha] >= C_TWO_PI){
                         phi_shifted[alpha]-= C_TWO_PI;}
                     while(phi_shifted[alpha]< 0){
                         phi_shifted[alpha]+=C_TWO_PI;}
                 }
-                if(phi_shifted[1]>=phi_shifted[2]){
+                if(phi_shifted[0]>phi_shifted[1]){
                     mis.m+=1;
-                }else{
+                }else if(phi_shifted[0]==phi_shifted[1]){
+		    mis.m+=0;	
+		}else{
                     mis.m+=(-1);
                 }
             }
