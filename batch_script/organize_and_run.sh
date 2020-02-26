@@ -17,8 +17,8 @@ H_bhigh=0.229
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
 Nmisu=1000000
-ntau=20
-nautosave=100000
+ntau=32
+nautosave=500000
 l_box=1.0
 rho_box=0.5
 theta_box=3.141592653
@@ -28,13 +28,13 @@ for L in $LLIST; do
 
 ############Creation of the output folder and of the two files of initialization####################
 
-cd ${BASEDIR}/Output
+cd ${BASEDIR}/Output_3C
 
 if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_bmin${H_blow}_bmax${H_bhigh} ]; then
    mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_bmin${H_blow}_bmax${H_bhigh}
 fi
 
-OUTPUT=${BASEDIR}/Output/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_bmin${H_blow}_bmax${H_bhigh}
+OUTPUT=${BASEDIR}/Output_3C/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_bmin${H_blow}_bmax${H_bhigh}
 
 cd ${OUTPUT}
 
