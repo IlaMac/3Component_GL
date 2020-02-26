@@ -130,31 +130,31 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
     directory_write=directory_parameters+"/beta_"+std::to_string(my_ind);
 
-    E_fname=directory_write+"/Energy.txt";
-    M_fname=directory_write+"/Magnetization.txt";
-    DS_fname=directory_write+"/Dual_Stiffness.txt";
-    DPsi_fname=directory_write+"/Psi_density.txt";
-    Check=directory_write+"/Check_file.txt";
+    E_fname=directory_write+"/Energy.bin";
+    M_fname=directory_write+"/Magnetization.bin";
+    DS_fname=directory_write+"/Dual_Stiffness.bin";
+    DPsi_fname=directory_write+"/Psi_density.bin";
+    Check=directory_write+"/Check_file.bin";
 
-    Energy_file.open(E_fname, std::ios::out);
+    Energy_file.open(E_fname, std::ios::out | std::ios::binary);
     Energy_file.close();
-    Energy_file.open(E_fname, std::ios::app);
+    Energy_file.open(E_fname, std::ios::app | std::ios::binary);
 
-    Magnetization_file.open(M_fname, std::ios::out);
+    Magnetization_file.open(M_fname, std::ios::out | std::ios::binary);
     Magnetization_file.close();
-    Magnetization_file.open(M_fname, std::ios::app);
+    Magnetization_file.open(M_fname, std::ios::app | std::ios::binary);
 
-    DualStiff_file.open(DS_fname, std::ios::out);
+    DualStiff_file.open(DS_fname, std::ios::out | std::ios::binary);
     DualStiff_file.close();
-    DualStiff_file.open(DS_fname, std::ios::app);
+    DualStiff_file.open(DS_fname, std::ios::app | std::ios::binary);
 
-    DensityPsi_file.open(DPsi_fname, std::ios::out);
+    DensityPsi_file.open(DPsi_fname, std::ios::out | std::ios::binary);
     DensityPsi_file.close();
-    DensityPsi_file.open(DPsi_fname, std::ios::app);
+    DensityPsi_file.open(DPsi_fname, std::ios::app | std::ios::binary);
 
-    Check_file.open(Check, std::ios::out);
+    Check_file.open(Check, std::ios::out | std::ios::binary);
     Check_file.close();
-    Check_file.open(Check, std::ios::app);
+    Check_file.open(Check, std::ios::app | std::ios::binary);
 
     measures_init(mis);
 
@@ -166,13 +166,13 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         //Measures
         measures_reset(mis);
         energy(mis, Hp, my_beta, Site);
-        Energy_file<<n<<"\t"<<"\t"<< mis.E<< "\t"<< mis.E_pot<< "\t"<< mis.E_kin<< "\t"<< mis.E_Josephson<< "\t"<< mis.E_B<<  std::endl;
+        Energy_file<< mis.E <<  std::endl;
         dual_stiffness(mis, Hp, Site);
-        DualStiff_file<<n<<"\t"<<mis.d_rhoz<<std::endl;
+        DualStiff_file<<mis.d_rhoz<<std::endl;
         magnetization(mis, Site);
-        Magnetization_file<<n<<"\t"<<"\t"<<mis.m<<"\t"<<(mis.m*mis.m)<<"\t"<<(mis.m*mis.m*mis.m*mis.m)<<std::endl;
+        Magnetization_file<<mis.m<<std::endl;
         density_psi(mis, Site);
-        DensityPsi_file<<n<<"\t"<<"\t"<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
+        DensityPsi_file<<mis.density_psi[0]<<"\t"<<mis.density_psi[1]<<"\t"<<mis.density_psi[2]<<std::endl;
 
         Check_file<<my_beta<<"\t"<<PTp.rank<<std::endl;
 
@@ -192,17 +192,17 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
         //Files and directory
         directory_write=directory_parameters+"/beta_"+std::to_string(my_ind);
-        E_fname=directory_write+"/Energy.txt";
-        M_fname=directory_write+"/Magnetization.txt";
-        DS_fname=directory_write+"/Dual_Stiffness.txt";
-        DPsi_fname=directory_write+"/Psi_density.txt";
-        Check=directory_write+"/Check_file.txt";
+        E_fname=directory_write+"/Energy.bin";
+        M_fname=directory_write+"/Magnetization.bin";
+        DS_fname=directory_write+"/Dual_Stiffness.bin";
+        DPsi_fname=directory_write+"/Psi_density.bin";
+        Check=directory_write+"/Check_file.bin";
 
-        Energy_file.open(E_fname, std::ios::app);
-        Magnetization_file.open(M_fname, std::ios::app);
-        DualStiff_file.open(DS_fname, std::ios::app);
-        DensityPsi_file.open(DPsi_fname, std::ios::app);
-        Check_file.open(Check, std::ios::app);
+        Energy_file.open(E_fname, std::ios::app | std::ios::binary);
+        Magnetization_file.open(M_fname, std::ios::app | std::ios::binary);
+        DualStiff_file.open(DS_fname, std::ios::app | std::ios::binary);
+        DensityPsi_file.open(DPsi_fname, std::ios::app | std::ios::binary);
+        Check_file.open(Check, std::ios::app | std::ios::binary);
 
     }
     save_lattice(Site, directory_write, std::string("final"));
