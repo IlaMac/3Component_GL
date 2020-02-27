@@ -24,7 +24,7 @@ option(ENABLE_H5PP                  "Use h5pp, a C++ front-end to HDF5"         
 option(ENABLE_OPENMP                "Enable OpenMP flags such as -fopenmp"                                            ON)
 option(ENABLE_LTO                   "Enable link time optimization"                                                   OFF)
 option(AS_SUBPROJECT                "Try using this as a subproject with add_subdirectory()"                          OFF)
-option(APPEND_LIBSUFFIX             "Append <libname> to CMAKE_INSTALL_PREFIX"                                        OFF)
+option(APPEND_LIBSUFFIX             "Append <libname> to CMAKE_INSTALL_PREFIX"                                        ON)
 
 
 
@@ -45,6 +45,7 @@ if(ENABLE_H5PP)
     set(ENABLE_EIGEN3 OFF)
     set(ENABLE_SPDLOG OFF)
 endif()
+
 
 
 
@@ -81,6 +82,28 @@ message("Compiling with: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
 ### This one is useful to pass to tests and examples so that they compile
 ### In the same way as our main project.
 add_library(project-settings INTERFACE)
+target_compile_features(project-settings INTERFACE cxx_std_17)
+
+
+# Let cmake find our Find<package>.cmake modules
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+# Require the filesystem header (and possibly stdc++fs library)
+find_package(Filesystem COMPONENTS Final Experimental)
+if (TARGET std::filesystem)
+    target_link_libraries(project-settings INTERFACE std::filesystem)
+elseif (DOWNLOAD_METHOD MATCHES "find|none")
+    message(STATUS "Your compiler lacks std::filesystem. Set DOWNLOAD_METHOD to 'conan' or 'native' to get the ghc::filesystem replacement")
+    message(STATUS "Read more about ghc::filesystem here: https://github.com/gulrak/filesystem")
+    message(FATAL_ERROR "<filesystem> header and/or library not found")
+else ()
+    message(STATUS "Your compiler lacks std::filesystem. Getting ghc::filesystem replacement")
+    message(STATUS "Read more about ghc::filesystem here: https://github.com/gulrak/filesystem")
+    include(cmake/Fetch_ghcFilesystem.cmake)
+    target_link_libraries(project-settings INTERFACE ghcFilesystem::ghc_filesystem)
+    list(APPEND H5PP_DIRECTORY_HINTS ${ghcfilesystem_install_prefix})
+endif ()
+
 
 ### Add all source files recursively
 file(GLOB_RECURSE SOURCES "source/*.cpp")
@@ -117,6 +140,20 @@ target_link_libraries(${PROJECT_NAME} PRIVATE MPI::MPI_CXX)
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT H5PP_IS_SUBPROJECT)
     message(STATUS "Setting default install prefix -- CMAKE_INSTALL_PREFIX --> ${CMAKE_BINARY_DIR}/deps-install")
     set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/deps-install" CACHE PATH "..." FORCE)
+endif ()
+if (APPEND_LIBSUFFIX)
+    set(H5PP_INSTALL_DIR h5pp/)
+    set(H5PP_CONFIG_DIR h5pp/share/h5pp/cmake)
+    set(eigen3_install_prefix ${CMAKE_INSTALL_PREFIX}/Eigen3)
+    set(spdlog_install_prefix ${CMAKE_INSTALL_PREFIX}/spdlog)
+    set(hdf5_install_prefix ${CMAKE_INSTALL_PREFIX}/hdf5)
+    set(ghcfilesystem_install_prefix ${CMAKE_INSTALL_PREFIX}/ghcFilesystem)
+else ()
+    set(H5PP_CONFIG_DIR share/h5pp/cmake)
+    set(eigen3_install_prefix ${CMAKE_INSTALL_PREFIX})
+    set(spdlog_install_prefix ${CMAKE_INSTALL_PREFIX})
+    set(hdf5_install_prefix ${CMAKE_INSTALL_PREFIX})
+    set(ghcfilesystem_install_prefix ${CMAKE_INSTALL_PREFIX})
 endif ()
 
 

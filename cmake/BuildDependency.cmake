@@ -36,7 +36,7 @@ function(build_dependency dep_name install_dir extra_flags)
             WORKING_DIRECTORY "${build_dir}"
             RESULT_VARIABLE build_result
             ERROR_VARIABLE  build_error
-    )
+            )
 
     if(${build_result})
         message(STATUS "Got non-zero exit code while building ${dep_name}")
