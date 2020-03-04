@@ -14,6 +14,7 @@
 #include <mpi.h>
 #include "rng.h"
 
+#define NC 3 /*Number of components*/
 namespace fs = std::filesystem;
 
 //#define Lx 8

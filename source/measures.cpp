@@ -7,7 +7,7 @@
 void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struct Node* Site){
 
     unsigned int i, ix, iy, iz, alpha, vec;
-    double h_Potential=0., h_Kinetic=0., h_Josephson=0., h_B=0., h_tot=0.;
+    double h_Potential=0., h_Kinetic=0., h_Josephson=0., h_B=0.;
     double F_A=0;
     double h2=(Hp.h*Hp.h);
     double h3=(Hp.h*Hp.h*Hp.h);
@@ -42,8 +42,7 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
     mis.E_pot=(double)h3*h_Potential;
     mis.E_Josephson=(double)h3*h_Josephson;
     mis.E_B= (double)h3*h_B;
-    h_tot= h_Potential + h_Kinetic +  h_Josephson +h_B;
-    mis.E=(double)h_tot*h3;
+    mis.E=(mis.E_kin + mis.E_pot +mis.E_Josephson + mis.E_B);
 }
 
 void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
@@ -148,29 +147,5 @@ void save_lattice(struct Node* Site, const fs::path & directory_write, std::stri
         fclose(fA);
     }
 
-}
-
-void measures_init(struct Measures &mis){
-    //Initialization
-    mis.d_rhoz=0.;
-    mis.m=0.;
-    mis.E=0.;
-    mis.E_pot=0.;
-    mis.E_kin=0.;
-    mis.E_Josephson=0.;
-    mis.E_B=0.;
-    mis.density_psi=(double *) calloc(3, sizeof(double));
-}
-
-void measures_reset(struct Measures &mis){
-    //Initialization
-    mis.d_rhoz=(double)0.0;
-    mis.m=(double)0.0;
-    mis.E=(double)0.0;
-    mis.E_pot=(double)0.0;
-    mis.E_kin=(double)0.0;
-    mis.E_Josephson=(double)0.0;
-    mis.E_B=(double)0.0;
-    memset(mis.density_psi, 0, 3*sizeof(double));
 }
 

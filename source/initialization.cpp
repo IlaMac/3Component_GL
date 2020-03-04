@@ -48,7 +48,7 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
             fclose(fin);
         }
     }else{
-        MCp.nmisu=1000;
+        MCp.nmisu=10;
         MCp.tau=10;
         MCp.n_autosave=20000;
         MCp.lbox_l=1.0;
@@ -70,7 +70,7 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
         FILE *fPsi= nullptr;
         if((fPsi=fopen(psi_init_file.c_str(), "r"))) {
             for (i = 0; i < N; i++) {
-                fread(Site[i].Psi, sizeof(struct O2), 3, fPsi);
+                fread(Site[i].Psi, sizeof(struct O2), NC, fPsi);
             }
             fclose(fPsi);
         }

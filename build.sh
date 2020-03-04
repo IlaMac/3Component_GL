@@ -20,7 +20,7 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
    | --enable-spdlog            : Enable Spdlog logging library
    | --enable-eigen3            : Enable Eigen3 linear algebra library
    | --enable-h5pp              : Enable h5pp, an HDF5 wrapper for C++
--t | --target [=args]           : Select CMake build target [ GL_3component | test-<name> ]  (default = none)
+-t | --target [=args]           : Select CMake build target [ GL_3components | test-<name> ]  (default = none)
    | --enable-tests             : Enable CTest tests
 -v | --verbose                  : Verbose makefiles
 EXAMPLE:
@@ -98,7 +98,7 @@ done
 
 if  [ -n "$clear_cmake" ] ; then
     echo "Clearing CMake files from build."
-	rm -rf ./build/$build_type
+	  rm -rf ./build/$build_type/CMakeCache.txt
 fi
 
 build_type_lower=$(echo $build_type | tr '[:upper:]' '[:lower:]')
@@ -119,6 +119,48 @@ if [[ ! "$download_method" =~ native|conan|find|none ]]; then
     exit 1
 fi
 
+
+if [[ "$HOSTNAME" == *"tetralith"* ]];then
+    echo "Running on tetralith"
+    if [ -z "$no_module" ]; then
+        module load zlib
+        module load GCC/8.2.0-2.31.1
+        if [ "$compiler" = "Clang" ] ; then
+            module load Clang/8.0.0-GCCcore-8.2.0
+            if [ -z "$gcc_toolchain" ] ; then gcc_toolchain=--gcc-toolchain=$EBROOTGCCCORE ; fi
+        fi
+    fi
+
+    if [ "$compiler" = "GNU" ] ; then
+        export CC=gcc
+        export CXX=g++
+    elif [ "$compiler" = "Clang" ] ; then
+        export CC=clang
+        export CXX=clang++
+    fi
+
+elif [[ "$HOSTNAME" == *"raken"* ]];then
+    if [ -z "$no_module" ]; then
+        if [ "$enable_mkl" = "ON" ] ; then module load imkl; else module load OpenBLAS; fi
+        module load HDF5/1.10.5-GCCcore-8.2.0
+        module load Eigen # We want our own patched eigen though.
+        module load CMake
+        module load GCCcore
+        if [ "$compiler" = "Clang" ] ; then
+            module load Clang
+            if [ -z "$gcc_toolchain" ] ; then gcc_toolchain=--gcc-toolchain=$EBROOTGCCCORE ; fi
+        fi
+        module list
+    fi
+
+    if [ "$compiler" = "GNU" ] ; then
+        export CC=gcc
+        export CXX=g++
+    elif [ "$compiler" = "Clang" ] ; then
+        export CC=clang
+        export CXX=clang++
+    fi
+fi
 
 
 if [ -n "$dryrun" ]; then
