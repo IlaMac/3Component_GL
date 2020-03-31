@@ -49,7 +49,6 @@ endif()
 
 
 
-
 # Used when h5pp is included as subproject (e.g., as Git submodule/subtree) in the source
 # tree of a project that uses it. Users may set the non-cached variable AS_SUBPROJECT
 # before add_subdirectory(h5pp)
