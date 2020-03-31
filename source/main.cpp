@@ -147,7 +147,9 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         magnetization(mis, Site);
         density_psi(mis, Site);
         mis.my_rank=PTp.rank;
-
+        if(PTp.rank == PTp.root) {
+            std::cout <<my_beta<< "\t"<< mis.m << "\n" << std::endl;
+        }
         file.appendTableEntries(mis, "Measurements");
 
         if ((n % MCp.n_autosave) == 0) {
@@ -160,7 +162,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
         //Files and directory
         directory_write=directory_parameters+"/beta_"+std::to_string(my_ind);
-        file = h5pp::File(directory_write+"/Output.h5", h5pp::AccessMode::READWRITE, h5pp::CreateMode::OPEN,0);
+        file = h5pp::File(directory_write+"/Output.h5", h5pp::AccessMode::READWRITE, h5pp::CreateMode::OPEN);
 
     }
     save_lattice(Site, directory_write, std::string("final"));
