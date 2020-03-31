@@ -160,7 +160,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
         //Files and directory
         directory_write=directory_parameters+"/beta_"+std::to_string(my_ind);
-        file = h5pp::File(directory_write+"/Output.h5", h5pp::AccessMode::READWRITE, h5pp::CreateMode::OPEN,0);
+        file = h5pp::File(directory_write+"/Output.h5", h5pp::AccessMode::READWRITE, h5pp::CreateMode::OPEN);
 
     }
     save_lattice(Site, directory_write, std::string("final"));

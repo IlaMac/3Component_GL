@@ -87,11 +87,11 @@ void magnetization(struct Measures &mis, struct Node* Site){
                     while(phi_shifted[alpha]< 0){
                         phi_shifted[alpha]+=C_TWO_PI;}
                 }
-                if(phi_shifted[0]>phi_shifted[1]){
+                if(phi_shifted[1]>phi_shifted[2]){
                     mis.m+=1;
-                }else if(phi_shifted[0]==phi_shifted[1]){
+                }else if(phi_shifted[1]==phi_shifted[2]){
 		    mis.m+=0;	
-		}else{
+		}else if(phi_shifted[1]<phi_shifted[2]){
                     mis.m+=(-1);
                 }
             }

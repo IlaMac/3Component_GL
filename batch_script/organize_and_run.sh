@@ -1,10 +1,10 @@
 #!/bin/bash
 
 BASEDIR=${HOME}/MultiComponents_SC
-SCRIPT_DIR=${BASEDIR}/Multi_Components_GL/batch_script
+SCRIPT_DIR=${BASEDIR}/3Component_GL//batch_script
 
-LLIST="10 12 16"
-
+LLIST="8 10 12 16 20"
+LLIST="8"
 ############# Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
 H_a=0
 H_b=1
@@ -16,9 +16,9 @@ H_bhigh=0.229
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
-Nmisu=1000000
+Nmisu=2000
 ntau=32
-nautosave=500000
+nautosave=10000
 l_box=1.0
 rho_box=0.5
 theta_box=3.141592653
@@ -87,12 +87,11 @@ echo "#!/bin/bash
 #SBATCH --mem-per-cpu=2000              # Memory per allocated cpu
 #SBATCH --nodes=${nnodes}               # Number of nodes
 #SBATCH --ntasks=${ntasks}
-#SBATCH --clusters=draken
 #SBATCH --output=${DIR_PAR}/logs/log_${jobname}.o
 #SBATCH --error=${DIR_PAR}/logs/log_${jobname}.e
 
 
-srun ${EXECUTE_DIR}/GL_3components ${L} ${DIR_PAR} &> ${DIR_PAR}/logs/log_${jobname}.o
+srun ${EXECUTE_DIR}/GL_3component ${L} ${DIR_PAR} &> ${DIR_PAR}/logs/log_${jobname}.o
 
 
 " >  submit_run
