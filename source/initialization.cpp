@@ -15,6 +15,7 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
             fscanf(fin, "%d" , &Hp.eta);
             fscanf(fin, "%lf" , &Hp.e);
             fscanf(fin, "%lf" , &Hp.h);
+            fscanf(fin, "%lf" , &Hp.nu);
             fscanf(fin, "%lf" , &Hp.b_low);
             fscanf(fin, "%lf" , &Hp.b_high);
             fclose(fin);
@@ -26,6 +27,7 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
         Hp.eta=1;
         Hp.e=0.5;
         Hp.h= 5.0;
+        Hp.nu=0;
         Hp.b_low=0.244;
         Hp.b_high=0.247;
     }
@@ -64,7 +66,6 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
     fs::path psi_init_file = directory_read / "Psi_final.txt";
     fs::path a_init_file = directory_read / "A_final.txt";
     unsigned int i=0;
-    unsigned int alpha=0;
 
     if(fs::exists(psi_init_file)){
         FILE *fPsi= nullptr;

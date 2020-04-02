@@ -15,6 +15,7 @@ struct Measures{
     double E_kin;
     double E_Josephson;
     double E_B;
+    double E_AB;
     double m; //magnetization (for the phase chirality of the three components
     //Binder cumulant U=<m⁴>/(3*<m²>²)
     double d_rhoz; //Dual stiffness along z

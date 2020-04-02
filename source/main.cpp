@@ -132,6 +132,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E_kin", HOFFSET(Measures, E_kin), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E_Josephson", HOFFSET(Measures, E_Josephson), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E_B", HOFFSET(Measures, E_B), H5T_NATIVE_DOUBLE);
+    H5Tinsert(MY_HDF5_MEASURES_TYPE, "E_AB", HOFFSET(Measures, E_AB), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "m", HOFFSET(Measures, m), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "ds", HOFFSET(Measures, d_rhoz), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "rho", HOFFSET(Measures, density_psi), HDF5_RHO_TYPE);
