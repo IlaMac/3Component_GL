@@ -1,11 +1,6 @@
 function(build_dependency dep_name install_dir extra_flags)
     set(build_dir    ${CMAKE_BINARY_DIR}/deps-build/${dep_name})
 
-    message(STATUS  "dep_name          : ${dep_name}")
-    message(STATUS  "build_dir         : ${build_dir}")
-    message(STATUS  "install_dir       : ${install_dir}")
-    message(STATUS  "extra_flags       : ${extra_flags}")
-
     execute_process( COMMAND  ${CMAKE_COMMAND} -E make_directory ${build_dir})
     execute_process(
             COMMAND  ${CMAKE_COMMAND}
