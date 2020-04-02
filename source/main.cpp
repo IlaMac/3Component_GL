@@ -120,7 +120,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     directory_write=directory_parameters+"/beta_"+std::to_string(my_ind);
 
 //    // Initialize a file
-    h5pp::File file(directory_write+"/Output.h5", h5pp::AccessMode::READWRITE, h5pp::CreateMode::TRUNCATE);
+    h5pp::File file(directory_write+"/Output.h5", h5pp::FilePermission::REPLACE);
 //    // Register the compound type
     h5pp::hid::h5t MY_HDF5_MEASURES_TYPE = H5Tcreate(H5T_COMPOUND, sizeof(Measures));
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E", HOFFSET(Measures, E), H5T_NATIVE_DOUBLE);
@@ -160,7 +160,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
         //Files and directory
         directory_write=directory_parameters+"/beta_"+std::to_string(my_ind);
-        file = h5pp::File(directory_write+"/Output.h5", h5pp::AccessMode::READWRITE, h5pp::CreateMode::OPEN);
+        file = h5pp::File(directory_write+"/Output.h5", h5pp::FilePermission::READWRITE);
 
     }
     save_lattice(Site, directory_write, std::string("final"));
