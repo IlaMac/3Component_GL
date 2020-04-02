@@ -71,6 +71,7 @@ enable_tests="OFF"
 target="all"
 make_threads=8
 verbose="OFF"
+clear_cmake="OFF"
 # Now goes through all the options with a case and using shift to analyse 1 argument at a time.
 #$1 identifies the first argument, and when we use shift we discard the first argument, so $2 becomes $1 and goes again through the case.
 echo "Build Configuration"
@@ -104,10 +105,10 @@ do
 done
 
 
+echo "HELLOOOO THIS SHOULD PRINT CLEAR CMAKE VARIABLE $clear_cmake"
 
-
-if  [ -n "$clear_cmake" ] ; then
-    echo "Clearing CMake files from build."
+if  [ "$clear_cmake" = "ON" ] ; then
+        echo "Clearing CMake files from build"
 	rm -rf ./build/$build_type/CMakeCache.txt
 fi
 

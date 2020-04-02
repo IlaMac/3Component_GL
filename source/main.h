@@ -10,12 +10,11 @@
 #include "o2.h"
 #include "montecarlo.h"
 #include "initialization.h"
-#include <filesystem>
+#include "robust_filesystem.h"
 #include <mpi.h>
 #include "rng.h"
 
 #define NC 3 /*Number of components*/
-namespace fs = std::filesystem;
 
 //#define Lx 8
 //#define Ly 8
