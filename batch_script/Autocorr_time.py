@@ -15,19 +15,19 @@ beta_high=float(sys.argv[2])
 nbeta=int(sys.argv[3])
 e=sys.argv[4]
 h=float(sys.argv[5])
-#nu=float(sys.argv[6])
+nu=float(sys.argv[6])
 
 beta=np.zeros((nbeta))
 if( (h).is_integer()): h=int(h)
-#if( (nu).is_integer()): nu=int(nu)
+if( (nu).is_integer()): nu=int(nu)
 
 
 L=[]
-for ind in range(6, len(sys.argv)):
+for ind in range(7, len(sys.argv)):
     L.append(int(sys.argv[ind]))
 
 
-Observables=["E", "ds"]
+Observables=["E", "m", "ds"]
 
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
@@ -68,7 +68,6 @@ for l in range(len(L)):
 #            plt.show()
 
             temp=np.where(A_Obs[:]<0.1)
-            print(Observables[name], b,temp)
             tmax_int=10*temp[0][0]
             temp_tau=[]
             time_int=1000

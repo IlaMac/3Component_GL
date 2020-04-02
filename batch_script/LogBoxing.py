@@ -43,7 +43,7 @@ for name in range(len(Observables)):
     A_name=Observables[name]
     transient_list=np.zeros((nbeta, len(L)))
     for l in range(len(L)):
-        BASEDIR=("/home/ilaria/Desktop/MultiComponents_SC/Output_2C/L%d_e%s_h%s_nu%s_bmin%s_bmax%s" %(L[l], e,  h, nu, beta_low, beta_high))
+        BASEDIR=("/home/ilaria/Desktop/MultiComponents_SC/Output_3C/L%d_a0_b1_eta1_e%s_h%s_bmin%s_bmax%s" %(L[l], e,  h, beta_low, beta_high))
 
         for b in range(nbeta):
             beta[b]=beta_low +b*(beta_high -beta_low)/(nbeta-1)

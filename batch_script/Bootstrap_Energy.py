@@ -48,7 +48,7 @@ ax1[1].set_xlabel(r"$\beta$")
 ax1[1].set_ylabel(r"$C_{v}$")
 
 for l in range(len(L)):
-    BASEDIR=("/home/ilaria/Desktop/MultiComponents_SC/Output_2C/L%d_e%s_h%s_nu%s_bmin%s_bmax%s" %(L[l], e,  h, nu, beta_low, beta_high))
+    BASEDIR=("/home/ilaria/Desktop/MultiComponents_SC/Output_3C/L%d_a0_b1_eta1_e%s_h%s_bmin%s_bmax%s" %(L[l], e,  h, beta_low, beta_high))
 
     Cv_mean=np.zeros((nbeta))
     Cv_err=np.zeros((nbeta))

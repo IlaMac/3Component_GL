@@ -9,6 +9,7 @@ import statsmodels.api as sm
 from statsmodels.tsa.stattools import acf
 import scipy.integrate as integrate
 import random
+import h5py
 
 beta_low=float(sys.argv[1])
 beta_high=float(sys.argv[2])
@@ -44,16 +45,13 @@ ax1.set_xlabel(r"$\beta$")
 ax1.set_ylabel(r"$L\rho$")
 
 for l in range(len(L)):
-    BASEDIR=("/home/ilaria/Desktop/MultiComponents_SC/Output_2C/L%d_e%s_h%s_nu%s_bmin%s_bmax%s" %(L[l], e,  h, nu, beta_low, beta_high))
+    BASEDIR=("/home/ilaria/Desktop/MultiComponents_SC/Output_3C/L%d_a0_b1_eta1_e%s_h%s_bmin%s_bmax%s" %(L[l], e,  h, beta_low, beta_high))
 
     Ds_mean=np.zeros((nbeta))
     Ds_err=np.zeros((nbeta))
 
     for b in range(nbeta):
         beta[b]=beta_low +b*(beta_high -beta_low)/(nbeta-1)
-
-#        fileDs=("%s/beta_%d/Dual_Stiffness.npy" %(BASEDIR, b))
-#        Ds=np.load(fileDs)
 
         file=h5py.File('%s/beta_%d/Output.h5' %(BASEDIR, b), 'r')
         Ds=np.asarray(file['Measurements']['ds'])
