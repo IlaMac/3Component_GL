@@ -8,7 +8,8 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
 -a | --arch [=arg]              : Choose microarchitecture | core2 | nehalem | sandybridge | haswell | native | (default = native)
 -b | --build-type [=arg]        : Build type: [ Release | RelWithDebInfo | Debug | Profile ]  (default = Release)
 -c | --clear-cmake              : Clear CMake files before build (delete ./build)
--g | --compiler [=arg]          : Compiler        | GNU | Clang | (default = "")
+-g | --compiler [=arg]          : Compiler        | GCC | Clang | (default = "")
+   | --compiler-version=[=arg]  : Append a compiler version e.g. for version "-9", then g++ --> g++-9
 -d | --dry-run                  : Dry run
    | --download-method          : Download libraries using [ native | conan ] (default = native)
 -f | --extra-flags [=arg]       : Extra CMake flags (defailt = none)
@@ -41,6 +42,7 @@ PARSED_OPTIONS=$(getopt -n "$0"   -o hb:cl:df:g:j:st:v \
                 clear-cmake\
                 clear-libs:\
                 compiler:\
+                compiler-version:\
                 dry-run\
                 download-method:\
                 enable-tests\
@@ -81,6 +83,8 @@ do
     -l|--clear-libs)
             clear_libs=($(echo "$2" | tr ',' ' '))                  ; echo " * Clear libraries          : $2"      ; shift 2 ;;
     -g|--compiler)                  compiler=$2                     ; echo " * C++ Compiler             : $2"      ; shift 2 ;;
+       --compiler-version)          compiler_version=$2             ; echo " * Compiler Version         : $2"      ; shift 2 ;;
+       --cc)                        cc=$2                           ; echo " * C++ Compiler name        : $2"      ; shift 2 ;;
     -d|--dry-run)                   dryrun="ON"                     ; echo " * Dry run                  : ON"      ; shift   ;;
        --download-method)           download_method=$2              ; echo " * Download method          : $2"      ; shift 2 ;;
     -f|--extra-flags)               extra_flags=$2                  ; echo " * Extra CMake flags        : $2"      ; shift 2 ;;
@@ -126,6 +130,8 @@ if [[ ! "$download_method" =~ native|conan|find|none ]]; then
 fi
 
 
+
+
 if [[ "$HOSTNAME" == *"tetralith"* ]];then
     echo "Running on tetralith"
     if [ -z "$no_module" ]; then
@@ -137,7 +143,7 @@ if [[ "$HOSTNAME" == *"tetralith"* ]];then
         fi
     fi
 
-    if [ "$compiler" = "GNU" ] ; then
+    if [ "$compiler" = "GCC" ] ; then
         export CC=gcc
         export CXX=g++
     elif [ "$compiler" = "Clang" ] ; then
@@ -159,12 +165,29 @@ elif [[ "$HOSTNAME" == *"raken"* ]];then
         module list
     fi
 
-    if [ "$compiler" = "GNU" ] ; then
+    if [ "$compiler" = "GCC" ] ; then
         export CC=gcc
         export CXX=g++
     elif [ "$compiler" = "Clang" ] ; then
         export CC=clang
         export CXX=clang++
+    fi
+
+else
+    if [ -n "$compiler" ] ; then
+        if [ "$compiler" = "GCC" ] ; then
+            compiler_string_CC=gcc
+            compiler_string_CXX=g++
+        elif [ "$compiler" = "Clang" ] ; then
+            compiler_string_CC=clang
+            compiler_string_CXX=clang++
+        fi
+        if [ -n "$compiler_version" ] ; then
+            compiler_string_CC=$compiler_string_CC$compiler_version
+            compiler_string_CXX=$compiler_string_CXX$compiler_version
+        fi
+        export CC=$compiler_string_CC
+        export CXX=$compiler_string_CXX
     fi
 fi
 
