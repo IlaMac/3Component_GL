@@ -137,6 +137,7 @@ if [[ "$HOSTNAME" == *"tetralith"* ]];then
     echo "Running on tetralith"
     if [ -z "$no_module" ]; then
         module load buildenv-gcc/2018a-eb
+	module load CMake/3.15.2
         module load GCCcore/8.2.0
         if [ "$compiler" = "Clang" ] ; then
             module load Clang/8.0.0-GCCcore-8.2.0
@@ -144,6 +145,7 @@ if [[ "$HOSTNAME" == *"tetralith"* ]];then
         fi
     fi
 
+    cmake --version
     if [ "$compiler" = "GCC" ] ; then
         export CC=gcc
         export CXX=g++

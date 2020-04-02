@@ -122,6 +122,10 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 //    // Initialize a file
     h5pp::File file(directory_write+"/Output.h5", h5pp::FilePermission::REPLACE);
 //    // Register the compound type
+
+    std::vector<hsize_t> rho_dims = {NC};	
+    h5pp::hid::h5t HDF5_RHO_TYPE = H5Tarray_create(H5T_NATIVE_DOUBLE,rho_dims.size(),rho_dims.data());
+
     h5pp::hid::h5t MY_HDF5_MEASURES_TYPE = H5Tcreate(H5T_COMPOUND, sizeof(Measures));
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E", HOFFSET(Measures, E), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E_pot", HOFFSET(Measures, E_pot), H5T_NATIVE_DOUBLE);
@@ -130,7 +134,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E_B", HOFFSET(Measures, E_B), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "m", HOFFSET(Measures, m), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "ds", HOFFSET(Measures, d_rhoz), H5T_NATIVE_DOUBLE);
-    H5Tinsert(MY_HDF5_MEASURES_TYPE, "rho", HOFFSET(Measures, density_psi), H5T_NATIVE_DOUBLE);
+    H5Tinsert(MY_HDF5_MEASURES_TYPE, "rho", HOFFSET(Measures, density_psi), HDF5_RHO_TYPE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "rank", HOFFSET(Measures, my_rank), H5T_NATIVE_INT);
 
     file.createTable(MY_HDF5_MEASURES_TYPE, "Measurements", "Measures");
