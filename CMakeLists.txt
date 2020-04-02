@@ -88,6 +88,36 @@ target_compile_features(project-settings INTERFACE cxx_std_17)
 # Let cmake find our Find<package>.cmake modules
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+
+
+
+
+# Set default install directory for dependencies
+# Append directory <libname> to CMAKE_INSTALL_PREFIX
+# Useful if you want to have separate directories for each libs
+# and to easily delete them individually
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT H5PP_IS_SUBPROJECT)
+    message(STATUS "Setting default install prefix -- CMAKE_INSTALL_PREFIX --> ${CMAKE_BINARY_DIR}/deps-install")
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/deps-install" CACHE PATH "..." FORCE)
+endif ()
+if (APPEND_LIBSUFFIX)
+    set(H5PP_INSTALL_DIR h5pp/)
+    set(H5PP_CONFIG_DIR h5pp/share/h5pp/cmake)
+    set(eigen3_install_prefix ${CMAKE_INSTALL_PREFIX}/Eigen3)
+    set(spdlog_install_prefix ${CMAKE_INSTALL_PREFIX}/spdlog)
+    set(hdf5_install_prefix ${CMAKE_INSTALL_PREFIX}/hdf5)
+    set(ghcfilesystem_install_prefix ${CMAKE_INSTALL_PREFIX}/ghcFilesystem)
+else ()
+    set(H5PP_CONFIG_DIR share/h5pp/cmake)
+    set(eigen3_install_prefix ${CMAKE_INSTALL_PREFIX})
+    set(spdlog_install_prefix ${CMAKE_INSTALL_PREFIX})
+    set(hdf5_install_prefix ${CMAKE_INSTALL_PREFIX})
+    set(ghcfilesystem_install_prefix ${CMAKE_INSTALL_PREFIX})
+endif ()
+
+
+
+
 # Require the filesystem header (and possibly stdc++fs library)
 find_package(Filesystem COMPONENTS Final Experimental)
 if (TARGET std::filesystem)
@@ -142,31 +172,6 @@ if(NOT TARGET Threads::Threads)
     set_target_properties(Threads::Threads PROPERTIES INTERFACE_LINK_LIBRARIES pthread)
 endif()
 
-
-
-
-# Set default install directory for dependencies
-# Append directory <libname> to CMAKE_INSTALL_PREFIX
-# Useful if you want to have separate directories for each libs
-# and to easily delete them individually
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT H5PP_IS_SUBPROJECT)
-    message(STATUS "Setting default install prefix -- CMAKE_INSTALL_PREFIX --> ${CMAKE_BINARY_DIR}/deps-install")
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/deps-install" CACHE PATH "..." FORCE)
-endif ()
-if (APPEND_LIBSUFFIX)
-    set(H5PP_INSTALL_DIR h5pp/)
-    set(H5PP_CONFIG_DIR h5pp/share/h5pp/cmake)
-    set(eigen3_install_prefix ${CMAKE_INSTALL_PREFIX}/Eigen3)
-    set(spdlog_install_prefix ${CMAKE_INSTALL_PREFIX}/spdlog)
-    set(hdf5_install_prefix ${CMAKE_INSTALL_PREFIX}/hdf5)
-    set(ghcfilesystem_install_prefix ${CMAKE_INSTALL_PREFIX}/ghcFilesystem)
-else ()
-    set(H5PP_CONFIG_DIR share/h5pp/cmake)
-    set(eigen3_install_prefix ${CMAKE_INSTALL_PREFIX})
-    set(spdlog_install_prefix ${CMAKE_INSTALL_PREFIX})
-    set(hdf5_install_prefix ${CMAKE_INSTALL_PREFIX})
-    set(ghcfilesystem_install_prefix ${CMAKE_INSTALL_PREFIX})
-endif ()
 
 
 
