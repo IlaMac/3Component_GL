@@ -43,7 +43,7 @@ for name in range(len(Observables)):
     A_name=Observables[name]
     transient_list=np.zeros((nbeta, len(L)))
     for l in range(len(L)):
-        BASEDIR=("/home/ilaria/Desktop/MultiComponents_SC/Output_3C/L%d_a0_b1_eta1_e%s_h%s_bmin%s_bmax%s" %(L[l], e,  h, beta_low, beta_high))
+        BASEDIR=("/Users/ilaria/Desktop/MultiComponents_SC/Output_3C/L%d_a0_b1_eta1_e%s_h%s_nu%s_bmin%s_bmax%s" %(L[l], e,  h, nu, beta_low, beta_high))
 
         for b in range(nbeta):
             beta[b]=beta_low +b*(beta_high -beta_low)/(nbeta-1)
@@ -55,7 +55,6 @@ for name in range(len(Observables)):
 
             file=h5py.File('%s/beta_%d/Output.h5' %(BASEDIR, b), 'r')
             A=np.asarray(file['Measurements']['%s' %(Observables[name])])
-
             tot_length=box_length
             start=0
             A_mean=[]
@@ -75,11 +74,9 @@ for name in range(len(Observables)):
             bins=np.array(bins)
             ##### Find where the plateau starts by taking the minimum values of the derivative of the binned funciton ####
             A_diff=np.diff(A_mean)
-            A_diffmin=np.min(np.sqrt(A_diff*A_diff))
-            index=np.where(np.sqrt(A_diff*A_diff)==A_diffmin)
+            index=np.argmin(np.abs(A_diff))
             #### The information to be extracted is the time up to the end of the bin where the plateau is observed: bin[index] ####            
             transient_list[b, l]=bins[index]
-
             file_Aout=("%s/beta_%d/Thermalization_%s.txt" %(BASEDIR, b, A_name))
             np.savetxt(file_Aout, np.transpose( [bins, A_mean, A_std]), fmt='%19.12e', delimiter=' ',  newline=os.linesep)
 
@@ -93,7 +90,7 @@ for name in range(len(Observables)):
 #            ax1.set_xscale("log")
 #            ax1.set_ylabel("$%s$" %A_name)
 #            plt.tight_layout()
-#            plt.show()
+#            plt.save("%s/")
 
     temp_transient_max=np.amax(transient_list)
     if(transient_max < temp_transient_max): transient_max=temp_transient_max

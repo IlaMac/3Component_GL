@@ -10,15 +10,15 @@
 
 struct Measures{
 
-    double E; //Energy
-    double E_pot;
-    double E_kin;
-    double E_Josephson;
-    double E_B;
-    double E_AB;
-    double m; //magnetization (for the phase chirality of the three components
+    double E=0.; //Energy
+    double E_pot=0.;
+    double E_kin=0.;
+    double E_Josephson=0.;
+    double E_B=0.;
+    double E_AB=0.;
+    double m=0.; //magnetization (for the phase chirality of the three components
     //Binder cumulant U=<m⁴>/(3*<m²>²)
-    double d_rhoz; //Dual stiffness along z
+    double d_rhoz=0.; //Dual stiffness along z
     double density_psi[NC] = {0};
     int my_rank = 0;
     void reset(){

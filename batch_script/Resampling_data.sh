@@ -24,21 +24,23 @@ nbeta=64
 
 LList=("8")
 
-BASEDIR="/home/ilaria/Desktop/MultiComponents_SC/Output_3C"
-
+BASEDIR="/Users/ilaria/Desktop/MultiComponents_SC/Output_3C"
 
 #transient_time=$(python3 LogBoxing.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]})
+python3 LogBoxing.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]}
 #echo ${transient_time} > ${BASEDIR}/transient_time_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt
 #
-#tau_max=$(python3 Autocorr_time.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]})
+#tau_max=$(
+python3 Autocorr_time.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]}
+#)
 #echo ${tau_max} > ${BASEDIR}/tau_max_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt
 #
 #python3 Bootstrap_Energy.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
 #python3 Bootstrap_Magnetization.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
 #python3 Bootstrap_DualStiffness.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
-
-transient_time=$(awk '{print $0}' ${BASEDIR}/transient_time_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt )
-tau_max=$(awk '{print $0}' ${BASEDIR}/tau_max_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt )
-
-python3 Bootstrap_PsiDensity.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
+#
+##transient_time=$(awk '{print $0}' ${BASEDIR}/transient_time_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt )
+##tau_max=$(awk '{print $0}' ${BASEDIR}/tau_max_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt )
+#
+#python3 Bootstrap_PsiDensity.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
 
