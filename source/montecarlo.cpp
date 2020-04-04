@@ -101,7 +101,8 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
 
     double h_Potential, h_Kinetic=0., h_Josephson=0., h_AB=0., h_tot;
     double h2=(Hp.h*Hp.h);
-    double J_alpha=0, J_beta=0;
+    double J_alpha1=0, J_beta1=0, J_alpha2=0, J_beta2=0;
+    double gauge_phase1, gauge_phase2;
     unsigned int beta=0, vec=0, i;
 
     i=ix +Lx*(iy+Ly*iz);
@@ -113,28 +114,28 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
 
     //Kinetic= -(1/h²)*\sum_k=1,2,3 (|Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) + (|Psi_{alpha}(r-k)||Psi_{alpha}(r)|* cos(theta_{alpha}(r) - theta_{alpha}(r-k) +h*e*A_k(r-k)))
     for(vec=0; vec<3; vec++){
-        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*cos(Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec]);
-        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos( Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
+        gauge_phase1=Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec];
+        gauge_phase2=Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec];
+        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*cos(gauge_phase1);
+        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos(gauge_phase2);
         //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;
-        // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r)))
+        // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) 
         if(Hp.nu !=0 ) {
             //+k
-            J_alpha= (1./Hp.h)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*sin(Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec]);
-            for (beta = 0; beta < 3; beta++) {
-                if (beta != alpha) {
-                    J_beta=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*sin(Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec]);
-                    h_AB += Hp.nu * (pow((J_alpha -J_beta),2));
-                }
-            }
+            J_alpha1= (1./Hp.h)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*sin(gauge_phase1);
             //-k
-            J_alpha= (1./Hp.h)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*sin( Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
+            J_alpha2= (1./Hp.h)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*sin(gauge_phase2);
             for (beta = 0; beta < 3; beta++) {
-                if (beta != alpha) {
-                    J_beta=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, -1)].Psi[beta].r)*sin( Site[i].Psi[beta].t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
-                    h_AB += Hp.nu * (pow((J_alpha -J_beta),2));
-                }
-            }
-        }
+            	if (beta != alpha) {
+                	//+k
+                        J_beta1=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*sin(Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec]);
+           		h_AB += Hp.nu * (pow((J_alpha1 -J_beta1),2));
+                        //-k
+                        J_beta2=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, -1)].Psi[beta].r)*sin( Site[i].Psi[beta].t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
+                        h_AB += Hp.nu * (pow((J_alpha2 -J_beta2),2));
+			}
+		}
+	}
     }
 
     //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beta}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
@@ -153,7 +154,8 @@ double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned in
 
     double h_Kinetic=0., h_Josephson=0., h_AB=0., h_tot;
     double h2=(Hp.h*Hp.h);
-    double J_alpha=0, J_beta=0;
+    double J_alpha1=0, J_beta1=0, J_alpha2=0, J_beta2=0;
+    double gauge_phase1=0, gauge_phase2=0;
     unsigned int beta=0, vec=0, i;
 
     i=ix +Lx*(iy+Ly*iz);
@@ -161,25 +163,25 @@ double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned in
 
     //Kinetic= -(1/h²)*\sum_k=1,2,3 (|Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) + (|Psi_{alpha}(r-k)||Psi_{alpha}(r)|* cos(theta_{alpha}(r) - theta_{alpha}(r-k) +h*e*A_k(r-k)))
     for(vec=0; vec<3; vec++){
-        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*cos(Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec]);
-        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos( Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
+	gauge_phase1=Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec];
+	gauge_phase2=Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec];
+        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*cos(gauge_phase1);
+        h_Kinetic-=(1./h2)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos(gauge_phase2);
         //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;
         // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r)))
         if(Hp.nu !=0 ) {
             //+k
-            J_alpha= (1./Hp.h)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*sin(Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec]);
+            J_alpha1= (1./Hp.h)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*sin(gauge_phase1);
+	    //-k
+	    J_alpha2= (1./Hp.h)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*sin(gauge_phase2);
             for (beta = 0; beta < 3; beta++) {
                 if (beta != alpha) {
-                    J_beta=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*sin(Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec]);
-                    h_AB += Hp.nu * (pow((J_alpha -J_beta),2));
-                }
-            }
-            //-k
-            J_alpha= (1./Hp.h)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*sin( Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
-            for (beta = 0; beta < 3; beta++) {
-                if (beta != alpha) {
-                    J_beta=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, -1)].Psi[beta].r)*sin( Site[i].Psi[beta].t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
-                    h_AB += Hp.nu * (pow((J_alpha -J_beta),2));
+		    //+k
+                    J_beta1=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*sin(Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec]);
+                    h_AB += Hp.nu * (pow((J_alpha1 -J_beta1),2));
+                    //-k
+		    J_beta2=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, -1)].Psi[beta].r)*sin( Site[i].Psi[beta].t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
+                    h_AB += Hp.nu * (pow((J_alpha2 -J_beta2),2));
                 }
             }
         }
