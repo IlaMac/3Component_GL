@@ -36,7 +36,7 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
                 }
                 //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;
                 // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r)))
-                if(Hp.nu !=0 ) {
+                if(Hp.nu >0 ) {
                     for (vec = 0; vec < 3; vec++) {
                         J_0 = (1. / Hp.h) * (Site[i].Psi[0].r * Site[nn(i, vec, 1)].Psi[0].r) *
                                   sin(Site[nn(i, vec, 1)].Psi[0].t - Site[i].Psi[0].t + Hp.h * Hp.e * Site[i].A[vec]);

@@ -147,7 +147,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
         //Measures
         mis.reset();
-        energy(mis, Hp, my_beta, Site);
+	energy(mis, Hp, my_beta, Site);
         dual_stiffness(mis, Hp, Site);
         magnetization(mis, Site);
         density_psi(mis, Site);
