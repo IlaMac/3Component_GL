@@ -58,8 +58,8 @@ int main(int argc, char *argv[]){
     for(i=0; i<N; i++) {
         Lattice[i].A = (double *) calloc(3, sizeof(double));
         Lattice[i].Psi = (struct O2 *) calloc(NC, sizeof(struct O2));
-        Neighbours[i].Psi_plusk= (double *) calloc(9, sizeof(double)); //3 components x 3 directions [alpha +3*vec] alpha=component, vec=direction
-        Neighbours[i].Psi_minusk= (double *) calloc(9, sizeof(double)); //3 components x 3 directions
+        Neighbours[i].Psi_plusk= (double *) calloc(9, sizeof(struct O2)); //3 components x 3 directions [alpha +3*vec] alpha=component, vec=direction
+        Neighbours[i].Psi_minusk= (double *) calloc(9, sizeof(struct O2)); //3 components x 3 directions
     }
 
     //Initialize H_parameters: file "H_init.txt"
