@@ -23,6 +23,11 @@ struct Node{
     struct O2* Psi; /*three SC components*/
 };
 
+struct NN_Node{ /*auxiliary structure to avoid to call too many times cos/sin functions*/
+    struct O2* Psi_plusk; /*three spatial directions*/
+    struct O2* Psi_minusk; /*three spatial directions*/
+};
+
 struct H_parameters{
     /*These values are externally given by an input file*/
     int a;

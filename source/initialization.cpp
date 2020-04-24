@@ -65,7 +65,7 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
 
     fs::path psi_init_file = directory_read / "Psi_final.txt";
     fs::path a_init_file = directory_read / "A_final.txt";
-    unsigned int i=0;
+    unsigned int i=0, alpha;
 
     if(fs::exists(psi_init_file)){
         FILE *fPsi= nullptr;
@@ -74,6 +74,14 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
                 fread(Site[i].Psi, sizeof(struct O2), NC, fPsi);
             }
             fclose(fPsi);
+        }
+    }else{
+        for(i=0; i<N; i++){
+            for(alpha=0; alpha<3; alpha++){
+                Site[i].Psi[alpha].r=(1./2.);
+                Site[i].Psi[alpha].t=0.;
+                polar_to_cartesian(Site[i].Psi[alpha]);
+            }
         }
     }
 
@@ -86,16 +94,6 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
             fclose(fA);
         }
     }
-
- /*
-    for(i=0; i<N; i++){
-        for(alpha=0; alpha<3; alpha++){
-            Site[i].Psi[alpha].r=sqrt(1./3.);
-            Site[i].Psi[alpha].t=0.;
-            polar_to_cartesian(Site[i].Psi[alpha]);
-        }
-    }
-*/
 
 }
 

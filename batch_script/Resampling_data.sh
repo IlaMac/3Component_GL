@@ -14,33 +14,29 @@ H_b=1
 H_eta=1
 H_e=0.5
 H_h=5.4
-H_nu=0
-H_blow=0.2245
-H_bhigh=0.229
+H_nu=0.1
+H_blow=0.222
+H_bhigh=0.224
 
-nbeta=64
+nbeta=32
 
 #LList="\"[[8] [10]]\""
 
-LList=("8")
+LList=("8 10 12 16 20 24")
 
-BASEDIR="/Users/ilaria/Desktop/MultiComponents_SC/Output_3C"
+BASEDIR="/Users/ilaria/Desktop/MultiComponents_SC/Output_3C/nu_${H_nu}/e_${H_e}"
 
-#transient_time=$(python3 LogBoxing.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]})
-python3 LogBoxing.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]}
-#echo ${transient_time} > ${BASEDIR}/transient_time_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt
+
+#for L in $LList; do
 #
-#tau_max=$(
-python3 Autocorr_time.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]}
-#)
-#echo ${tau_max} > ${BASEDIR}/tau_max_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt
+#    DIRECTORY=$BASEDIR/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+#    python3 New_Autocorr_time.py ${H_blow} ${H_bhigh} ${nbeta} ${DIRECTORY} ${L} 
+#    python3 New_LogBoxing.py ${H_blow} ${H_bhigh} ${nbeta} ${DIRECTORY} ${L}
 #
-#python3 Bootstrap_Energy.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
-#python3 Bootstrap_Magnetization.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
-#python3 Bootstrap_DualStiffness.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
-#
-##transient_time=$(awk '{print $0}' ${BASEDIR}/transient_time_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt )
-##tau_max=$(awk '{print $0}' ${BASEDIR}/tau_max_e${H_e}_h${H_h}_${H_nu}_bmin${H_blow}_bmax${H_bhigh}.txt )
-#
-#python3 Bootstrap_PsiDensity.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${transient_time} ${tau_max} ${LList[@]}
+#done
+
+
+#python3 New_Bootstrap_Energy.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]}
+python3 New_Bootstrap_Magnetization.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]}
+#python3 New_Bootstrap_DualStiffness.py ${H_blow} ${H_bhigh} ${nbeta} ${H_e} ${H_h} ${H_nu} ${LList[@]}
 

@@ -13,11 +13,12 @@ unsigned int Lx, Ly, Lz, N;
 int main(int argc, char *argv[]){
 
     struct Node* Lattice;
+    struct NN_Node* Neighbours;
     struct H_parameters Hp;
     struct MC_parameters MCp;
     struct PT_parameters PTp;
     struct PTroot_parameters PTroot;
-    unsigned int i;
+    unsigned int i, alpha, vec;
     long int seednumber=-1; /*by default it is a negative number which means that rng will use random_device*/
     double my_beta=0.244;
     int my_ind=0;
@@ -52,9 +53,13 @@ int main(int argc, char *argv[]){
 
     //Declaration of structure Lattice
     Lattice=(struct Node*)calloc(N,sizeof(struct Node));
+    Neighbours=(struct NN_Node*)calloc(N,sizeof(struct NN_Node));
+
     for(i=0; i<N; i++) {
         Lattice[i].A = (double *) calloc(3, sizeof(double));
         Lattice[i].Psi = (struct O2 *) calloc(NC, sizeof(struct O2));
+        Neighbours[i].Psi_plusk= (double *) calloc(9, sizeof(double)); //3 components x 3 directions [alpha +3*vec] alpha=component, vec=direction
+        Neighbours[i].Psi_minusk= (double *) calloc(9, sizeof(double)); //3 components x 3 directions
     }
 
     //Initialize H_parameters: file "H_init.txt"
@@ -86,8 +91,23 @@ int main(int argc, char *argv[]){
 
     //Initialize Lattice: files "Psi_init.txt" and "A_init.txt" in the directory DIRECTORY_READ!!! I HAVE TO INITIALIZE PROPERLY!!!!!!!
     initialize_lattice(Lattice, directory_read);
+    //Initialize the auxiliary lattice
+    for(i=0; i<N; i++){
+        for(alpha=0; alpha<3; alpha++){
+            for(vec=0; vec<3; vec++) {
+                Neighbours[i].Psi_plusk[alpha + 3 * vec].r = Lattice[nn(i, vec, 1)].Psi[alpha].r;
+                Neighbours[i].Psi_plusk[alpha + 3 * vec].t = Lattice[nn(i, vec, 1)].Psi[alpha].t + Hp.e*Hp.h*Lattice[i].A[vec];
+                Neighbours[i].Psi_minusk[alpha + 3 * vec].r = Lattice[nn(i, vec, -1)].Psi[alpha].r;
+                Neighbours[i].Psi_minusk[alpha + 3 * vec].t = Lattice[nn(i, vec, -1)].Psi[alpha].t - Hp.e*Hp.h*Lattice[nn(i, vec, -1)].A[vec];
+                polar_to_cartesian(Neighbours[i].Psi_plusk[alpha + 3 * vec]);
+                polar_to_cartesian(Neighbours[i].Psi_minusk[alpha + 3 * vec]);
+            }
+        }
+    }
+
+
     //Mainloop
-    mainloop(Lattice, MCp, Hp, my_beta, my_ind, PTp, PTroot, directory_parameters);
+    mainloop(Lattice, Neighbours, MCp, Hp, my_beta, my_ind, PTp, PTroot, directory_parameters);
 
     if(PTp.rank == PTp.root) {
         //Final time
@@ -109,7 +129,7 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp, double &my_beta, int &my_ind, struct PT_parameters PTp, struct PTroot_parameters PTroot, std::string directory_parameters) {
+void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &MCp, struct H_parameters &Hp, double &my_beta, int &my_ind, struct PT_parameters PTp, struct PTroot_parameters PTroot, std::string directory_parameters) {
 
     int n = 0, t = 0;
 
@@ -142,12 +162,12 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
     for (n = 0; n<MCp.nmisu; n++) {
         for (t = 0; t < MCp.tau; t++) {
-            metropolis(Site, MCp, Hp,  my_beta);
+            metropolis(Site, NN_Site, MCp, Hp,  my_beta);
         }
 
         //Measures
         mis.reset();
-	energy(mis, Hp, my_beta, Site);
+	    energy(mis, Hp, my_beta, Site, NN_Site);
         dual_stiffness(mis, Hp, Site);
         magnetization(mis, Site);
         density_psi(mis, Site);

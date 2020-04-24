@@ -44,7 +44,7 @@ for name in range(len(Observables)):
     transient_list=np.zeros((nbeta, len(L)))
     for l in range(len(L)):
         BASEDIR=("/Users/ilaria/Desktop/MultiComponents_SC/Output_3C/L%d_a0_b1_eta1_e%s_h%s_nu%s_bmin%s_bmax%s" %(L[l], e,  h, nu, beta_low, beta_high))
-
+#        BASEDIR=("/Users/ilaria/Desktop/MultiComponents_SC/Output_3C/L%d_a0_b1_eta1_e%s_h%s_bmin%s_bmax%s" %(L[l], e,  h, beta_low, beta_high))
         for b in range(nbeta):
             beta[b]=beta_low +b*(beta_high -beta_low)/(nbeta-1)
             base=2
@@ -52,7 +52,6 @@ for name in range(len(Observables)):
             box_length=base**exp
 #            file=("%s/beta_%d/%s.npy" %(BASEDIR, b, A_name))
 #            A=np.load(file)
-
             file=h5py.File('%s/beta_%d/Output.h5' %(BASEDIR, b), 'r')
             A=np.asarray(file['Measurements']['%s' %(Observables[name])])
             tot_length=box_length

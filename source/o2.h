@@ -36,7 +36,7 @@ struct O2 {
     }
 
 #define O2prod(__a,__b) ((__a).x*(__b).x+(__a).y*(__b).y)
-#define O2vprod(__a,__b) ((__a).x*(__b).y-(__a).y*(__b).x)
+#define O2vprod(__a,__b) ((__a).x*(__b).y-(__a).y*(__b).x) //\a\\b\sin(theta_b -theta_a)
 #define O2norm2(__a) O2prod((__a),(__a))
 #define O2norm(__a) (sqrt(O2norm2((__a))))
 
