@@ -20,13 +20,13 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                 /*************PSI UPDATE: move in the plane ImPsi, RePsi**********/
                 for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];
-                    oldE = local_HPsi(OldPsi, ix, iy, iz, alpha, Hp, Site);
+                    oldE = local_HPsi(OldPsi, ix, iy, iz, alpha, Hp, Site, NN_Site);
                     l=rn::uniform_real_box(0, MCp.lbox_l);
                     phi=rn::uniform_real_box(0, C_TWO_PI);
                     NewPsi.x = OldPsi.x + (l * cos(phi));
                     NewPsi.y = OldPsi.y + (l * sin(phi));
                     cartesian_to_polar(NewPsi);
-                    newE = local_HPsi(NewPsi, ix, iy, iz, alpha, Hp, Site);
+                    newE = local_HPsi(NewPsi, ix, iy, iz, alpha, Hp, Site, NN_Site);
                     minus_deltaE = h3*(oldE - newE);
                     if (minus_deltaE > 0) {
                         Site[i].Psi[alpha] = NewPsi;
@@ -59,12 +59,12 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                 /*******PHASE ONLY UPDATE**************/
                 for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];
-                    oldE = local_Htheta(OldPsi, ix, iy, iz, alpha, Hp, Site);
+                    oldE = local_Htheta(OldPsi, ix, iy, iz, alpha, Hp, Site, NN_Site);
                     d_theta=rn::uniform_real_box(-MCp.lbox_theta, MCp.lbox_theta);
                     NewPsi.t = fmod(OldPsi.t + d_theta, C_TWO_PI);
                     NewPsi.r= OldPsi.r;
                     polar_to_cartesian(NewPsi);
-                    newE = local_Htheta(NewPsi, ix, iy, iz, alpha, Hp, Site);
+                    newE = local_Htheta(NewPsi, ix, iy, iz, alpha, Hp, Site, NN_Site);
                     minus_deltaE = h3*(oldE - newE);
                     if (minus_deltaE > 0) {
                         Site[i].Psi[alpha] = NewPsi;
@@ -99,10 +99,10 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                     for (vec = 0; vec < 3; vec++) {
                         //Update of A
                         OldA = Site[i].A[vec];
-                        oldE = local_HA(OldA, ix, iy, iz, vec, Hp, Site);
+                        oldE = local_HA(OldA, ix, iy, iz, vec, Hp, Site, NN_Site);
                         d_A = rn::uniform_real_box(-MCp.lbox_A, MCp.lbox_A);
                         NewA = OldA + d_A;
-                        newE = local_HA(NewA, ix, iy, iz, vec, Hp, Site);
+                        newE = local_HA(NewA, ix, iy, iz, vec, Hp, Site, NN_Site);
                         minus_deltaE = h3 * (oldE - newE);
                         if (minus_deltaE > 0.) {
                             Site[i].A[vec] = NewA;
@@ -159,9 +159,9 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
         // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) 
         if(Hp.nu !=0 ) {
             //+k
-            J_alpha1=(1./Hp.h)*O2vprod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]) //this order corresponds to gauge_phase1
+            J_alpha1=(1./Hp.h)*O2vprod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]); //this order corresponds to gauge_phase1
             //-k
-            J_alpha2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi) //this order corresponds to gauge_phase2
+            J_alpha2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi); //this order corresponds to gauge_phase2
 
             for (beta = 0; beta < 3; beta++) {
             	if (beta != alpha) {
@@ -211,10 +211,10 @@ double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned in
         // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r)))
         if(Hp.nu !=0 ) {
             //+k
-            J_alpha1=(1./Hp.h)*O2vprod(Psi, Psi_aux_plus) //this order corresponds to gauge_phase1
+            J_alpha1=(1./Hp.h)*O2vprod(Psi, Psi_aux_plus); //this order corresponds to gauge_phase1
 
             //-k
-            J_alpha2=(1./Hp.h)*O2vprod(Psi_aux_minus, Psi) //this order corresponds to gauge_phase2
+            J_alpha2=(1./Hp.h)*O2vprod(Psi_aux_minus, Psi); //this order corresponds to gauge_phase2
 
             for (beta = 0; beta < 3; beta++) {
                 if (beta != alpha) {
