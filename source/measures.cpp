@@ -135,8 +135,8 @@ void save_lattice(struct Node* Site, const fs::path & directory_write, std::stri
 
     std::string sPsi;
     std::string sA;
-    sPsi= std::string("Psi_")+ configuration + std::string(".txt");
-    sA= std::string("A_")+ configuration + std::string(".txt");
+    sPsi= std::string("Psi_")+ configuration + std::string(".bin");
+    sA= std::string("A_")+ configuration + std::string(".bin");
     fs::path psi_init_file = directory_write / sPsi;
     fs::path a_init_file = directory_write / sA;
 

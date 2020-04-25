@@ -63,8 +63,8 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
 
 void initialize_lattice(struct Node* Site, const fs::path & directory_read){
 
-    fs::path psi_init_file = directory_read / "Psi_final.txt";
-    fs::path a_init_file = directory_read / "A_final.txt";
+    fs::path psi_init_file = directory_read / "Psi_final.bin";
+    fs::path a_init_file = directory_read / "A_final.bin";
     unsigned int i=0, alpha;
 
     if((fs::exists(psi_init_file)) and (Annealing==1)){
