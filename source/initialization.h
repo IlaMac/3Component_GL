@@ -14,9 +14,9 @@
 #include "robust_filesystem.h"
 #define C_TWO_PI (6.2831853071795864769252867665590058L)
 #define C_PI (3.1415926535897932384626433832795029L)
+#define Annealing (0) //To be implemented
 
 //static constexpr double C_TWO_PI = 6.2831853071795864769252867665590058;
-
 
 struct Node{
     double* A; /*three spatial dimensions*/

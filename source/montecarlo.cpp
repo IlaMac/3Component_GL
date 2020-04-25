@@ -115,8 +115,7 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                                 acc_A++;
                                 for (alpha = 0; alpha < 3; alpha++) {//Update of the auxiliary struct
                                     NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec].r = Site[i].Psi[alpha].r;
-                                    NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec].t =
-                                            Site[i].Psi[alpha].t - Hp.e * Hp.h * Site[i].A[vec];
+                                    NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec].t = Site[i].Psi[alpha].t - Hp.e * Hp.h * Site[i].A[vec];
                                     polar_to_cartesian(NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec]);
                                 }
                             }
@@ -153,6 +152,9 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
     //Kinetic= -(1/h²)*\sum_k=1,2,3 (|Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) + (|Psi_{alpha}(r-k)||Psi_{alpha}(r)|* cos(theta_{alpha}(r) - theta_{alpha}(r-k) +h*e*A_k(r-k)))
     for(vec=0; vec<3; vec++){
 
+        /*Check*/
+        printf("Plus k: angle %.5lf NN_Site %.5lf \n", Site[nn(i, vec, 1)].Psi[alpha].t + Hp.h*Hp.e*Site[i].A[vec], NN_Site[i].Psi_plusk[alpha+3*vec].t);
+        printf("Minus k: angle %.5lf NN_Site %.5lf \n", Site[nn(i, vec, -1)].Psi[alpha].t - Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec], NN_Site[i].Psi_minusk[alpha+3*vec].t);
         h_Kinetic-=(1./h2)*(O2prod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]) + O2prod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi));
 
         //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;
@@ -194,10 +196,6 @@ double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned in
     double J_alpha1=0, J_beta1=0, J_alpha2=0, J_beta2=0;
     double gauge_phase1=0, gauge_phase2=0;
     unsigned int beta=0, vec=0, i;
-    struct O2 Psi_aux_plus;
-    struct O2 Psi_aux_minus;
-    struct O2 Psib_aux_plus;
-    struct O2 Psib_aux_minus;
 
     i=ix +Lx*(iy+Ly*iz);
     //We need to compute just the part of the Hamiltonian involving Psi.t
@@ -211,10 +209,10 @@ double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned in
         // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r)))
         if(Hp.nu !=0 ) {
             //+k
-            J_alpha1=(1./Hp.h)*O2vprod(Psi, Psi_aux_plus); //this order corresponds to gauge_phase1
+            J_alpha1=(1./Hp.h)*O2vprod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]); //this order corresponds to gauge_phase1
 
             //-k
-            J_alpha2=(1./Hp.h)*O2vprod(Psi_aux_minus, Psi); //this order corresponds to gauge_phase2
+            J_alpha2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi); //this order corresponds to gauge_phase2
 
             for (beta = 0; beta < 3; beta++) {
                 if (beta != alpha) {

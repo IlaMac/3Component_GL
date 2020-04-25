@@ -67,7 +67,7 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
     fs::path a_init_file = directory_read / "A_final.txt";
     unsigned int i=0, alpha;
 
-    if(fs::exists(psi_init_file)){
+    if((fs::exists(psi_init_file)) and (Annealing==1)){
         FILE *fPsi= nullptr;
         if((fPsi=fopen(psi_init_file.c_str(), "r"))) {
             for (i = 0; i < N; i++) {
@@ -85,7 +85,7 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
         }
     }
 
-    if(fs::exists(a_init_file)){
+    if( (fs::exists(a_init_file)) and (Annealing==1)){
         FILE *fA= nullptr;
         if((fA=fopen(a_init_file.c_str(), "r"))) {
             for (i = 0; i < N; i++) {

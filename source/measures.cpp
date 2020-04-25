@@ -23,7 +23,7 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
                     h_Potential += (O2norm2(Site[i].Psi[alpha]) * ((Hp.a + (3. / h2))+(0.5 * Hp.b *O2norm2(Site[i].Psi[alpha]))));
                     //Kinetic= -(1/h²)*\sum_k=1,2,3 |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos( theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))
                     for (vec = 0; vec < 3; vec++) {
-                        h_Kinetic -= (1. / h2) * O2prod(Site[i].Psi[alpha], NN_Site[i].Psi_plusk[alpha]);
+                        h_Kinetic -= (1. / h2) * O2prod(Site[i].Psi[alpha], NN_Site[i].Psi_plusk[alpha +3*vec]);
                     }
                     for (vec = alpha+1; vec < 3; vec++) {
                             //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beys}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
@@ -37,9 +37,9 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
                 // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r)))
                 if(Hp.nu >0 ) {
                     for (vec = 0; vec < 3; vec++) {
-                        J_0 = (1. / Hp.h) *O2vprod(Site[i].Psi[0], NN_Site[i].Psi_plusk[0]);
-                        J_1 = (1. / Hp.h) *O2vprod(Site[i].Psi[1], NN_Site[i].Psi_plusk[1]);
-                        J_2 = (1. / Hp.h) *O2vprod(Site[i].Psi[2], NN_Site[i].Psi_plusk[2]);
+                        J_0 = (1. / Hp.h) *O2vprod(Site[i].Psi[0], NN_Site[i].Psi_plusk[0 +3*vec]);
+                        J_1 = (1. / Hp.h) *O2vprod(Site[i].Psi[1], NN_Site[i].Psi_plusk[1+3*vec]);
+                        J_2 = (1. / Hp.h) *O2vprod(Site[i].Psi[2], NN_Site[i].Psi_plusk[2+3*vec]);
                         h_AB += Hp.nu * (pow((J_0 - J_1),2) + pow((J_0 - J_2),2) +pow((J_1 - J_2),2));
                     }
                 }
