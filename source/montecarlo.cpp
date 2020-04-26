@@ -31,6 +31,14 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                     if (minus_deltaE > 0) {
                         Site[i].Psi[alpha] = NewPsi;
                         acc_l++;
+			for (vec = 0; vec < 3; vec++) {//Update of the auxiliary struct
+                                NN_Site[nn(i, vec, 1)].Psi_minusk[alpha +3*vec].r=NewPsi.r;
+                                NN_Site[nn(i, vec, 1)].Psi_minusk[alpha +3*vec].t=NewPsi.t - Hp.e*Hp.h*Site[i].A[vec];
+                                polar_to_cartesian(NN_Site[nn(i, vec, 1)].Psi_minusk[alpha +3*vec]);
+                                NN_Site[nn(i, vec, -1)].Psi_plusk[alpha +3*vec].r=NewPsi.r;
+                                NN_Site[nn(i, vec, -1)].Psi_plusk[alpha +3*vec].t=NewPsi.t + Hp.e*Hp.h*Site[nn(i, vec, -1)].A[vec];
+                                polar_to_cartesian(NN_Site[nn(i, vec, -1)].Psi_plusk[alpha +3*vec]);
+                            }
                     } else {
                         rand= rn::uniform_real_box(0,1);
                         //Boltzmann weight: exp(-\beta \Delta E) E= h³ \sum_i E(i)
@@ -68,6 +76,14 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                     minus_deltaE = h3*(oldE - newE);
                     if (minus_deltaE > 0) {
                         Site[i].Psi[alpha] = NewPsi;
+                        for (vec = 0; vec < 3; vec++) {//Update of the auxiliary struct
+                                NN_Site[nn(i, vec, 1)].Psi_minusk[alpha +3*vec].r=NewPsi.r;
+                                NN_Site[nn(i, vec, 1)].Psi_minusk[alpha +3*vec].t=NewPsi.t - Hp.e*Hp.h*Site[i].A[vec];
+                                polar_to_cartesian(NN_Site[nn(i, vec, 1)].Psi_minusk[alpha +3*vec]);
+                                NN_Site[nn(i, vec, -1)].Psi_plusk[alpha +3*vec].r=NewPsi.r;
+                                NN_Site[nn(i, vec, -1)].Psi_plusk[alpha +3*vec].t=NewPsi.t + Hp.e*Hp.h*Site[nn(i, vec, -1)].A[vec];
+                                polar_to_cartesian(NN_Site[nn(i, vec, -1)].Psi_plusk[alpha +3*vec]);
+                            }
                         acc_theta++;
                     } else {
                         rand= rn::uniform_real_box(0,1);
@@ -107,7 +123,15 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                         if (minus_deltaE > 0.) {
                             Site[i].A[vec] = NewA;
                             acc_A++;
-                        } else {
+                            for (alpha = 0; alpha < 3; alpha++) {//Update of the auxiliary struct
+                            	NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec].r = Site[i].Psi[alpha].r;
+                            	NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec].t = Site[i].Psi[alpha].t - Hp.e * Hp.h * Site[i].A[vec];
+                            	polar_to_cartesian(NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec]);
+                                NN_Site[i].Psi_plusk[alpha + 3 * vec].r = Site[nn(i, vec, 1)].Psi[alpha].r;
+                                NN_Site[i].Psi_plusk[alpha + 3 * vec].t = Site[nn(i, vec, 1)].Psi[alpha].t +Hp.e * Hp.h * Site[i].A[vec];
+                                polar_to_cartesian(NN_Site[i].Psi_plusk[alpha + 3 * vec]);
+			   }
+			} else {
                             rand = rn::uniform_real_box(0, 1);
                             //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
                             if (rand < exp(my_beta * minus_deltaE)) {
@@ -117,7 +141,10 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                                     NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec].r = Site[i].Psi[alpha].r;
                                     NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec].t = Site[i].Psi[alpha].t - Hp.e * Hp.h * Site[i].A[vec];
                                     polar_to_cartesian(NN_Site[nn(i, vec, 1)].Psi_minusk[alpha + 3 * vec]);
-                                }
+                                    NN_Site[i].Psi_plusk[alpha + 3 * vec].r = Site[nn(i, vec, 1)].Psi[alpha].r;
+                               	    NN_Site[i].Psi_plusk[alpha + 3 * vec].t = Site[nn(i, vec, 1)].Psi[alpha].t +Hp.e * Hp.h * Site[i].A[vec];
+                                    polar_to_cartesian(NN_Site[i].Psi_plusk[alpha + 3 * vec]);
+			    	}
                             }
                         }
                     }
@@ -125,6 +152,7 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
             }
         }
     }
+
     acc_l=(double) acc_l/(3*N);
     acc_theta=(double) acc_theta/(3*N);
     acc_A=(double) acc_A/(3*N);
@@ -152,9 +180,6 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
     //Kinetic= -(1/h²)*\sum_k=1,2,3 (|Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) + (|Psi_{alpha}(r-k)||Psi_{alpha}(r)|* cos(theta_{alpha}(r) - theta_{alpha}(r-k) +h*e*A_k(r-k)))
     for(vec=0; vec<3; vec++){
 
-        /*Check*/
-        printf("Plus k: angle %.5lf NN_Site %.5lf \n", Site[nn(i, vec, 1)].Psi[alpha].t + Hp.h*Hp.e*Site[i].A[vec], NN_Site[i].Psi_plusk[alpha+3*vec].t);
-        printf("Minus k: angle %.5lf NN_Site %.5lf \n", Site[nn(i, vec, -1)].Psi[alpha].t - Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec], NN_Site[i].Psi_minusk[alpha+3*vec].t);
         h_Kinetic-=(1./h2)*(O2prod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]) + O2prod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi));
 
         //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;

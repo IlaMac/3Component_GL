@@ -4,16 +4,15 @@ BASEDIR=${HOME}/MultiComponents_SC
 SCRIPT_DIR=${BASEDIR}/3Component_GL//batch_script
 
 LLIST="8 10 12 16 20"
-LLIST="8 10 12"
 ############# Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
 H_a=0
 H_b=1
 H_eta=1 
 H_e=0.5
 H_h=5.4
-H_nu=0.01
+H_nu=0
 H_blow=0.2245
-H_bhigh=0.229
+H_bhigh=0.2265
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
@@ -31,11 +30,23 @@ for L in $LLIST; do
 
 cd ${BASEDIR}/Output_3C
 
+if [ ! -d ./Se_${H_e} ]; then
+   mkdir -p e_${H_e}
+fi
+
+cd e_${H_e}
+
+if [ ! -d ./Snu_${H_nu} ]; then
+   mkdir -p nu_${H_nu}
+fi
+
+cd nu_${H_nu}
+
 if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh} ]; then
    mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
 fi
 
-OUTPUT=${BASEDIR}/Output_3C/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+OUTPUT=${BASEDIR}/Output_3C/e_${H_e}/nu_${H_nu}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
 
 cd ${OUTPUT}
 
@@ -61,8 +72,8 @@ echo $A_box >> MC_init.txt
 #################Creation of the submit_runs script#########################
 
 jobname="L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}"
-nnodes=2
-ntasks=64 #parallel tempering over ntasks temperatures
+nnodes=1
+ntasks=32 #parallel tempering over ntasks temperatures
 
 #I create ntasks folder: one for each rank.
 
