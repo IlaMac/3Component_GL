@@ -56,14 +56,6 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                         }
                     }
                 }
-            }
-        }
-    }
-
-    for (ix= 0; ix < Lx; ix++) {
-        for (iy = 0; iy < Ly; iy++) {
-            for (iz = 0; iz < Lz; iz++) {
-                i=ix + Lx * (iy + iz * Ly);
                 /*******PHASE ONLY UPDATE**************/
                 for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];
@@ -102,15 +94,8 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                         }
                     }
                 }
-            }
-        }
-    }
-
-    if(Hp.e!=0) {
-        for (ix = 0; ix < Lx; ix++) {
-            for (iy = 0; iy < Ly; iy++) {
-                for (iz = 0; iz < Lz; iz++) {
-                    i = ix + Lx * (iy + iz * Ly);
+	    
+		if(Hp.e!=0) {
                     /**********VECTOR POTENTIAL UPDATE********/
                     for (vec = 0; vec < 3; vec++) {
                         //Update of A
@@ -227,7 +212,6 @@ double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned in
 
     //Kinetic= -(1/h²)*\sum_k=1,2,3 (|Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) + (|Psi_{alpha}(r-k)||Psi_{alpha}(r)|* cos(theta_{alpha}(r) - theta_{alpha}(r-k) +h*e*A_k(r-k)))
     for(vec=0; vec<3; vec++){
-
         h_Kinetic-=(1./h2)*(O2prod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]) + O2prod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi));
 
         //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;

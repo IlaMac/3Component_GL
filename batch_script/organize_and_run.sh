@@ -4,6 +4,7 @@ BASEDIR=${HOME}/MultiComponents_SC
 SCRIPT_DIR=${BASEDIR}/3Component_GL//batch_script
 
 LLIST="8 10 12 16 20"
+LLIST="8"
 ############# Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
 H_a=0
 H_b=1
@@ -96,7 +97,7 @@ EXECUTE_DIR="../build/Release"
 
 echo "#!/bin/bash
 #SBATCH --job-name=${jobname}          # Name of the job
-#SBATCH --time=7-00:00:00               # Allocation time
+#SBATCH --time=1-00:00:00               # Allocation time
 #SBATCH --mem-per-cpu=2000              # Memory per allocated cpu
 #SBATCH --nodes=${nnodes}               # Number of nodes
 #SBATCH --ntasks=${ntasks}
