@@ -97,7 +97,7 @@ EXECUTE_DIR="../build/Release"
 
 echo "#!/bin/bash
 #SBATCH --job-name=${jobname}          # Name of the job
-#SBATCH --time=1-00:00:00               # Allocation time
+#SBATCH --time=2-00:10:00               # Allocation time
 #SBATCH --mem-per-cpu=2000              # Memory per allocated cpu
 #SBATCH --nodes=${nnodes}               # Number of nodes
 #SBATCH --ntasks=${ntasks}
