@@ -185,7 +185,7 @@ if(GL_MARCH)
     else()
         string(TOLOWER ${GL_MARCH} CXX_MARCH)
     endif()
-    message(STATUS "Using microarchitechture: ${CXX_MARCH}")
+    message(STATUS "CPU optimizations: ${CXX_MARCH}")
 endif()
 
 
