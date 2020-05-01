@@ -11,9 +11,8 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
 -g | --compiler [=arg]          : Compiler        | GCC | Clang | (default = "")
    | --compiler-version=[=arg]  : Append a compiler version e.g. for version "-9", then g++ --> g++-9
 -d | --dry-run                  : Dry run
-   | --download-method          : Download libraries using [ native | conan ] (default = native)
+   | --download-method          : Download libraries using [ find | fetch | find-or-fetch | conan ] (default = fetch)
 -f | --extra-flags [=arg]       : Extra CMake flags (defailt = none)
--g | --gcc-toolchain [=arg]     : Path to GCC toolchain. Use with Clang if it can't find stdlib (defailt = none)
 -h | --help                     : Help. Shows this text.
 -j | --make-threads [=num]      : Number of threads used by Make build (default = 8)
 -l | --clear-libs [=args]       : Clear libraries in comma separated list 'lib1,lib2...'. "all" deletes all.
@@ -27,16 +26,17 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
    | --enable-tests             : Enable CTest tests
 -v | --verbose                  : Verbose makefiles
 EXAMPLE:
-./build.sh -b Release  --make-threads 8   --enable-shared  --enable-openmp --enable-eigen3  --download-method=native
+./build.sh -b Release  --make-threads 8   --enable-shared  --enable-openmp --enable-eigen3  --download-method=fetch
 EOF
   exit 1
 }
 
 
 # Execute getopt on the arguments passed to this program, identified by the special character $@
-PARSED_OPTIONS=$(getopt -n "$0"   -o hb:cl:df:g:j:st:v \
+PARSED_OPTIONS=$(getopt -n "$0"   -o ha:b:cl:df:g:j:st:v \
                 --long "\
                 help\
+                arch:\
                 build-type:\
                 target:\
                 clear-cmake\
@@ -47,7 +47,6 @@ PARSED_OPTIONS=$(getopt -n "$0"   -o hb:cl:df:g:j:st:v \
                 download-method:\
                 enable-tests\
                 enable-shared\
-                gcc-toolchain:\
                 make-threads:\
                 enable-openmp\
                 enable-spdlog\
@@ -66,19 +65,21 @@ eval set -- "$PARSED_OPTIONS"
 
 build_type="Release"
 shared="OFF"
-download_method="native"
+download_method="fetch"
 enable_tests="OFF"
 target="all"
 make_threads=8
 verbose="OFF"
 clear_cmake="OFF"
+arch="native"
 # Now goes through all the options with a case and using shift to analyse 1 argument at a time.
 #$1 identifies the first argument, and when we use shift we discard the first argument, so $2 becomes $1 and goes again through the case.
 echo "Build Configuration"
 while true;
 do
   case "$1" in
-    -h|--help)                      usage                                                                       ; shift   ;;
+    -h|--help)                      usage                                                                          ; shift   ;;
+    -b|--arch)                      arch=$2                         ; echo " * Microarchitechture       : $2"      ; shift 2 ;;
     -b|--build-type)                build_type=$2                   ; echo " * Build type               : $2"      ; shift 2 ;;
     -c|--clear-cmake)               clear_cmake="ON"                ; echo " * Clear CMake              : ON"      ; shift   ;;
     -l|--clear-libs)
@@ -89,7 +90,6 @@ do
     -d|--dry-run)                   dryrun="ON"                     ; echo " * Dry run                  : ON"      ; shift   ;;
        --download-method)           download_method=$2              ; echo " * Download method          : $2"      ; shift 2 ;;
     -f|--extra-flags)               extra_flags=$2                  ; echo " * Extra CMake flags        : $2"      ; shift 2 ;;
-       --gcc-toolchain)             gcc_toolchain=$2                ; echo " * GCC toolchain            : $2"      ; shift 2 ;;
     -j|--make-threads)              make_threads=$2                 ; echo " * MAKE threads             : $2"      ; shift 2 ;;
     -s|--enable-shared)             shared="ON"                     ; echo " * Link shared libraries    : ON"      ; shift   ;;
        --enable-tests)              enable_tests="ON"               ; echo " * CTest Testing            : ON"      ; shift   ;;
@@ -105,7 +105,6 @@ do
 done
 
 
-echo "HELLOOOO THIS SHOULD PRINT CLEAR CMAKE VARIABLE $clear_cmake"
 
 if  [ "$clear_cmake" = "ON" ] ; then
         echo "Clearing CMake files from build"
@@ -125,7 +124,7 @@ for lib in "${clear_libs[@]}"; do
     fi
 done
 
-if [[ ! "$download_method" =~ native|conan|find|none ]]; then
+if [[ ! "$download_method" =~ find|fetch|conan ]]; then
     echo "Download method unsupported: $download_method"
     exit 1
 fi
@@ -209,19 +208,21 @@ Running script:
 ===============================================================
     cmake -E make_directory build/$build_type
     cd build/$build_type
-    cmake   -DCMAKE_BUILD_TYPE=$build_type
-            -DDOWNLOAD_METHOD=$download_method
-            -DENABLE_OPENMP=$enable_openmp
-            -DENABLE_SPDLOG=$enable_spdlog
-            -DENABLE_H5PP=$enable_h5pp
-            -DENABLE_TESTS=$enable_tests
-            -DBUILD_SHARED_LIBS=$shared
+    cmake   -DCMAKE_BUILD_TYPE=$build_type \
+            -DGL_MARCH=$arch \
+            -DGL_PRINT_INFO=ON \
+            -DGL_DOWNLOAD_METHOD=$download_method \
+            -DGL_ENABLE_OPENMP=$enable_openmp \
+            -DGL_ENABLE_SPDLOG=$enable_spdlog \
+            -DGL_ENABLE_EIGEN3=$enable_eigen3 \
+            -DGL_ENABLE_H5PP=$enable_h5pp \
+            -DGL_ENABLE_TESTS=$enable_tests \
+            -DBUILD_SHARED_LIBS=$shared \
             -DPREFER_CONDA_LIBS=$prefer_conda \
-            -DGCC_TOOLCHAIN=$gcc_toolchain
-            -DCMAKE_VERBOSE_MAKEFILE=$verbose
-            $extra_flags
+            -DCMAKE_VERBOSE_MAKEFILE=$verbose \
+            $extra_flags \
             -G "CodeBlocks - Unix Makefiles" ../../
-    cmake --build . --target $target -- -j $make_threads
+    cmake --build . --target $target --parallel $make_threads
 ===============================================================
 EOF
 
@@ -230,25 +231,56 @@ if [ -z "$dryrun" ] ;then
     cmake -E make_directory build/$build_type
     cd build/$build_type
     cmake   -DCMAKE_BUILD_TYPE=$build_type \
-            -DDOWNLOAD_METHOD=$download_method \
-            -DENABLE_OPENMP=$enable_openmp \
-            -DENABLE_SPDLOG=$enable_spdlog \
-            -DENABLE_EIGEN3=$enable_eigen3 \
-            -DENABLE_H5PP=$enable_h5pp \
-            -DENABLE_TESTS=$enable_tests \
+            -DGL_MARCH=$arch \
+            -DGL_PRINT_INFO=ON \
+            -DGL_DOWNLOAD_METHOD=$download_method \
+            -DGL_ENABLE_OPENMP=$enable_openmp \
+            -DGL_ENABLE_SPDLOG=$enable_spdlog \
+            -DGL_ENABLE_EIGEN3=$enable_eigen3 \
+            -DGL_ENABLE_H5PP=$enable_h5pp \
+            -DGL_ENABLE_TESTS=$enable_tests \
             -DBUILD_SHARED_LIBS=$shared \
             -DPREFER_CONDA_LIBS=$prefer_conda \
-            -DGCC_TOOLCHAIN=$gcc_toolchain \
             -DCMAKE_VERBOSE_MAKEFILE=$verbose \
             $extra_flags \
             -G "CodeBlocks - Unix Makefiles" ../../
-    cmake --build . --target $target -- -j $make_threads
-fi
 
-if [ "$enable_tests" = "ON" ] ;then
-    if [[ "$target" == *"test-"* ]]; then
-        ctest -C $build_type --verbose -R $target
-    else
-       ctest -C $build_type --output-on-failure
+
+    exit_code=$?
+    if [ "$exit_code" != "0" ]; then
+            echo ""
+            echo "Exit code: $exit_code"
+            echo "CMakeFiles/CMakeError.log:"
+            echo ""
+            cat CMakeFiles/CMakeError.log
+            exit "$exit_code"
     fi
+
+
+    if [ "$enable_tests" = "ON" ] ;then
+        if [[ "$target" == *"test-"* ]]; then
+            ctest  --build-config $build_type --verbose --build-and-test --build-target $target -R $target
+        else
+           ctest  --build-config $build_type --build-and-test --output-on-failure
+        fi
+    fi
+
+    exit_code=$?
+    if [ "$exit_code" != "0" ]; then
+            echo "Exit code: $exit_code"
+            exit "$exit_code"
+    fi
+
+
+    cmake --build . --target $target --parallel $make_threads
+    exit_code=$?
+    if [ "$exit_code" != "0" ]; then
+            echo ""
+            echo "Exit code: $exit_code"
+            echo "CMakeFiles/CMakeError.log:"
+            echo ""
+            cat CMakeFiles/CMakeError.log
+            exit "$exit_code"
+    fi
+
 fi
