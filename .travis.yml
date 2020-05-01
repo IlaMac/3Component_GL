@@ -33,6 +33,7 @@ matrix:
             - gfortran-8
             - libsz2
             - zlibc
+            - libopenmpi-dev
             - libeigen3-dev
             - libhdf5-dev
             - libspdlog-dev
@@ -62,6 +63,8 @@ matrix:
             - gcc-7
             - g++-7
             - gfortran-7
+            - libopenmpi-dev
+
       cache:
         pip: true
         directories:
@@ -87,6 +90,7 @@ matrix:
           packages:
             - libstdc++-8-dev
             - gfortran-8
+            - libopenmpi-dev
       cache:
         pip: true
         directories:
@@ -110,6 +114,7 @@ matrix:
           packages:
             - libstdc++-8-dev
             - gfortran-8
+            - libopenmpi-dev
       cache:
         pip: true
         directories:
@@ -182,5 +187,5 @@ before_script:
   - cmake --version
 
 script:
-  - ./build.sh --verbose --enable-shared --enable-h5pp --enable-eigen3 --enable-spdlog --enable-tests  -a haswell  -j 2 --build-type=Debug ${FLAGS}
+  - ./build.sh --verbose --enable-shared --enable-h5pp --enable-eigen3 --enable-spdlog --enable-tests --enable-mpi  -a haswell  -j 2 --build-type=Debug ${FLAGS}
 
