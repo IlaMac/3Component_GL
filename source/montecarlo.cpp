@@ -1,5 +1,5 @@
 #include "montecarlo.h"
-#include "main.h"
+#include "eigen.h"
 #include "rng.h"
 
 void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &MCp, struct H_parameters &Hp,  double my_beta){

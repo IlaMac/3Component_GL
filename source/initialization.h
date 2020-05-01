@@ -5,13 +5,13 @@
 #ifndef INITIALIZATION_H
 #define INITIALIZATION_H
 
-#include<cstdio>
-#include<cmath>
-#include<cstdlib>
-#include <iostream>
-#include <fstream>
-#include "main.h"
+#include "eigen.h"
 #include "robust_filesystem.h"
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 #define C_TWO_PI (6.2831853071795864769252867665590058L)
 #define C_PI (3.1415926535897932384626433832795029L)
 #define Annealing (0) //To be implemented
