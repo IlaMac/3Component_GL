@@ -1,5 +1,8 @@
 if(NOT TARGET h5pp::h5pp AND GL_DOWNLOAD_METHOD STREQUAL "find")
-    find_package(h5pp 1.7.1 QUIET)
+    find_package(h5pp 1.7.1 QUIET
+            HINTS ${CMAKE_INSTALL_PREFIX}
+            PATH_SUFFIXES h5pp
+            )
     if(h5pp_FOUND AND TARGET h5pp::h5pp)
         message(STATUS "Found h5pp")
     endif()

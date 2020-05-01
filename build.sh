@@ -209,6 +209,8 @@ Running script:
     cmake -E make_directory build/$build_type
     cd build/$build_type
     cmake   -DCMAKE_BUILD_TYPE=$build_type \
+            -DBUILD_SHARED_LIBS=$shared \
+            -DCMAKE_VERBOSE_MAKEFILE=$verbose \
             -DGL_MARCH=$arch \
             -DGL_PRINT_INFO=ON \
             -DGL_DOWNLOAD_METHOD=$download_method \
@@ -217,9 +219,7 @@ Running script:
             -DGL_ENABLE_EIGEN3=$enable_eigen3 \
             -DGL_ENABLE_H5PP=$enable_h5pp \
             -DGL_ENABLE_TESTS=$enable_tests \
-            -DBUILD_SHARED_LIBS=$shared \
-            -DPREFER_CONDA_LIBS=$prefer_conda \
-            -DCMAKE_VERBOSE_MAKEFILE=$verbose \
+            -DGL_PREFER_CONDA_LIBS=$prefer_conda \
             $extra_flags \
             -G "CodeBlocks - Unix Makefiles" ../../
     cmake --build . --target $target --parallel $make_threads
@@ -231,6 +231,8 @@ if [ -z "$dryrun" ] ;then
     cmake -E make_directory build/$build_type
     cd build/$build_type
     cmake   -DCMAKE_BUILD_TYPE=$build_type \
+            -DBUILD_SHARED_LIBS=$shared \
+            -DCMAKE_VERBOSE_MAKEFILE=$verbose \
             -DGL_MARCH=$arch \
             -DGL_PRINT_INFO=ON \
             -DGL_DOWNLOAD_METHOD=$download_method \
@@ -239,9 +241,7 @@ if [ -z "$dryrun" ] ;then
             -DGL_ENABLE_EIGEN3=$enable_eigen3 \
             -DGL_ENABLE_H5PP=$enable_h5pp \
             -DGL_ENABLE_TESTS=$enable_tests \
-            -DBUILD_SHARED_LIBS=$shared \
-            -DPREFER_CONDA_LIBS=$prefer_conda \
-            -DCMAKE_VERBOSE_MAKEFILE=$verbose \
+            -DGL_PREFER_CONDA_LIBS=$prefer_conda \
             $extra_flags \
             -G "CodeBlocks - Unix Makefiles" ../../
 

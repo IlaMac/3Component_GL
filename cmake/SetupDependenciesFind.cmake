@@ -24,6 +24,9 @@ endif()
 
 
 if(GL_ENABLE_MPI)
+    if(NOT BUILD_SHARED_LIBS)
+        message(WARNING "Linking MPI statically is discouraged and may fail. Try --enable-shared or setting BUILD_SHARED_LIBS=ON.")
+    endif()
     find_package(MPI REQUIRED)
     list(APPEND NATIVE_TARGETS MPI::MPI_CXX)
 endif()
