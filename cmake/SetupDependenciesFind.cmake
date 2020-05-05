@@ -1,6 +1,8 @@
 if(GL_DOWNLOAD_METHOD MATCHES "find")
     # Let cmake find our Find<package>.cmake modules
     list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
+
     if(GL_PREFER_CONDA_LIBS)
         list(APPEND CMAKE_PREFIX_PATH
                 $ENV{CONDA_PREFIX}
