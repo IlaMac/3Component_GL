@@ -1,1 +1,1 @@
-
+[![Build Status](https://travis-ci.org/DavidAce/3Component_GL.svg?branch=master)](https://travis-ci.org/DavidAce/3Component_GL)

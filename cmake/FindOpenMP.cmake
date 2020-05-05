@@ -29,6 +29,12 @@ function(check_omp_compiles REQUIRED_FLAGS REQUIRED_LIBRARIES_UNPARSED REQUIRED_
     set(CMAKE_REQUIRED_LIBRARIES "${expanded_libs}") # Can be a ;list
     set(CMAKE_REQUIRED_INCLUDES  "${REQUIRED_INCLUDES};${expanded_incs}") # Can be a ;list
     string(REPLACE ";" " " CMAKE_REQUIRED_FLAGS "${REQUIRED_FLAGS} ${expanded_opts}") # Needs to be a space-separated list
+    if(GL_PRINT_CHECKS)
+        message(STATUS "OPENMP TEST COMPILE CMAKE_REQUIRED_FLAGS        ${CMAKE_REQUIRED_FLAGS}")
+        message(STATUS "OPENMP TEST COMPILE CMAKE_REQUIRED_DEFINITIONS  ${CMAKE_REQUIRED_DEFINITIONS}")
+        message(STATUS "OPENMP TEST COMPILE CMAKE_REQUIRED_LIBRARIES    ${CMAKE_REQUIRED_LIBRARIES}")
+        message(STATUS "OPENMP TEST COMPILE CMAKE_REQUIRED_INCLUDES     ${CMAKE_REQUIRED_INCLUDES}")
+    endif()
     unset(has_omp_h)
     unset(has_omp_h CACHE)
     unset(OMP_COMPILES)
@@ -69,7 +75,11 @@ endfunction()
 
 
 if(NOT OpenMP_FOUND AND NOT TARGET openmp::openmp AND BUILD_SHARED_LIBS)
+    set(BACKUP ${CMAKE_MODULE_PATH})
+    unset(CMAKE_MODULE_PATH)
     find_package(OpenMP)
+    list(APPEND CMAKE_MODULE_PATH ${BACKUP})
+    unset(BACKUP)
 endif()
 
 
@@ -81,19 +91,17 @@ if(NOT OpenMP_FOUND)
         # MKL comes with a useable iomp5 library
         find_path(MKL_ROOT_DIR
                 include/mkl.h
-                HINTS ${CMAKE_INSTALL_PREFIX} ${CONDA_HINTS}
+                HINTS ${CMAKE_INSTALL_PREFIX}
                 PATHS
                 $ENV{MKL_DIR}  ${MKL_DIR}
                 $ENV{MKLDIR}   ${MKLDIR}
                 $ENV{MKLROOT}  ${MKLROOT}
                 $ENV{MKL_ROOT} ${MKL_ROOT}
                 $ENV{mkl_root} ${mkl_root}
-                $ENV{EBROOTIMKL}
                 $ENV{HOME}/intel/mkl
                 /opt/intel/mkl
                 /opt/intel
                 $ENV{BLAS_DIR}
-                $ENV{CONDA_PREFIX}
                 /usr/lib/x86_64-linux-gnu
                 /Library/Frameworks/Intel_MKL.framework/Versions/Current/lib/universal
                 "Program Files (x86)/Intel/ComposerXE-2011/mkl"
@@ -134,12 +142,12 @@ find_package_handle_standard_args(OpenMP DEFAULT_MSG OMP_COMPILES)
 
 
 
-if(OMP_COMPILES)
+if(OMP_COMPILES AND NOT TARGET openmp::openmp)
     add_library(openmp::openmp INTERFACE IMPORTED)
     if(TARGET OpenMP::OpenMP_CXX)
         target_link_libraries(openmp::openmp INTERFACE OpenMP::OpenMP_CXX)
     else()
-        target_link_libraries(openmp::openmp INTERFACE ${OMP_LIBRARY} pthread rt dl)
+        target_link_libraries(openmp::openmp INTERFACE ${OMP_LIBRARY} Threads::Threads rt dl)
         target_compile_definitions(openmp::openmp INTERFACE -D_OPENMP)
     endif()
 endif()

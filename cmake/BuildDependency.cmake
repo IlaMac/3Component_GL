@@ -1,6 +1,5 @@
 function(build_dependency dep_name install_dir extra_flags)
     set(build_dir    ${CMAKE_BINARY_DIR}/deps-build/${dep_name})
-
     execute_process( COMMAND  ${CMAKE_COMMAND} -E make_directory ${build_dir})
     execute_process(
             COMMAND  ${CMAKE_COMMAND}
@@ -14,7 +13,6 @@ function(build_dependency dep_name install_dir extra_flags)
             WORKING_DIRECTORY ${build_dir}
             RESULT_VARIABLE config_result
             ERROR_VARIABLE  config_error
-
     )
     if(${config_result})
         message(STATUS "Got non-zero exit code while configuring ${dep_name}")
@@ -25,14 +23,17 @@ function(build_dependency dep_name install_dir extra_flags)
         message(STATUS  "Output saved to ${build_dir}/stdout and ${build_dir}/stderr")
         file(APPEND ${build_dir}/stdout ${config_result})
         file(APPEND ${build_dir}/stderr ${config_error})
-        if(CMAKE_VERBOSE_MAKEFILE)
+        if(GL_PRINT_INFO)
             message(STATUS "Contents of stdout: \n  ${config_result} \n")
             message(STATUS "Contents of stderr: \n  ${config_error}  \n")
         endif()
     endif()
 
 
-    execute_process(COMMAND  ${CMAKE_COMMAND} --build . --parallel
+    include(cmake/GetNumThreads.cmake)
+    get_num_threads(num_threads)
+    set(ENV{CMAKE_BUILD_PARALLEL_LEVEL} ${num_threads})
+    execute_process(COMMAND  ${CMAKE_COMMAND} --build . --parallel ${num_threads}
             WORKING_DIRECTORY "${build_dir}"
             RESULT_VARIABLE build_result
             ERROR_VARIABLE  build_error
@@ -47,10 +48,11 @@ function(build_dependency dep_name install_dir extra_flags)
         message(STATUS  "Output saved to ${build_dir}/stdout and ${build_dir}/stderr")
         file(APPEND ${build_dir}/stdout ${build_result})
         file(APPEND ${build_dir}/stderr ${build_error})
-        if(CMAKE_VERBOSE_MAKEFILE)
+        if(GL_PRINT_CHECKS)
             message(STATUS "Contents of stdout: \n  ${build_result} \n")
             message(STATUS "Contents of stderr: \n  ${build_error} \n")
         endif()
     endif()
+
 
 endfunction()

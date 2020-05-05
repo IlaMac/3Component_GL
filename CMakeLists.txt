@@ -16,43 +16,34 @@ cmake_minimum_required(VERSION 3.12)
 project(GL_3component CXX)
 
 ### Set options for compilation
-option(ENABLE_TESTS                 "Enables CTest testing"                                                           OFF)
-option(BUILD_SHARED_LIBS            "Sets shared linking on/off"                                                      OFF)
-option(ENABLE_EIGEN3                "Use Eigen3 Library. Guide with -DEIGEN_INCLUDE_DIR:PATH=<dir-to-eigen3>"         OFF)
-option(ENABLE_SPDLOG                "Use SpdLog logging library. Guide with -Dspdlog_DIR:PATH=<dir-to-spdlog>"        OFF)
-option(ENABLE_H5PP                  "Use h5pp, a C++ front-end to HDF5"                                               ON)
-option(ENABLE_OPENMP                "Enable OpenMP flags such as -fopenmp"                                            ON)
-option(ENABLE_MPI                   "Enable MPI parallelization"                                                      ON)
-option(ENABLE_LTO                   "Enable link time optimization"                                                   OFF)
-option(AS_SUBPROJECT                "Try using this as a subproject with add_subdirectory()"                          OFF)
-option(APPEND_LIBSUFFIX             "Append <libname> to CMAKE_INSTALL_PREFIX"                                        ON)
+option(GL_ENABLE_TESTS       "Enables CTest testing"                                    ON)
+option(GL_ENABLE_H5PP        "h5pp is a C++ front-end to HDF5"                          ON)
+option(GL_ENABLE_EIGEN3      "Eigen3 is a linear algebra template library"              ON)
+option(GL_ENABLE_SPDLOG      "Spdlog is a fast logging library"                         ON)
+option(GL_ENABLE_OPENMP      "Enable OpenMP flags such as -fopenmp"                     ON)
+option(GL_ENABLE_MPI         "Enable MPI parallelization"                               ON)
+option(GL_ENABLE_LTO         "Enable link time optimization"                            OFF)
+option(GL_AS_SUBPROJECT      "Try using this as a subproject with add_subdirectory()"   OFF)
+option(GL_APPEND_LIBSUFFIX   "Append <libname> to CMAKE_INSTALL_PREFIX"                 ON)
+option(GL_PRINT_INFO         "Prints additional information during CMake configure"     ON)
 
 
 
 #################################################################
 ### Make an "enum" for valid download methods                 ###
 #################################################################
-set(VALID_DOWNLOAD_METHODS none find-only conan native)
-set(DOWNLOAD_METHOD find-only CACHE STRING "Download method for external dependencies")
-set_property(CACHE DOWNLOAD_METHOD  PROPERTY STRINGS ${VALID_DOWNLOAD_METHODS})
-if(NOT DOWNLOAD_METHOD IN_LIST VALID_DOWNLOAD_METHODS)
-    message(FATAL_ERROR "DOWNLOAD_METHOD must be one of ${VALID_DOWNLOAD_METHODS}")
+set(GL_VALID_DOWNLOAD_METHODS none find fetch find-or-fetch conan)
+set(GL_DOWNLOAD_METHOD find CACHE STRING "Download method for external dependencies")
+set_property(CACHE GL_DOWNLOAD_METHOD  PROPERTY STRINGS ${VALID_DOWNLOAD_METHODS})
+if(NOT GL_DOWNLOAD_METHOD IN_LIST GL_VALID_DOWNLOAD_METHODS)
+    message(FATAL_ERROR "GL_DOWNLOAD_METHOD must be one of ${GL_VALID_DOWNLOAD_METHODS}")
 endif()
 
 
-### h5pp includes eigen and spdlog as a dependencies
-if(ENABLE_H5PP)
-    message(STATUS "NOTE: Eigen3 and spdlog are included with h5pp")
-    set(ENABLE_EIGEN3 OFF)
-    set(ENABLE_SPDLOG OFF)
-endif()
-
-
-
-# Used when h5pp is included as subproject (e.g., as Git submodule/subtree) in the source
-# tree of a project that uses it. Users may set the non-cached variable AS_SUBPROJECT
-# before add_subdirectory(h5pp)
-if(NOT AS_SUBPROJECT)
+# Used when GL is included as subproject (e.g., as Git submodule/subtree) in the source
+# tree of a project that uses it. Users may set the non-cached variable GL_AS_SUBPROJECT
+# before add_subdirectory(GL)
+if(NOT GL_AS_SUBPROJECT)
     if("^${CMAKE_SOURCE_DIR}$" STREQUAL "^${PROJECT_SOURCE_DIR}$")
         set (AS_SUBPROJECT FALSE)
     else()
@@ -71,8 +62,13 @@ endif()
 include(cmake/gitversion.cmake)
 
 
-### Print operating system details
+############################################################
+### Print extra info during CMake configure              ###
+############################################################
 include(cmake/PrintHostInfo.cmake)
+include(cmake/PrintOptionInfo.cmake)
+
+
 
 ### Print compiler details
 message("Compiling with: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
@@ -85,54 +81,16 @@ add_library(project-settings INTERFACE)
 target_compile_features(project-settings INTERFACE cxx_std_17)
 
 
-# Let cmake find our Find<package>.cmake modules
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-
-
-
 
 # Set default install directory for dependencies
 # Append directory <libname> to CMAKE_INSTALL_PREFIX
 # Useful if you want to have separate directories for each libs
 # and to easily delete them individually
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT H5PP_IS_SUBPROJECT)
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT GL_IS_SUBPROJECT)
     message(STATUS "Setting default install prefix -- CMAKE_INSTALL_PREFIX --> ${CMAKE_BINARY_DIR}/deps-install")
     set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/deps-install" CACHE PATH "..." FORCE)
 endif ()
-if (APPEND_LIBSUFFIX)
-    set(H5PP_INSTALL_DIR h5pp/)
-    set(H5PP_CONFIG_DIR h5pp/share/h5pp/cmake)
-    set(eigen3_install_prefix ${CMAKE_INSTALL_PREFIX}/Eigen3)
-    set(spdlog_install_prefix ${CMAKE_INSTALL_PREFIX}/spdlog)
-    set(hdf5_install_prefix ${CMAKE_INSTALL_PREFIX}/hdf5)
-    set(ghcfilesystem_install_prefix ${CMAKE_INSTALL_PREFIX}/ghcFilesystem)
-else ()
-    set(H5PP_CONFIG_DIR share/h5pp/cmake)
-    set(eigen3_install_prefix ${CMAKE_INSTALL_PREFIX})
-    set(spdlog_install_prefix ${CMAKE_INSTALL_PREFIX})
-    set(hdf5_install_prefix ${CMAKE_INSTALL_PREFIX})
-    set(ghcfilesystem_install_prefix ${CMAKE_INSTALL_PREFIX})
-endif ()
 
-
-
-
-# Require the filesystem header (and possibly stdc++fs library)
-find_package(Filesystem COMPONENTS Final Experimental)
-if (TARGET std::filesystem)
-    target_link_libraries(project-settings INTERFACE std::filesystem)
-elseif (DOWNLOAD_METHOD MATCHES "find|none")
-    message(STATUS "Your compiler lacks std::filesystem. Set DOWNLOAD_METHOD to 'conan' or 'native' to get the ghc::filesystem replacement")
-    message(STATUS "Read more about ghc::filesystem here: https://github.com/gulrak/filesystem")
-    message(FATAL_ERROR "<filesystem> header and/or library not found")
-else ()
-    message(STATUS "Your compiler lacks std::filesystem. Getting ghc::filesystem replacement")
-    message(STATUS "Read more about ghc::filesystem here: https://github.com/gulrak/filesystem")
-    include(cmake/Fetch_ghcFilesystem.cmake)
-    target_link_libraries(project-settings INTERFACE ghcFilesystem::ghc_filesystem)
-    list(APPEND H5PP_DIRECTORY_HINTS ${ghcfilesystem_install_prefix})
-endif ()
 
 
 ### Add all source files recursively
@@ -140,11 +98,6 @@ file(GLOB_RECURSE SOURCES "source/*.cpp")
 file(GLOB_RECURSE HEADERS "source/*.h")
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-if(ENABLE_MPI)
-    ### Link MPI
-    find_package(MPI REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE MPI::MPI_CXX)
-endif()
 
 
 ##################################################################
@@ -177,18 +130,37 @@ endif()
 
 
 # Fetch or find all the dependencies
-if(DOWNLOAD_METHOD MATCHES "conan")
-    include(cmake/SetupDependenciesConan.cmake)
-elseif(DOWNLOAD_METHOD MATCHES "find|native")
-    include(cmake/SetupDependenciesNative.cmake)
-endif()
-include(cmake/PrintTargetInfo.cmake)
+include(cmake/SetupDependenciesFind.cmake)
+include(cmake/SetupDependenciesFetch.cmake)
+include(cmake/SetupDependenciesConan.cmake)
+
+##################################################################
+### Link all the things!                                       ###
+##################################################################
+target_link_libraries(project-settings INTERFACE  ${CONAN_TARGETS} ${NATIVE_TARGETS}) # Order is important here
 target_link_libraries(${PROJECT_NAME} PRIVATE project-settings)  # Link everything to main project
-print_target_info(${PROJECT_NAME})
+
+
+
+
+# Print summary of CMake configuration
+if (GL_PRINT_INFO)
+    include(cmake/PrintTargetInfo.cmake)
+    include(cmake/getExpandedTarget.cmake)
+    expand_target_all_targets(project-settings GL_TARGETS_EXPANDED)
+    message(STATUS "| GL TARGET SUMMARY")
+    message(STATUS "|--------------------")
+    foreach(tgt ${GL_TARGETS_EXPANDED})
+        print_target_info(${tgt} "| ")
+    endforeach()
+    print_target_info(${PROJECT_NAME} "| ")
+endif()
+
+
 
 
 # Enable link time optimization
-if(ENABLE_LTO)
+if(GL_ENABLE_LTO)
     ### Check if we can enable LTO
     include(CheckIPOSupported)
     check_ipo_supported(RESULT supported OUTPUT error)
@@ -202,33 +174,37 @@ endif()
 
 
 
-### CTest testing
-if(ENABLE_TESTS AND NOT AS_SUBPROJECT)
-    enable_testing()
-    add_custom_target(all-tests)
-    if(TARGET h5pp::h5pp OR TARGET CONAN_PKG::h5pp)
-        add_subdirectory(tests/h5pp)
-        add_dependencies(all-tests test-h5pp)
-    endif()
-    if(TARGET spdlog::spdlog OR TARGET CONAN_PKG::spdlog)
-        add_subdirectory(tests/spdlog)
-        add_dependencies(all-tests test-spdlog)
-    endif()
-    if(TARGET Eigen3::Eigen OR TARGET CONAN_PKG::Eigen3 OR TARGET CONAN_PKG::eigen)
-        add_subdirectory(tests/eigen3)
-        add_dependencies(all-tests test-eigen3)
-    endif()
-    if(TARGET openmp::openmp)
-        add_subdirectory(tests/openmp)
-        add_dependencies(all-tests test-openmp)
-    endif()
-    #Run all tests as soon as the tests have been built
-    add_custom_command(TARGET all-tests
-            POST_BUILD
-            COMMENT "Running Tests"
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> --output-on-failures)
+############################################################
+### Set  the same microarchitecture for c++ and OpenBLAS ###
+############################################################
 
+
+if(GL_MARCH)
+    if (GL_MARCH MATCHES "zen")
+        set(CXX_MARCH znver1)
+    else()
+        string(TOLOWER ${GL_MARCH} CXX_MARCH)
+    endif()
+    message(STATUS "CPU optimizations: ${CXX_MARCH}")
+endif()
+
+
+###########################################
+###  Apply RELEASE/DEBUG compile flags  ###
+###########################################
+# Segfault from -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC when using ceres, but -D_GLIBCXX_DEBUG fixes gdb incomplete types
+target_compile_options(project-settings INTERFACE $<$<COMPILE_LANGUAGE:CXX>: -Wall -march=${CXX_MARCH} -mtune=${CXX_MARCH}>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELEASE>>:          -O3 -g -DNDEBUG>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:DEBUG>>:            -O0 -g3 -Wpedantic -Wextra -fstack-protector -D_FORTIFY_SOURCE=2 -D_GLIBCXX_DEBUG>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELWITHDEBINFO>>:   -O1 -g3 -Wpedantic -Wextra -fstack-protector -D_FORTIFY_SOURCE=2>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:PROFILE>>:          -O3 -g  -DNDEBUG  -lprofiler  -ftime-report>)
+
+
+
+### CTest testing
+if(GL_ENABLE_TESTS AND NOT GL_AS_SUBPROJECT)
+    enable_testing()
+    add_subdirectory(tests)
 endif()
 
 

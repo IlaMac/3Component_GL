@@ -12,7 +12,9 @@
 
 
 int main(){
-    auto std_threads = std::thread::hardware_concurrency();
+#ifdef _OPENMP
+
+  auto std_threads = std::thread::hardware_concurrency();
     auto omp_threads = omp_get_max_threads();
     std::cout << "Machine has " << std_threads << " hyperthreads available" << std::endl;
     std::cout << "Using " << omp_threads << " OpenMP with threads" << std::endl;
@@ -25,6 +27,6 @@ int main(){
         counter++;
     }
     std::cout << "Counter is: " << counter << std::endl;
-
+#endif
     return 0;
 }

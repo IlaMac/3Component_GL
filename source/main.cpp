@@ -1,12 +1,11 @@
-#include <cstring>
-#include <string>
-#include "main.h"
+#include "eigen.h"
 #include "initialization.h"
 #include "measures.h"
-#include "rng.h"
 #include "memory_check.h"
+#include "rng.h"
+#include <cstring>
 #include <h5pp/h5pp.h>
-
+#include <string>
 
 unsigned int Lx, Ly, Lz, N;
 

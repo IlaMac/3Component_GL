@@ -1,46 +1,27 @@
-dist: xenial
 sudo: false
-language: generic
+language: cpp
 notifications:
   email: false
 branches:
   only:
     - master
+    - fix-filesystem
 
 matrix:
   fast_finish: true
   include:
-    - os: linux
-      compiler: gcc-7
+
+
+    - name: "bionic gcc-8 | shared | apt | find-or-fetch"
+      dist: bionic
+      os: linux
+      compiler: gcc
       env:
-        - COMPILER_NAME=gcc
-        - GCC_VERSION=7
-        - CC=gcc-7
-        - CXX=g++-7
-        - FC=gfortran-7
-        - MATRIX_EVAL="CXX=g++-7 && CC=gcc-7 && FC=gfortran-7"
-      cache:
-        apt: true
-      addons:
-        apt:
-          update: true
-          sources:
-            - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages:
-            - gcc-7
-            - g++-7
-            - gfortran-7
-    - os: linux
-      compiler: gcc-8
-      env:
-        - COMPILER_NAME=gcc
-        - GCC_VERSION=8
-        - CC=gcc-8
+        - CACHE_NAME=bionic-gcc-8-shared-apt-ff
         - CXX=g++-8
+        - CC=gcc-8
         - FC=gfortran-8
-        - MATRIX_EVAL="CXX=g++-8 && CC=gcc-8 && FC=gfortran-8"
-      cache:
-        apt: true
+        - FLAGS="--download-method=find-or-fetch"
       addons:
         apt:
           update: true
@@ -50,42 +31,161 @@ matrix:
             - gcc-8
             - g++-8
             - gfortran-8
-    - os: linux
-      compiler: clang-7
-      env:
-        - COMPILER_NAME=clang
-        - CXX=clang++-7
-        - CC=clang-7
-        - CLANG_VERSION=7
-        - FC=gfortran-8
-        - MATRIX_EVAL="CXX=clang++-7 && CC=clang-7 && FC=gfortran-8"
+            - libsz2
+            - zlibc
+            - libopenmpi-dev
+            - libeigen3-dev
+            - libhdf5-dev
+            - libspdlog-dev
       cache:
-        apt: true
+        pip: true
+        directories:
+          - $TRAVIS_BUILD_DIR/build/Debug/dmrg-deps-install
+
+    - name: "bionic gcc-7 | shared | conda-forge | find-or-fetch"
+      # Note that xenial gives a TLS error "Bad symbol" when linking openblas from conda-forge
+      dist: bionic
+      os: linux
+      compiler: gcc
+      env:
+        - CACHE_NAME=bionic-gcc-7-shared-conda-forge-ff
+        - CXX=g++-7
+        - CC=gcc-7
+        - FC=gfortran-7
+        - FLAGS="--download-method=find-or-fetch --prefer-conda"
+        - CONDA_PACKAGES="spdlog hdf5 hdf5-static eigen"
       addons:
         apt:
           update: true
           sources:
-            - sourceline:  'ppa:ubuntu-toolchain-r/test'
-            - sourceline:  'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main'
-              key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
           packages:
-            - llvm-7-dev
-            - clang-7
+            - gcc-7
+            - g++-7
+            - gfortran-7
+            - libopenmpi-dev
+
+      cache:
+        pip: true
+        directories:
+          - $TRAVIS_BUILD_DIR/build/Debug/dmrg-deps-install
+          - $HOME/miniconda
+
+
+    - name: "bionic clang | shared | conda-forge | find-or-fetch"
+      # Note that xenial gives a TLS error "Bad symbol" when linking openblas from conda-forge
+      dist: bionic
+      os: linux
+      compiler: clang
+      env:
+        - CACHE_NAME=bionic-clang-shared-conda-forge-ff
+        - FC=gfortran-8
+        - FLAGS="--download-method=find-or-fetch --prefer-conda"
+        - CONDA_PACKAGES="spdlog hdf5 hdf5-static eigen"
+      addons:
+        apt:
+          update: true
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
             - libstdc++-8-dev
             - gfortran-8
+            - libopenmpi-dev
+      cache:
+        pip: true
+        directories:
+          - $TRAVIS_BUILD_DIR/build/Debug/deps-install
+          - $HOME/miniconda
 
 
+    - name: "bionic clang | shared | conan"
+      dist: bionic
+      os: linux
+      compiler: clang
+      env:
+        - CACHE_NAME=bionic-clang-shared-conan
+        - FC=gfortran-8
+        - FLAGS="--download-method=conan"
+      addons:
+        apt:
+          update: true
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - libstdc++-8-dev
+            - gfortran-8
+            - libopenmpi-dev
+      cache:
+        pip: true
+        directories:
+          - $TRAVIS_BUILD_DIR/build/Debug/deps-install
+          - $HOME/.conan/data
 
+
+# The pre-install script. On windows it will install conan via chocolatey
 before_install:
-  - eval "${MATRIX_EVAL}"
+  - echo "Starting before_install"
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      choco upgrade cmake
+      if [[ "$TRAVIS_JOB_NAME" =~ conan ]]; then
+        choco install python3 --version 3.7.4
+        export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
+        python -m pip install --upgrade pip
+      fi
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      export PATH=/Users/travis/Library/Python/2.7/bin:$PATH
+    else
+      pip install --user --upgrade pip
+    fi
+    cmake --version
+  - echo "Finished before_install"
+
+
+install:
+  - echo "Starting install"
+  - |
+    if [[ "$TRAVIS_JOB_NAME" =~ conan ]]; then
+      if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+        pip install conan
+        export PATH=/c/Program\ Files/Conan/conan:$PATH
+      elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        pip install --user conan --upgrade
+      fi
+    fi
+  - echo "Finished install of pip"
+
+
+# Setup Build
+before_script:
+  # On windows PATH's do not get set properly because travis does not restart the shell, so we add them manually
+  - echo "Starting before_script"
+  - |
+    if [[ "$TRAVIS_JOB_NAME" =~ conan ]]; then
+      conan user
+      conan profile new default --detect
+      conan profile update settings.compiler.libcxx=libstdc++11 default
+      conan remote add conan-dmrg https://api.bintray.com/conan/davidace/conan-dmrg
+    fi
+    if [[ "$TRAVIS_JOB_NAME" =~ conda ]] && [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      # Here we just install Miniconda
+      wget --no-clobber https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+      chmod +x miniconda.sh
+      bash miniconda.sh -u -b -p $HOME/miniconda
+      source "$HOME/miniconda/etc/profile.d/conda.sh"
+      export PATH=$HOME/miniconda/bin:$PATH
+      hash -r
+      conda config --set always_yes yes --set changeps1 no
+      # Useful for debugging any issues with conda
+      conda info -a
+      # conda update --yes conda
+      # conda update -q conda
+      conda config --add channels conda-forge
+      conda install --yes ${CONDA_PACKAGES}
+    fi
+  - echo "Finished before_script"
+  - cmake --version
 
 script:
-  - ./build.sh -j 2
-  - ./build.sh -j 2 -c -L -s OFF -o OFF
-  - ./build.sh -j 2 -c -L -s OFF -o OFF -D
-  - ./build.sh -j 2 -c    -s OFF -o OFF -D
-  - ./build.sh -j 2 -c -L -s ON -o ON -D
-  - ./build.sh -j 2 -c    -s ON -o ON -D
-
-
+  - ./build.sh --verbose --enable-shared --enable-h5pp --enable-eigen3 --enable-spdlog --enable-tests --enable-mpi  -a haswell  -j 2 --build-type=Debug ${FLAGS}
 
