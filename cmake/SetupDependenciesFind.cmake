@@ -25,12 +25,8 @@ endif()
 
 
 
-if(GL_ENABLE_MPI)
-    if(NOT BUILD_SHARED_LIBS)
-        message(WARNING "Linking MPI statically is discouraged and may fail. Try --enable-shared or setting BUILD_SHARED_LIBS=ON.")
-    endif()
+if(GL_ENABLE_MPI AND NOT TARGET MPI::MPI_CXX)
     find_package(MPI REQUIRED)
-    list(APPEND NATIVE_TARGETS MPI::MPI_CXX)
 endif()
 
 
@@ -41,7 +37,6 @@ endif()
 ###  static openmp anyway because I find it useful. Installing             ###
 ###  libiomp5 might help for shared linking.                               ###
 ##############################################################################
-if(GL_ENABLE_OPENMP)
+if(GL_ENABLE_OPENMP AND NOT TARGET openmp::openmp)
     find_package(OpenMP) # Uses GL's own find module
-    list(APPEND NATIVE_TARGETS openmp::openmp)
 endif()

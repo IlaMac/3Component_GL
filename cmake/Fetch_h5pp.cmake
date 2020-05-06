@@ -9,7 +9,7 @@ if(NOT TARGET h5pp::h5pp AND GL_DOWNLOAD_METHOD STREQUAL "find")
 endif()
 
 if(NOT TARGET h5pp::h5pp AND GL_DOWNLOAD_METHOD MATCHES "fetch")
-    find_package(h5pp 1.7.1
+    find_package(h5pp 1.7.2
             HINTS ${CMAKE_INSTALL_PREFIX}
             PATH_SUFFIXES h5pp
             NO_CMAKE_PACKAGE_REGISTRY)

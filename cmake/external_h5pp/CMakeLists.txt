@@ -6,7 +6,7 @@ project(external-h5pp)
 include(ExternalProject)
 ExternalProject_Add(external_h5pp
         GIT_REPOSITORY https://github.com/DavidAce/h5pp.git
-        GIT_TAG v1.7.1
+        GIT_TAG v1.7.2
         GIT_PROGRESS 1
         GIT_SHALLOW 1
         PREFIX          ${CMAKE_BINARY_DIR}
@@ -22,7 +22,7 @@ ExternalProject_Add(external_h5pp
         -DH5PP_ENABLE_EIGEN3:BOOL=${H5PP_ENABLE_EIGEN3}
         -DH5PP_ENABLE_SPDLOG:BOOL=${H5PP_ENABLE_SPDLOG}
         -DH5PP_PREFER_CONDA_LIBS:BOOL=${H5PP_PREFER_CONDA_LIBS}
-        -DH5PP_APPEND_LIBSUFFIX:BOOL=ON
+        -DH5PP_DEPS_IN_SUBDIR:BOOL=ON
         -DCMAKE_INSTALL_MESSAGE=NEVER #Avoid unnecessary output to console, like up-to-date and installing
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         )
