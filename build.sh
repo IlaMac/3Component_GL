@@ -180,27 +180,27 @@ elif [[ "$HOSTNAME" == *"raken"* ]];then
         module load Eigen # We want our own patched eigen though.
         module load CMake
         module load GCCcore
-        if [ "$compiler" = "Clang" ] ; then
+        if [[ "$compiler" =~ Clang|clang|cl ]] ; then
             module load Clang
             if [ -z "$gcc_toolchain" ] ; then gcc_toolchain=--gcc-toolchain=$EBROOTGCCCORE ; fi
         fi
         module list
     fi
 
-    if [ "$compiler" = "GCC" ] ; then
+    if [[ "$compiler" =~ GCC|Gcc|gcc|cc|G++|g++|c++ ]] ; then
         export CC=gcc
         export CXX=g++
-    elif [ "$compiler" = "Clang" ] ; then
+    elif [[ "$compiler" =~ Clang|clang|cl ]] ; then
         export CC=clang
         export CXX=clang++
     fi
 
 else
     if [ -n "$compiler" ] ; then
-        if [ "$compiler" = "GCC" ] ; then
+        if [[ "$compiler" =~ GCC|Gcc|gcc|cc|G++|g++|c++ ]] ; then
             compiler_string_CC=gcc
             compiler_string_CXX=g++
-        elif [ "$compiler" = "Clang" ] ; then
+        elif [[ "$compiler" =~ Clang|clang|cl ]] ; then
             compiler_string_CC=clang
             compiler_string_CXX=clang++
         fi
