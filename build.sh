@@ -155,10 +155,11 @@ fi
 if [[ "$HOSTNAME" == *"tetralith"* ]];then
     echo "Running on tetralith"
     if [ -z "$no_module" ]; then
+        module load module load buildenv-gcc/2018a-eb
         module load foss/2019a
-        module load CMake
+        module load CMake/3.16.5
         if [[ "$compiler" =~ Clang|clang|cl ]] ; then
-            module load Clang
+            module try-load clang/6.0.1
         fi
     fi
 
