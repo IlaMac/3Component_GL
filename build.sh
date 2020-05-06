@@ -26,7 +26,7 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
 -t | --target [=args]           : Select build target [ CMakeTemplate | all-tests | test-<name> ]  (default = none)
    | --enable-tests             : Enable CTest tests
    | --prefer-conda             : Prefer libraries from anaconda
-   | --no-modules               : Disable use of "module load"
+   | --no-module                : Disable use of "module load"
    | --quiet                    : Print less CMake info
 -v | --verbose                  : Verbose makefiles
 EXAMPLE:
@@ -56,7 +56,7 @@ PARSED_OPTIONS=$(getopt -n "$0"   -o ha:b:cl:df:g:G:j:st:v \
                 enable-spdlog\
                 enable-openmp\
                 enable-mpi\
-                no-modules\
+                no-module\
                 prefer-conda\
                 verbose\
                 quiet\
@@ -115,7 +115,7 @@ do
        --enable-spdlog)             enable_spdlog="ON"              ; echo " * Enable spdlog            : ON"      ; shift   ;;
        --enable-openmp)             enable_openmp="ON"              ; echo " * Enable OpenMP            : ON"      ; shift   ;;
        --enable-mpi)                enable_mpi="ON"                 ; echo " * Enable OpenMPI           : ON"      ; shift   ;;
-       --no-modules)                no_modules="ON"                 ; echo " * Disable module load      : ON"      ; shift   ;;
+       --no-module)                 no_module="ON"                 ; echo " * Disable module load      : ON"      ; shift   ;;
        --prefer-conda)              prefer_conda="ON"               ; echo " * Prefer anaconda libs     : ON"      ; shift   ;;
        --quiet)                     print_info="OFF"                ; echo " * Print less CMake info    : ON"      ; shift   ;;
     -v|--verbose)                   verbose="ON"                    ; echo " * Verbose makefiles        : ON"      ; shift   ;;
