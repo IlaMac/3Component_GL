@@ -155,20 +155,18 @@ fi
 if [[ "$HOSTNAME" == *"tetralith"* ]];then
     echo "Running on tetralith"
     if [ -z "$no_module" ]; then
-        module load buildenv-gcc/2018a-eb
-	module load CMake/3.15.2
-        module load GCCcore/8.2.0
-        if [ "$compiler" = "Clang" ] ; then
-            module load Clang/8.0.0-GCCcore-8.2.0
-            if [ -z "$gcc_toolchain" ] ; then gcc_toolchain=--gcc-toolchain=$EBROOTGCCCORE ; fi
+        module load foss/2019a
+        module load CMake
+        if [[ "$compiler" =~ Clang|clang|cl ]] ; then
+            module load Clang
         fi
     fi
 
     cmake --version
-    if [ "$compiler" = "GCC" ] ; then
+    if [[ "$compiler" =~ GCC|Gcc|gcc|cc|G++|g++|c++ ]] ; then
         export CC=gcc
         export CXX=g++
-    elif [ "$compiler" = "Clang" ] ; then
+    elif [[ "$compiler" =~ Clang|clang|cl ]] ; then
         export CC=clang
         export CXX=clang++
     fi
