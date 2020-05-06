@@ -7,7 +7,7 @@ function(build_dependency dep_name install_dir extra_flags)
     endif()
     include(cmake/GetNumThreads.cmake)
     get_num_threads(num_threads)
-
+    execute_process( COMMAND  ${CMAKE_COMMAND} -E remove ${build_dir}/CMakeCache.txt)
     execute_process( COMMAND  ${CMAKE_COMMAND} -E make_directory ${build_dir})
     execute_process(
             COMMAND  ${CMAKE_COMMAND}

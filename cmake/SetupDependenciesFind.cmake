@@ -20,13 +20,17 @@ if(GL_DOWNLOAD_METHOD MATCHES "find")
             $ENV{EBROOTEIGEN}
             $ENV{EBROOTSPDLOG}
             )
-
 endif()
 
+
+# Things below  should happen regardless of download mode find|fetch|find-or-fetch|conan
 
 
 if(GL_ENABLE_MPI AND NOT TARGET MPI::MPI_CXX)
     find_package(MPI REQUIRED)
+    if(TARGET MPI::MPI_CXX)
+        list(APPEND NATIVE_TARGETS MPI::MPI_CXX)
+    endif()
 endif()
 
 
@@ -39,4 +43,9 @@ endif()
 ##############################################################################
 if(GL_ENABLE_OPENMP AND NOT TARGET openmp::openmp)
     find_package(OpenMP) # Uses GL's own find module
+    if(TARGET openmp::openmp)
+        list(APPEND NATIVE_TARGETS openmp::openmp)
+    else()
+        target_compile_options(project-settings INTERFACE -Wno-unknown-pragmas)
+    endif()
 endif()
