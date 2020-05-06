@@ -115,7 +115,7 @@ do
        --enable-spdlog)             enable_spdlog="ON"              ; echo " * Enable spdlog            : ON"      ; shift   ;;
        --enable-openmp)             enable_openmp="ON"              ; echo " * Enable OpenMP            : ON"      ; shift   ;;
        --enable-mpi)                enable_mpi="ON"                 ; echo " * Enable OpenMPI           : ON"      ; shift   ;;
-       --no-module)                 no_module="ON"                 ; echo " * Disable module load      : ON"      ; shift   ;;
+       --no-module)                 no_module="ON"                  ; echo " * Disable module load      : ON"      ; shift   ;;
        --prefer-conda)              prefer_conda="ON"               ; echo " * Prefer anaconda libs     : ON"      ; shift   ;;
        --quiet)                     print_info="OFF"                ; echo " * Print less CMake info    : ON"      ; shift   ;;
     -v|--verbose)                   verbose="ON"                    ; echo " * Verbose makefiles        : ON"      ; shift   ;;
