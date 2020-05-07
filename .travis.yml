@@ -187,5 +187,5 @@ before_script:
   - cmake --version
 
 script:
-  - ./build.sh --verbose --enable-shared --enable-h5pp --enable-eigen3 --enable-spdlog --enable-tests --enable-mpi  -a haswell  -j 2 --build-type=Debug ${FLAGS}
+  - ./build.sh --verbose --enable-shared --enable-mpi --enable-h5pp --enable-eigen3 --enable-spdlog --enable-tests --enable-mpi  -a haswell  -j 2 --build-type=Debug ${FLAGS}
 

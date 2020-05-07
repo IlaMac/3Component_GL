@@ -16,6 +16,7 @@ cmake_minimum_required(VERSION 3.12)
 project(GL_3component CXX)
 
 ### Set options for compilation
+option(BUILD_SHARED_LIBS     "Enables shared library linking (recommended for MPI)"     ON)
 option(GL_ENABLE_TESTS       "Enables CTest testing"                                    ON)
 option(GL_ENABLE_H5PP        "h5pp is a C++ front-end to HDF5"                          ON)
 option(GL_ENABLE_EIGEN3      "Eigen3 is a linear algebra template library"              ON)
@@ -24,16 +25,21 @@ option(GL_ENABLE_OPENMP      "Enable OpenMP flags such as -fopenmp"             
 option(GL_ENABLE_MPI         "Enable MPI parallelization"                               ON)
 option(GL_ENABLE_LTO         "Enable link time optimization"                            OFF)
 option(GL_AS_SUBPROJECT      "Try using this as a subproject with add_subdirectory()"   OFF)
-option(GL_APPEND_LIBSUFFIX   "Append <libname> to CMAKE_INSTALL_PREFIX"                 ON)
+option(GL_DEPS_IN_SUBDIR     "Install dependencies into CMAKE_INSTALL_PREFIX/<libname>" ON)
 option(GL_PRINT_INFO         "Prints additional information during CMake configure"     ON)
 
+if(NOT GL_ENABLE_MPI)
+    message(FATAL_ERROR "This project uses MPI and should be enabled by default.")
+endif()
 
-
+if(GL_ENABLE_MPI AND NOT BUILD_SHARED_LIBS)
+    message(WARNING "This project uses MPI which strongly encourages shared library linking")
+endif()
 #################################################################
 ### Make an "enum" for valid download methods                 ###
 #################################################################
 set(GL_VALID_DOWNLOAD_METHODS none find fetch find-or-fetch conan)
-set(GL_DOWNLOAD_METHOD find CACHE STRING "Download method for external dependencies")
+set(GL_DOWNLOAD_METHOD fetch CACHE STRING "Download method for external dependencies")
 set_property(CACHE GL_DOWNLOAD_METHOD  PROPERTY STRINGS ${VALID_DOWNLOAD_METHODS})
 if(NOT GL_DOWNLOAD_METHOD IN_LIST GL_VALID_DOWNLOAD_METHODS)
     message(FATAL_ERROR "GL_DOWNLOAD_METHOD must be one of ${GL_VALID_DOWNLOAD_METHODS}")
@@ -108,7 +114,7 @@ if(BUILD_SHARED_LIBS)
 else()
     set(LINK_TYPE STATIC)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} )
-    target_link_libraries  (project-settings INTERFACE -static)   ### Static linkage
+    #target_link_libraries  (project-settings INTERFACE -static)   ### Static linkage
 endif()
 
 
@@ -137,7 +143,7 @@ include(cmake/SetupDependenciesConan.cmake)
 ##################################################################
 ### Link all the things!                                       ###
 ##################################################################
-target_link_libraries(project-settings INTERFACE  ${CONAN_TARGETS} ${NATIVE_TARGETS}) # Order is important here
+target_link_libraries(project-settings INTERFACE  ${CONAN_TARGETS} ${NATIVE_TARGETS} Threads::Threads) # Order is important here
 target_link_libraries(${PROJECT_NAME} PRIVATE project-settings)  # Link everything to main project
 
 

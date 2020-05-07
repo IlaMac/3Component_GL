@@ -9,7 +9,7 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
 -b | --build-type [=arg]        : Build type: [ Release | RelWithDebInfo | Debug | Profile ]  (default = Release)
 -c | --clear-cmake              : Clear CMake files before build (delete ./build)
 -d | --dry-run                  : Dry run
-   | --download-method          : Download method for dependencies [ find | fetch | find-or-fetch | conan ] (default = find)
+   | --download-method          : Download method for dependencies [ find | fetch | find-or-fetch | conan ] (default = fetch)
 -f | --extra-flags [=arg]       : Extra CMake flags (defailt = none)
 -g | --compiler [=arg]          : Compiler        | GNU | Clang | (default = "")
 -G | --generator [=arg]         : CMake generator  | many options... | (default = "CodeBlocks - Unix Makefiles")
@@ -26,7 +26,8 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
 -t | --target [=args]           : Select build target [ CMakeTemplate | all-tests | test-<name> ]  (default = none)
    | --enable-tests             : Enable CTest tests
    | --prefer-conda             : Prefer libraries from anaconda
-   | --no-modules               : Disable use of "module load"
+   | --no-module                : Disable use of "module load"
+   | --quiet                    : Print less CMake info
 -v | --verbose                  : Verbose makefiles
 EXAMPLE:
 ./build.sh --arch native -b Release  --make-threads 8   --enable-shared  --with-openmp --with-eigen3  --download-method=find
@@ -49,16 +50,16 @@ PARSED_OPTIONS=$(getopt -n "$0"   -o ha:b:cl:df:g:G:j:st:v \
                 download-method:\
                 enable-tests\
                 enable-shared\
-                gcc-toolchain:\
                 make-threads:\
                 enable-h5pp\
                 enable-eigen3\
                 enable-spdlog\
                 enable-openmp\
                 enable-mpi\
-                no-modules\
+                no-module\
                 prefer-conda\
                 verbose\
+                quiet\
                 generator\
                 extra-flags:\
                 "  -- "$@")
@@ -69,23 +70,27 @@ if [ $? -ne 0 ]; then exit 1 ; fi
 # A little magic, necessary when using getopt.
 eval set -- "$PARSED_OPTIONS"
 
+
+# Set the defaults here
 build_type="Release"
 target="all"
 arch="haswell"
 enable_shared="ON"
-download_method="find"
-enable_tests="OFF"
-enable_h5pp="OFF"
-enable_eigen3="OFF"
-enable_spdlog="OFF"
-enable_openmp="OFF"
-enable_mpi="OFF"
-make_threads=1
+download_method="fetch"
+enable_tests="ON"
+enable_h5pp="ON"
+enable_eigen3="ON"
+enable_spdlog="ON"
+enable_openmp="ON"
+enable_mpi="ON"
+make_threads=8
 prefer_conda="OFF"
 verbose="OFF"
+print_info="ON"
 generator="CodeBlocks - Unix Makefiles"
-# Now goes through all the options with a case and using shift to analyse 1 argument at a time.
-#$1 identifies the first argument, and when we use shift we discard the first argument, so $2 becomes $1 and goes again through the case.
+
+
+# Now override the defaults with command-line options:
 echo "Enabled options:"
 while true;
 do
@@ -101,18 +106,18 @@ do
     -f|--extra-flags)               extra_flags=$2                  ; echo " * Extra CMake flags        : $2"      ; shift 2 ;;
     -g|--compiler)                  compiler=$2                     ; echo " * C++ Compiler             : $2"      ; shift 2 ;;
     -G|--generator)                 generator=$2                    ; echo " * CMake generator          : $2"      ; shift 2 ;;
-       --gcc-toolchain)             gcc_toolchain=$2                ; echo " * GCC toolchain            : $2"      ; shift 2 ;;
     -j|--make-threads)              make_threads=$2                 ; echo " * MAKE threads             : $2"      ; shift 2 ;;
     -s|--enable-shared)             enable_shared="ON"              ; echo " * Link shared libraries    : ON"      ; shift   ;;
        --enable-tests)              enable_tests="ON"               ; echo " * CTest Testing            : ON"      ; shift   ;;
     -t|--target)                    target=$2                       ; echo " * CMake Build target       : $2"      ; shift 2 ;;
-       --enable-h5pp)               enable_h5pp="ON"                ; echo " * Enable OpenMP            : ON"      ; shift   ;;
-       --enable-eigen3)             enable_eigen3="ON"              ; echo " * Enable OpenMP            : ON"      ; shift   ;;
-       --enable-spdlog)             enable_spdlog="ON"              ; echo " * Enable OpenMP            : ON"      ; shift   ;;
+       --enable-h5pp)               enable_h5pp="ON"                ; echo " * Enable h5pp              : ON"      ; shift   ;;
+       --enable-eigen3)             enable_eigen3="ON"              ; echo " * Enable Eigen3            : ON"      ; shift   ;;
+       --enable-spdlog)             enable_spdlog="ON"              ; echo " * Enable spdlog            : ON"      ; shift   ;;
        --enable-openmp)             enable_openmp="ON"              ; echo " * Enable OpenMP            : ON"      ; shift   ;;
-       --enable-mpi)                enable_mpi="ON"                 ; echo " * Enable OpenMP            : ON"      ; shift   ;;
-       --no-modules)                no_modules="ON"                 ; echo " * Disable module load      : ON"      ; shift   ;;
-       --prefer-conda)              prefer_conda="ON"               ; echo " * Prefer anaconda libs:    : ON"      ; shift   ;;
+       --enable-mpi)                enable_mpi="ON"                 ; echo " * Enable OpenMPI           : ON"      ; shift   ;;
+       --no-module)                 no_module="ON"                  ; echo " * Disable module load      : ON"      ; shift   ;;
+       --prefer-conda)              prefer_conda="ON"               ; echo " * Prefer anaconda libs     : ON"      ; shift   ;;
+       --quiet)                     print_info="OFF"                ; echo " * Print less CMake info    : ON"      ; shift   ;;
     -v|--verbose)                   verbose="ON"                    ; echo " * Verbose makefiles        : ON"      ; shift   ;;
     --) shift; break;;
   esac
@@ -144,6 +149,22 @@ if [[ ! "$download_method" =~ find|fetch|conan ]]; then
     exit 1
 fi
 
+# Deactivate conda if not explicitly asked for
+if [[ "$prefer_conda" =~ OFF|off|False|false ]] && [ -n "$CONDA_PREFIX" ] ; then
+    if [ -f "$CONDA_PREFIX_1/etc/profile.d/conda.sh" ]; then
+        source $CONDA_PREFIX_1/etc/profile.d/conda.sh
+    fi
+    if [ -f "$CONDA_PREFIX/etc/profile.d/conda.sh" ]; then
+        source $CONDA_PREFIX/etc/profile.d/conda.sh
+    fi
+    counter=0
+    while [ -n "$CONDA_PREFIX" ] && [  $counter -lt 10 ]; do
+        let counter=counter+1
+        echo "Deactivating conda environment $CONDA_PREFIX"
+        conda deactivate
+    done
+    conda info --envs
+fi
 
 
 
@@ -151,19 +172,18 @@ if [[ "$HOSTNAME" == *"tetralith"* ]];then
     echo "Running on tetralith"
     if [ -z "$no_module" ]; then
         module load buildenv-gcc/2018a-eb
-	module load CMake/3.15.2
-        module load GCCcore/8.2.0
-        if [ "$compiler" = "Clang" ] ; then
-            module load Clang/8.0.0-GCCcore-8.2.0
-            if [ -z "$gcc_toolchain" ] ; then gcc_toolchain=--gcc-toolchain=$EBROOTGCCCORE ; fi
+        module load foss/2019a
+        module load CMake/3.16.5
+        if [[ "$compiler" =~ Clang|clang|cl ]] ; then
+            module try-load clang/6.0.1
         fi
     fi
 
     cmake --version
-    if [ "$compiler" = "GCC" ] ; then
+    if [[ "$compiler" =~ GCC|Gcc|gcc|cc|G++|g++|c++ ]] ; then
         export CC=gcc
         export CXX=g++
-    elif [ "$compiler" = "Clang" ] ; then
+    elif [[ "$compiler" =~ Clang|clang|cl ]] ; then
         export CC=clang
         export CXX=clang++
     fi
@@ -175,27 +195,27 @@ elif [[ "$HOSTNAME" == *"raken"* ]];then
         module load Eigen # We want our own patched eigen though.
         module load CMake
         module load GCCcore
-        if [ "$compiler" = "Clang" ] ; then
+        if [[ "$compiler" =~ Clang|clang|cl ]] ; then
             module load Clang
             if [ -z "$gcc_toolchain" ] ; then gcc_toolchain=--gcc-toolchain=$EBROOTGCCCORE ; fi
         fi
         module list
     fi
 
-    if [ "$compiler" = "GCC" ] ; then
+    if [[ "$compiler" =~ GCC|Gcc|gcc|cc|G++|g++|c++ ]] ; then
         export CC=gcc
         export CXX=g++
-    elif [ "$compiler" = "Clang" ] ; then
+    elif [[ "$compiler" =~ Clang|clang|cl ]] ; then
         export CC=clang
         export CXX=clang++
     fi
 
 else
     if [ -n "$compiler" ] ; then
-        if [ "$compiler" = "GCC" ] ; then
+        if [[ "$compiler" =~ GCC|Gcc|gcc|cc|G++|g++|c++ ]] ; then
             compiler_string_CC=gcc
             compiler_string_CXX=g++
-        elif [ "$compiler" = "Clang" ] ; then
+        elif [[ "$compiler" =~ Clang|clang|cl ]] ; then
             compiler_string_CC=clang
             compiler_string_CXX=clang++
         fi
@@ -237,7 +257,8 @@ Running script:
             -DGL_ENABLE_TESTS=$enable_tests
             -DGL_PREFER_CONDA_LIBS=$prefer_conda
             $extra_flags
-            -G "CodeBlocks - Unix Makefiles" ../../
+            -G "$generator"
+            ../../
     cmake --build . --target $target --parallel $make_threads
 ===============================================================
 EOF
@@ -250,21 +271,22 @@ if [ -z "$dry_run" ] ;then
             -DBUILD_SHARED_LIBS=$enable_shared \
             -DCMAKE_VERBOSE_MAKEFILE=$verbose \
             -DGL_MARCH=$arch \
-            -DGL_PRINT_INFO=ON \
+            -DGL_PRINT_INFO=$print_info \
             -DGL_DOWNLOAD_METHOD=$download_method \
             -DGL_ENABLE_SPDLOG=$enable_spdlog \
             -DGL_ENABLE_EIGEN3=$enable_eigen3 \
             -DGL_ENABLE_H5PP=$enable_h5pp \
             -DGL_ENABLE_OPENMP=$enable_openmp \
-            -DGL_ENABLE_MPI=$enable_h5pp \
+            -DGL_ENABLE_MPI=$enable_mpi \
             -DGL_ENABLE_TESTS=$enable_tests \
             -DGL_PREFER_CONDA_LIBS=$prefer_conda \
             $extra_flags \
-            -G "CodeBlocks - Unix Makefiles" ../../
+            -G "$generator" \
+            ../../
 
 
     exit_code=$?
-    if [ "$exit_code" != "0" ]; then
+    if [ "$exit_code" != "0" ] && [ $build_type == "Debug" ]; then
             echo ""
             echo "Exit code: $exit_code"
             echo "CMakeFiles/CMakeError.log:"
@@ -283,7 +305,7 @@ if [ -z "$dry_run" ] ;then
     fi
 
     exit_code=$?
-    if [ "$exit_code" != "0" ]; then
+    if [ "$exit_code" != "0" ] && [ $build_type == "Debug" ]; then
             echo "Exit code: $exit_code"
             exit "$exit_code"
     fi
@@ -291,7 +313,7 @@ if [ -z "$dry_run" ] ;then
 
     cmake --build . --target $target --parallel $make_threads
     exit_code=$?
-    if [ "$exit_code" != "0" ]; then
+    if [ "$exit_code" != "0" ] && [ $build_type == "Debug" ]; then
             echo ""
             echo "Exit code: $exit_code"
             echo "CMakeFiles/CMakeError.log:"

@@ -1,6 +1,8 @@
 if(GL_DOWNLOAD_METHOD MATCHES "find")
     # Let cmake find our Find<package>.cmake modules
     list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
+
     if(GL_PREFER_CONDA_LIBS)
         list(APPEND CMAKE_PREFIX_PATH
                 $ENV{CONDA_PREFIX}
@@ -18,17 +20,17 @@ if(GL_DOWNLOAD_METHOD MATCHES "find")
             $ENV{EBROOTEIGEN}
             $ENV{EBROOTSPDLOG}
             )
-
 endif()
 
 
+# Things below  should happen regardless of download mode find|fetch|find-or-fetch|conan
 
-if(GL_ENABLE_MPI)
-    if(NOT BUILD_SHARED_LIBS)
-        message(WARNING "Linking MPI statically is discouraged and may fail. Try --enable-shared or setting BUILD_SHARED_LIBS=ON.")
-    endif()
+
+if(GL_ENABLE_MPI AND NOT TARGET MPI::MPI_CXX)
     find_package(MPI REQUIRED)
-    list(APPEND NATIVE_TARGETS MPI::MPI_CXX)
+    if(TARGET MPI::MPI_CXX)
+        list(APPEND NATIVE_TARGETS MPI::MPI_CXX)
+    endif()
 endif()
 
 
@@ -39,7 +41,11 @@ endif()
 ###  static openmp anyway because I find it useful. Installing             ###
 ###  libiomp5 might help for shared linking.                               ###
 ##############################################################################
-if(GL_ENABLE_OPENMP)
+if(GL_ENABLE_OPENMP AND NOT TARGET openmp::openmp)
     find_package(OpenMP) # Uses GL's own find module
-    list(APPEND NATIVE_TARGETS openmp::openmp)
+    if(TARGET openmp::openmp)
+        list(APPEND NATIVE_TARGETS openmp::openmp)
+    else()
+        target_compile_options(project-settings INTERFACE -Wno-unknown-pragmas)
+    endif()
 endif()
