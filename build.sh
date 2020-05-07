@@ -190,11 +190,13 @@ if [[ "$HOSTNAME" == *"tetralith"* ]];then
 
 elif [[ "$HOSTNAME" == *"raken"* ]];then
     if [ -z "$no_module" ]; then
-        if [ "$enable_mkl" = "ON" ] ; then module load imkl; else module load OpenBLAS; fi
-        module load HDF5/1.10.5-GCCcore-8.2.0
-        module load Eigen # We want our own patched eigen though.
         module load CMake
-        module load GCCcore
+        if [[ "$download_method" =~ find ]] ; then
+                module load foss/2019b
+                module load HDF5/1.10.5-GCCcore-8.3.0
+                module load Eigen/3.3.7
+        fi
+
         if [[ "$compiler" =~ Clang|clang|cl ]] ; then
             module load Clang
             if [ -z "$gcc_toolchain" ] ; then gcc_toolchain=--gcc-toolchain=$EBROOTGCCCORE ; fi
