@@ -149,6 +149,22 @@ if [[ ! "$download_method" =~ find|fetch|conan ]]; then
     exit 1
 fi
 
+# Deactivate conda if not explicitly asked for
+if [[ "$prefer_conda" =~ OFF|off|False|false ]] && [ -n "$CONDA_PREFIX" ] ; then
+    if [ -f "$CONDA_PREFIX_1/etc/profile.d/conda.sh" ]; then
+        source $CONDA_PREFIX_1/etc/profile.d/conda.sh
+    fi
+    if [ -f "$CONDA_PREFIX/etc/profile.d/conda.sh" ]; then
+        source $CONDA_PREFIX/etc/profile.d/conda.sh
+    fi
+    counter=0
+    while [ -n "$CONDA_PREFIX" ] && [  $counter -lt 10 ]; do
+        let counter=counter+1
+        echo "Deactivating conda environment $CONDA_PREFIX"
+        conda deactivate
+    done
+    conda info --envs
+fi
 
 
 
