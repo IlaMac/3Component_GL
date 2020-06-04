@@ -1,5 +1,5 @@
 #include "montecarlo.h"
-#include "eigen.h"
+#include "main.h"
 #include "rng.h"
 
 void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &MCp, struct H_parameters &Hp,  double my_beta){
@@ -164,21 +164,35 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
     for(vec=0; vec<3; vec++){
         h_Kinetic-=(1./h2)*(O2prod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]) + O2prod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi));
 
+	gauge_phase1=Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec];
+    	gauge_phase2=Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec];
         //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;
         // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))) 
         if(Hp.nu !=0 ) {
             //+k
-            J_alpha1=(1./Hp.h)*O2vprod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]); //this order corresponds to gauge_phase1
+            //J_alpha1=(1./Hp.h)*O2vprod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]); //this order corresponds to gauge_phase1
             //-k
-            J_alpha2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi); //this order corresponds to gauge_phase2
-           
-	    for (beta = 0; beta < 3; beta++) {
-            	if (beta != alpha) {
+            //J_alpha2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi); //this order corresponds to gauge_phase2           
+            //
+	    // for (beta = 0; beta < 3; beta++) {
+            //	if (beta != alpha) {
                 	//+k
-                	J_beta1=(1./Hp.h)*O2vprod(Site[i].Psi[beta], NN_Site[i].Psi_plusk[beta+3*vec]);
-           		h_AB += Hp.nu * (pow((J_alpha1 -J_beta1),2));
+		//	J_beta1=(1./Hp.h)*O2vprod(Site[i].Psi[beta], NN_Site[i].Psi_plusk[beta+3*vec]);
+           	//	h_AB += Hp.nu * (pow((J_alpha1 -J_beta1),2));
                         //-k
-                        J_beta2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[beta+3*vec], Site[i].Psi[beta]);
+                //        J_beta2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[beta+3*vec], Site[i].Psi[beta]);
+                //        h_AB += Hp.nu * (pow((J_alpha2 -J_beta2),2));
+		//	}
+		//}
+		J_alpha1= (1./Hp.h)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*sin(gauge_phase1);
+		J_alpha2= (1./Hp.h)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*sin(gauge_phase2);
+		for (beta = 0; beta < 3; beta++) {
+			if (beta != alpha) {
+			//+k
+			J_beta1=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*sin(Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec]);
+			h_AB += Hp.nu * (pow((J_alpha1 -J_beta1),2));
+                        //-k
+                        J_beta2=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, -1)].Psi[beta].r)*sin( Site[i].Psi[beta].t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
                         h_AB += Hp.nu * (pow((J_alpha2 -J_beta2),2));
 			}
 		}
@@ -211,30 +225,42 @@ double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned in
     for(vec=0; vec<3; vec++){
 
         h_Kinetic-=(1./h2)*(O2prod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]) + O2prod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi));
+        gauge_phase1=Site[nn(i, vec, 1)].Psi[alpha].t - Psi.t + Hp.h*Hp.e*Site[i].A[vec];
+        gauge_phase2=Psi.t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec];
 
        //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;
         // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r)))
         if(Hp.nu !=0 ) {
            //+k
-           J_alpha1=(1./Hp.h)*O2vprod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]); //this order corresponds to gauge_phase1
-	   //-k
-	   J_alpha2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi); //this order corresponds to gauge_phase2	    
-           for (beta = 0; beta < 3; beta++) {
+     //      J_alpha1=(1./Hp.h)*O2vprod(Psi, NN_Site[i].Psi_plusk[alpha+3*vec]); //this order corresponds to gauge_phase1
+     //      //-k
+     //      J_alpha2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[alpha+3*vec], Psi); //this order corresponds to gauge_phase2	    
+     //      for (beta = 0; beta < 3; beta++) {
+     //           if (beta != alpha) {
+     //   	    //+k
+     //               J_beta1=(1./Hp.h)*O2vprod(Site[i].Psi[beta], NN_Site[i].Psi_plusk[beta+3*vec]);
+     //               h_AB += Hp.nu * (pow((J_alpha1 -J_beta1),2));
+     //               //-k
+     //               J_beta2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[beta+3*vec], Site[i].Psi[beta]);
+     //               h_AB += Hp.nu * (pow((J_alpha2 -J_beta2),2));
+     //           }
+     //       }
+        J_alpha1= (1./Hp.h)*(Psi.r*Site[nn(i, vec, 1)].Psi[alpha].r)*sin(gauge_phase1);
+        J_alpha2= (1./Hp.h)*(Psi.r*Site[nn(i, vec, -1)].Psi[alpha].r)*sin(gauge_phase2);
+        for (beta = 0; beta < 3; beta++) {
                 if (beta != alpha) {
-		    //+k
-                    J_beta1=(1./Hp.h)*O2vprod(Site[i].Psi[beta], NN_Site[i].Psi_plusk[beta+3*vec]);
-                    h_AB += Hp.nu * (pow((J_alpha1 -J_beta1),2));
-                    //-k
-                    J_beta2=(1./Hp.h)*O2vprod(NN_Site[i].Psi_minusk[beta+3*vec], Site[i].Psi[beta]);
-                    h_AB += Hp.nu * (pow((J_alpha2 -J_beta2),2));
-                }
-            }
+                J_beta1=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*sin(Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec]);
+                h_AB += Hp.nu * (pow((J_alpha1 -J_beta1),2));
+                J_beta2=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, -1)].Psi[beta].r)*sin( Site[i].Psi[beta].t -Site[nn(i, vec, -1)].Psi[alpha].t + Hp.h*Hp.e*Site[nn(i, vec, -1)].A[vec]);
+                h_AB += Hp.nu * (pow((J_alpha2 -J_beta2),2));
+                	}
+        	}
         }
     }
 
-    //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beta}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
-    for(beta=0; beta<3; beta++){
-        if(beta != alpha) {
+    //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beta}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r)) 
+    for(beta=0; beta<3; beta++){ 
+	if(beta != alpha) {
             h_Josephson += (Hp.eta * O2prod(Psi, Site[i].Psi[beta]));
         }
     }
