@@ -12,7 +12,7 @@ H_eta=1
 H_e=0.2
 H_h=0.2
 H_nu=0
-H_blow=11.0
+H_blow=10.5
 H_bhigh=12.0
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################

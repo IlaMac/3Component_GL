@@ -169,9 +169,9 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
 
         //Measures
         mis.reset();
-	    energy(mis, Hp, my_beta, Site, NN_Site);
+	energy(mis, Hp, my_beta, Site, NN_Site);
         dual_stiffness(mis, Hp, Site);
-        helicity_modulus(mis, Hp, Site);
+        helicity_modulus(mis, Hp, Site, NN_Site);
         magnetization(mis, Site);
         density_psi(mis, Site);
         mis.my_rank=PTp.rank;
