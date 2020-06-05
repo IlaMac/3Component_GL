@@ -19,6 +19,10 @@ struct Measures{
     double m=0; //magnetization (for the phase chirality of the three components
     //Binder cumulant U=<m⁴>/(3*<m²>²)
     double d_rhoz=0; //Dual stiffness along z
+    double D2H_Dd2i[NC]={0}; //2nd derivative in the twisted phase of the i component
+    double D2H_Dd2ij[NC]={0}; //2nd mixed derivative in the twisted phases of the component i and j
+    double DH_Ddi[NC]={0}; //1st derivative in the twisted phase of the i component
+
     double density_psi[NC] = {0};
     int my_rank = 0;
     void reset(){
@@ -27,7 +31,7 @@ struct Measures{
 };
 
 
-
+void helicity_modulus(struct Measures &mis, struct H_parameters &Hp, struct Node* Site);
 void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* Site);
 void magnetization(struct Measures &mis, struct Node* Site);
 void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struct Node* Site, struct NN_Node* NN_Site);

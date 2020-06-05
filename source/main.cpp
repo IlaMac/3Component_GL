@@ -155,6 +155,9 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "m", HOFFSET(Measures, m), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "ds", HOFFSET(Measures, d_rhoz), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "rho", HOFFSET(Measures, density_psi), HDF5_RHO_TYPE);
+    H5Tinsert(MY_HDF5_MEASURES_TYPE, "DH_Ddi", HOFFSET(Measures, DH_Ddi), HDF5_RHO_TYPE);
+    H5Tinsert(MY_HDF5_MEASURES_TYPE, "D2H_Dd2i", HOFFSET(Measures, D2H_Dd2i), HDF5_RHO_TYPE);
+    H5Tinsert(MY_HDF5_MEASURES_TYPE, "D2H_Dd2ij", HOFFSET(Measures, D2H_Dd2ij), HDF5_RHO_TYPE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "rank", HOFFSET(Measures, my_rank), H5T_NATIVE_INT);
 
     file.createTable(MY_HDF5_MEASURES_TYPE, "Measurements", "Measures");
@@ -168,6 +171,7 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
         mis.reset();
 	    energy(mis, Hp, my_beta, Site, NN_Site);
         dual_stiffness(mis, Hp, Site);
+        helicity_modulus(mis, Hp, Site);
         magnetization(mis, Site);
         density_psi(mis, Site);
         mis.my_rank=PTp.rank;

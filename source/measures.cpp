@@ -56,6 +56,50 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
     mis.E=(mis.E_kin + mis.E_pot +mis.E_Josephson + mis.E_B + mis.E_AB);
 }
 
+
+void helicity_modulus(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
+
+    double invV= 1./N;
+    double J_alpha=0., J_beta=0., DJ_alpha_Dd=0.;
+    unsigned int i, ix, iy, iz, alpha, beta, vec;
+    vec=0; //helicity modulus computed along the x direction
+
+    for(ix=0; ix<Lx;ix++){
+        for(iy=0; iy<Ly;iy++){
+            for(iz=0; iz<Lz;iz++){
+                i=ix +Lx*(iy+Ly*iz);
+                for(alpha=0; alpha<NC; alpha++){
+
+                    J_alpha=(1./Hp.h)*(Site[i].Psi[alpha].r*Site[nn(i, vec, 1)].Psi[alpha].r)*
+                        sin(Site[nn(i, vec, 1)].Psi[alpha].t - Site[i].Psi[alpha].t + Hp.h*Hp.e*Site[i].A[vec]);
+
+                    DJ_alpha_Dd=(1./Hp.h)*(Site[i].Psi[alpha].r*Site[nn(i, vec, 1)].Psi[alpha].r)*
+                                cos(Site[nn(i, vec, 1)].Psi[alpha].t - Site[i].Psi[alpha].t + Hp.h*Hp.e*Site[i].A[vec]);
+
+                    mis.DH_Ddi[alpha] += ((1. / Hp.h) * J_alpha);
+
+                    mis.D2H_Dd2i[alpha]+= ((1. / Hp.h)*DJ_alpha_Dd ) + 2*Hp.nu*((DJ_alpha_Dd*DJ_alpha_Dd) -J_alpha);
+
+                    for(beta=0; beta<NC; beta++) {
+                        if(beta !=alpha ){
+                            J_beta=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*
+                                   sin(Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec]);
+                            mis.DH_Ddi[alpha] += (2 * Hp.nu *(J_alpha - J_beta)*DJ_alpha_Dd );
+                        }
+                        if(beta>alpha){
+                            DJ_beta_Dd=(1./Hp.h)*(Site[i].Psi[alpha].r*Site[nn(i, vec, 1)].Psi[beta].r)*
+                                        cos(Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec]);
+                            mis.D2H_Dd2ij[alpha]+= (-2*Hp.nu*(DJ_alpha_Dd*DJ_beta_Dd));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+
 void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
 
     double qx_min=C_TWO_PI/(Lx);
