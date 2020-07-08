@@ -3,6 +3,7 @@ build/
 tmp/
 libs/
 old_source/
+batch_script/
 .idea/
 .vscode/
 Data/
