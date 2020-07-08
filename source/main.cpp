@@ -144,7 +144,6 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
 
     std::vector<hsize_t> rho_dims = {NC};	
     h5pp::hid::h5t HDF5_RHO_TYPE = H5Tarray_create(H5T_NATIVE_DOUBLE,rho_dims.size(),rho_dims.data());
-
     h5pp::hid::h5t MY_HDF5_MEASURES_TYPE = H5Tcreate(H5T_COMPOUND, sizeof(Measures));
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E", HOFFSET(Measures, E), H5T_NATIVE_DOUBLE);
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "E_pot", HOFFSET(Measures, E_pot), H5T_NATIVE_DOUBLE);
@@ -169,7 +168,7 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
 
         //Measures
         mis.reset();
-	energy(mis, Hp, my_beta, Site, NN_Site);
+    	energy(mis, Hp, my_beta, Site, NN_Site);
         dual_stiffness(mis, Hp, Site);
         helicity_modulus(mis, Hp, Site, NN_Site);
         magnetization(mis, Site);

@@ -102,7 +102,7 @@ endif ()
 ### Add all source files recursively
 file(GLOB_RECURSE SOURCES "source/*.cpp")
 file(GLOB_RECURSE HEADERS "source/*.h")
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} source/class_tic_toc.cpp source/class_tic_toc.h)
 
 
 
@@ -192,6 +192,9 @@ if(GL_MARCH)
         string(TOLOWER ${GL_MARCH} CXX_MARCH)
     endif()
     message(STATUS "CPU optimizations: ${CXX_MARCH}")
+else()
+    set(GL_MARCH "native")
+    set(CXX_MARCH "native")
 endif()
 
 

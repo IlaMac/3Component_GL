@@ -2,6 +2,7 @@ cmake-build*/
 build/
 tmp/
 libs/
+old_source/
 .idea/
 .vscode/
 Data/

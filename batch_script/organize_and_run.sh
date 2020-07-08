@@ -1,20 +1,19 @@
 #!/bin/bash
 
-BASEDIR=${HOME}/MultiComponents_SC
+BASEDIR=${HOME}/Desktop/MultiComponents_SC
 SCRIPT_DIR=${BASEDIR}/3Component_GL//batch_script
 
 LLIST="8 10 12 16 20"
-LLIST="8 10 12"
+LLIST="8 10"
 ############# Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
 H_a=0
 H_b=1
 H_eta=1 
 H_e=0.2
 H_h=0.2
-H_nu=0
-H_blow=10.5
-H_bhigh=12.0
-
+H_nu=0.1
+H_blow=1.0
+H_bhigh=20.0
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
 Nmisu=200000
