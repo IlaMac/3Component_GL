@@ -1,22 +1,23 @@
 #!/bin/bash
 
-BASEDIR=${HOME}/Desktop/MultiComponents_SC
+BASEDIR=${HOME}/MultiComponents_SC
 SCRIPT_DIR=${BASEDIR}/3Component_GL//batch_script
 
-LLIST="8 10 12 16 20"
-LLIST="8 10"
-############# Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
+LLIST="8 10 12 16"
+#LLIST="8 10 12"
+############ Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
 H_a=0
 H_b=1
 H_eta=1 
-H_e=0.2
+H_e=0
 H_h=0.2
-H_nu=0.1
-H_blow=1.0
-H_bhigh=20.0
+H_nu=0.01
+H_blow=10.7
+H_bhigh=11.1
+
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
-Nmisu=200000
+Nmisu=2000000
 ntau=32
 nautosave=100000
 l_box=1.0
@@ -96,7 +97,7 @@ EXECUTE_DIR="../build/Release"
 
 echo "#!/bin/bash
 #SBATCH --job-name=${jobname}          # Name of the job
-#SBATCH --time=2-00:10:00               # Allocation time
+#SBATCH --time=7-00:00:00               # Allocation time
 #SBATCH --mem-per-cpu=2000              # Memory per allocated cpu
 #SBATCH --nodes=${nnodes}               # Number of nodes
 #SBATCH --ntasks=${ntasks}
