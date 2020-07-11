@@ -10,6 +10,7 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
     double h_Potential=0., h_Kinetic=0., h_Josephson=0., h_B=0., h_AB=0.;
     double F_A=0;
     double J_0, J_1, J_2;
+    double gauge_phase, gauge_phase_0,gauge_phase_1, gauge_phase_2;
     double h2=(Hp.h*Hp.h);
     double h3=(Hp.h*Hp.h*Hp.h);
 
@@ -22,7 +23,9 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
                     h_Potential += (O2norm2(Site[i].Psi[alpha]) * ((Hp.a + (3. / h2))+(0.5 * Hp.b *O2norm2(Site[i].Psi[alpha]))));
                     //Kinetic= -(1/h²)*\sum_k=1,2,3 |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* cos( theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r))
                     for (vec = 0; vec < 3; vec++) {
-                        h_Kinetic -= (1. / h2) * O2prod(Site[i].Psi[alpha], NN_Site[i].Psi_plusk[alpha +3*vec]);
+                        gauge_phase=Site[nn(i, vec, 1)].Psi[alpha].t - Site[i].Psi[alpha].t + Hp.h*Hp.e*Site[i].A[vec];
+                        //h_Kinetic -= (1. / h2) * O2prod(Site[i].Psi[alpha], NN_Site[i].Psi_plusk[alpha +3*vec]);
+                        h_Kinetic -= (1. / h2) * (Site[i].Psi[alpha].r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos(gauge_phase) ;
                     }
                     for (vec = alpha+1; vec < 3; vec++) {
                             //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beys}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
@@ -36,9 +39,12 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
                 // with J^k_alpha= |Psi_{alpha}(r)||Psi_{alpha}(r+k)|* sin(theta_{alpha}(r+k) - theta_{alpha}(r) +h*e*A_k(r)))
                 if(Hp.nu >0 ) {
                     for (vec = 0; vec < 3; vec++) {
-                        J_0 = (1. / Hp.h) *O2vprod(Site[i].Psi[0], NN_Site[i].Psi_plusk[0 +3*vec]);
-                        J_1 = (1. / Hp.h) *O2vprod(Site[i].Psi[1], NN_Site[i].Psi_plusk[1+3*vec]);
-                        J_2 = (1. / Hp.h) *O2vprod(Site[i].Psi[2], NN_Site[i].Psi_plusk[2+3*vec]);
+                        gauge_phase_0=Site[nn(i, vec, 1)].Psi[0].t - Site[i].Psi[0].t + Hp.h*Hp.e*Site[i].A[vec];
+                        gauge_phase_1=Site[nn(i, vec, 1)].Psi[1].t - Site[i].Psi[1].t + Hp.h*Hp.e*Site[i].A[vec];
+                        gauge_phase_2=Site[nn(i, vec, 1)].Psi[2].t - Site[i].Psi[2].t + Hp.h*Hp.e*Site[i].A[vec];
+                        J_0 = (1. / Hp.h) *(Site[i].Psi[0].r*Site[nn(i, vec, 1)].Psi[0].r)*sin(gauge_phase_0);
+                        J_1 = (1. / Hp.h) *(Site[i].Psi[1].r*Site[nn(i, vec, 1)].Psi[1].r)*sin(gauge_phase_1);
+                        J_2 = (1. / Hp.h) *(Site[i].Psi[2].r*Site[nn(i, vec, 1)].Psi[2].r)*sin(gauge_phase_2);
                         h_AB += Hp.nu * (pow((J_0 - J_1),2) + pow((J_0 - J_2),2) +pow((J_1 - J_2),2));
                     }
                 }
@@ -61,27 +67,30 @@ void helicity_modulus(struct Measures &mis, struct H_parameters &Hp, struct Node
     double J_alpha=0., J_beta=0., DJ_alpha_Dd=0., DJ_beta_Dd=0.;
     unsigned int i, ix, iy, iz, alpha, beta, vec;
     vec=0; //helicity modulus computed along the x direction
+    double gauge_phase1, gauge_phase2;
 
     for(ix=0; ix<Lx;ix++){
         for(iy=0; iy<Ly;iy++){
             for(iz=0; iz<Lz;iz++){
                 i=ix +Lx*(iy+Ly*iz);
                 for(alpha=0; alpha<NC; alpha++){
+                    gauge_phase1=Site[nn(i, vec, 1)].Psi[alpha].t - Site[i].Psi[alpha].t + Hp.h*Hp.e*Site[i].A[vec];
 
-                    J_alpha=(1. / Hp.h) *O2vprod(Site[i].Psi[alpha], NN_Site[i].Psi_plusk[alpha +3*vec]);
-                    DJ_alpha_Dd=(1./Hp.h)*O2prod(Site[i].Psi[alpha], NN_Site[i].Psi_plusk[alpha +3*vec]);
+                    J_alpha=(1. / Hp.h)*(Site[i].Psi[alpha].r*Site[nn(i, vec, 1)].Psi[alpha].r)*sin(gauge_phase1);
+                    DJ_alpha_Dd=(1./Hp.h)*(Site[i].Psi[alpha].r*Site[nn(i, vec, 1)].Psi[alpha].r)*cos(gauge_phase1);
 
                     mis.DH_Ddi[alpha] += ((1. / Hp.h) * J_alpha);
-
                     mis.D2H_Dd2i[alpha]+= ((1. / Hp.h)*DJ_alpha_Dd ) + 2*Hp.nu*((DJ_alpha_Dd*DJ_alpha_Dd) -J_alpha);
 
                     for(beta=0; beta<NC; beta++) {
                         if(beta !=alpha ){
-                            J_beta= (1./Hp.h)*O2vprod(Site[i].Psi[beta], NN_Site[i].Psi_plusk[beta +3*vec]);
+                            gauge_phase2=Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec];
+                            J_beta= (1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*sin(gauge_phase2);
                             mis.DH_Ddi[alpha] += (2 * Hp.nu *(J_alpha - J_beta)*DJ_alpha_Dd );
                         }
                         if(beta>alpha){
-                            DJ_beta_Dd=(1./Hp.h)*O2prod(Site[i].Psi[beta], NN_Site[i].Psi_plusk[beta +3*vec]);
+                            gauge_phase2=Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec];
+                            DJ_beta_Dd=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*cos(gauge_phase2);
                             mis.D2H_Dd2ij[alpha]+= (-2*Hp.nu*(DJ_alpha_Dd*DJ_beta_Dd));
                         }
                     }

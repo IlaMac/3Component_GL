@@ -5,7 +5,7 @@
 #ifndef MEASURES_H
 #define MEASURES_H
 
-#include "eigen.h"
+#include "main.h"
 #include <fstream>
 
 struct Measures{

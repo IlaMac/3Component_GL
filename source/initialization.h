@@ -5,7 +5,7 @@
 #ifndef INITIALIZATION_H
 #define INITIALIZATION_H
 
-#include "eigen.h"
+#include "main.h"
 #include "robust_filesystem.h"
 #include <cmath>
 #include <cstdio>
@@ -67,7 +67,7 @@ struct MC_parameters{
     double lbox_A; //length of the box for the uniform distribution of dA (transformation of the vector potential)
 };
 
-void initialize_lattice(struct Node* Site, const fs::path & directory_read);
+void initialize_lattice(struct Node* Site, const fs::path & directory_read, int RESTART);
 void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_parameters);
 void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directory_parameters);
 void initialize_PTarrays(struct PT_parameters &PTp, struct PTroot_parameters &PTroot, struct H_parameters &Hp);

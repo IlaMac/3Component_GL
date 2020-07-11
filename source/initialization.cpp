@@ -27,7 +27,7 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
         Hp.eta=1;
         Hp.e=0.5;
         Hp.h= 5.0;
-        Hp.nu=0;
+        Hp.nu=0.1;
         Hp.b_low=0.244;
         Hp.b_high=0.247;
     }
@@ -50,9 +50,9 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
             fclose(fin);
         }
     }else{
-        MCp.nmisu=10;
-        MCp.tau=10;
-        MCp.n_autosave=20000;
+        MCp.nmisu=200;
+        MCp.tau=32;
+        MCp.n_autosave=20000; //not used now
         MCp.lbox_l=1.0;
         MCp.lbox_rho=0.5;
         MCp.lbox_theta=C_PI;
@@ -61,18 +61,31 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
 
 }
 
-void initialize_lattice(struct Node* Site, const fs::path & directory_read){
+void initialize_lattice(struct Node* Site, const fs::path & directory_read, int RESTART){
 
-    fs::path psi_init_file = directory_read / "Psi_final.bin";
-    fs::path a_init_file = directory_read / "A_final.bin";
-    unsigned int i=0, alpha;
+    unsigned int i, alpha;
+    fs::path psi_init_file = directory_read / "Psi_restart.bin";
+    fs::path a_init_file = directory_read / "A_restart.bin";
 
-    if((fs::exists(psi_init_file)) and (Annealing==1)){
+    if(RESTART==1){
+        fs::path psi_init_file = directory_read / "Psi_restart.bin";
+        fs::path a_init_file = directory_read / "A_restart.bin";
+    }
+    else if (RESTART==2){
+        fs::path psi_init_file = directory_read / "Psi_final.bin";
+        fs::path a_init_file = directory_read / "A_final.bin";
+    }
+
+    if((fs::exists(psi_init_file)) and (fs::exists(a_init_file)) and (RESTART!=0)){
+
         FILE *fPsi= nullptr;
-        if((fPsi=fopen(psi_init_file.c_str(), "r"))) {
+        FILE *fA= nullptr;
+        if((fPsi=fopen(psi_init_file.c_str(), "r")) and (fA=fopen(a_init_file.c_str(), "r")) ) {
             for (i = 0; i < N; i++) {
                 fread(Site[i].Psi, sizeof(struct O2), NC, fPsi);
+                fread(Site[i].A, sizeof(struct O2), NC, fA);
             }
+            fclose(fA);
             fclose(fPsi);
         }
     }else{
@@ -85,17 +98,9 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read){
         }
     }
 
-    if( (fs::exists(a_init_file)) and (Annealing==1)){
-        FILE *fA= nullptr;
-        if((fA=fopen(a_init_file.c_str(), "r"))) {
-            for (i = 0; i < N; i++) {
-                fread(Site[i].A, sizeof(struct O2), 3, fA);
-            }
-            fclose(fA);
-        }
-    }
-
 }
+
+
 
 void initialize_PTarrays(struct PT_parameters &PTp, struct PTroot_parameters &PTroot, struct H_parameters &Hp){
     int p;

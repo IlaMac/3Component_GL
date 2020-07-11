@@ -3,6 +3,18 @@
 BASEDIR=${HOME}/MultiComponents_SC
 SCRIPT_DIR=${BASEDIR}/3Component_GL//batch_script
 
+cd /tmp/
+
+if [ ! -d ./SOutput_x_ilaria ]; then
+   mkdir -p Output_x_ilaria
+fi
+
+#RESTART=0-> Restart from scratch
+#RESTART=1-> Restart from interrupted run
+#RESTART=2-> Restart from the previois final scenario
+
+RESTART=1
+
 LLIST="8 10 12 16"
 #LLIST="8 10 12"
 ############ Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
@@ -49,6 +61,26 @@ fi
 
 OUTPUT=${BASEDIR}/Output_3C/e_${H_e}/nu_${H_nu}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
 
+cd /tmp/Output_x_ilaria
+
+if [ ! -d ./Se_${H_e} ]; then
+   mkdir -p e_${H_e}
+fi
+
+cd e_${H_e}
+
+if [ ! -d ./Snu_${H_nu} ]; then
+   mkdir -p nu_${H_nu}
+fi
+
+cd nu_${H_nu}
+
+if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh} ]; then
+   mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+fi
+
+OUTPUT_TEMP=/tmp/Output_x_ilaria/e_${H_e}/nu_${H_nu}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+
 cd ${OUTPUT}
 
 #THE ORDER OF WRITING DOES MATTER
@@ -88,8 +120,19 @@ fi
 
 done
 
+cd ${OUTPUT_TEMP}
+
+for ((rank=0; rank<${ntasks}; rank++)); do
+
+if [ ! -d ./Sbeta_${rank} ]; then
+   mkdir -p beta_${rank}
+fi
+
+done
+
 cd ${SCRIPT_DIR}
 DIR_PAR="${OUTPUT}"
+DIR_PAR_TEMP="${OUTPUT_TEMP}"
 
 #SEED= If I want to repeat exactly a simulation I could initialize the random number generator exactly at the same way
 
@@ -105,8 +148,7 @@ echo "#!/bin/bash
 #SBATCH --error=${DIR_PAR}/logs/log_${jobname}.e
 
 
-srun ${EXECUTE_DIR}/GL_3component ${L} ${DIR_PAR} &> ${DIR_PAR}/logs/log_${jobname}.o
-
+srun ${EXECUTE_DIR}/GL_3component ${L} ${DIR_PAR} ${DIR_PAR_TEMP} ${RESTART} &> ${DIR_PAR}/logs/log_${jobname}.o
 
 " >  submit_run
 
