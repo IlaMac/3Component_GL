@@ -3,7 +3,7 @@
 #include "rng.h"
 #include "class_tic_toc.h"
 
-void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &MCp, struct H_parameters &Hp,  double my_beta){
+void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp,  double my_beta){
 
     double l, phi, d_theta, d_A, rand;
     unsigned int ix=0, iy=0, iz=0, alpha=0, vec=0, i;
@@ -26,7 +26,7 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                 for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];
                     //t_localHpsi.tic();
-                    oldE = local_HPsi(OldPsi, ix, iy, iz, alpha, Hp, Site, NN_Site);
+                    oldE = local_HPsi(OldPsi, ix, iy, iz, alpha, Hp, Site);
                     //t_localHpsi.toc();
                     l=rn::uniform_real_box(0, MCp.lbox_l);
                     phi=rn::uniform_real_box(0, C_TWO_PI);
@@ -34,7 +34,7 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                     NewPsi.y = OldPsi.y + (l * sin(phi));
                     cartesian_to_polar(NewPsi);
                     //t_localHpsi.tic();
-                    newE = local_HPsi(NewPsi, ix, iy, iz, alpha, Hp, Site, NN_Site);
+                    newE = local_HPsi(NewPsi, ix, iy, iz, alpha, Hp, Site);
                     //t_localHpsi.toc();
                     minus_deltaE = h3*(oldE - newE);
                     if (minus_deltaE > 0) {
@@ -54,14 +54,14 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                 for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];
                     //t_localHtheta.tic();
-                    oldE = local_Htheta(OldPsi, ix, iy, iz, alpha, Hp, Site, NN_Site);
+                    oldE = local_Htheta(OldPsi, ix, iy, iz, alpha, Hp, Site);
                     //t_localHtheta.toc();
                     d_theta=rn::uniform_real_box(-MCp.lbox_theta, MCp.lbox_theta);
                     NewPsi.t = fmod(OldPsi.t + d_theta, C_TWO_PI);
                     NewPsi.r= OldPsi.r;
                     polar_to_cartesian(NewPsi);
                     //t_localHtheta.tic();
-                    newE = local_Htheta(NewPsi, ix, iy, iz, alpha, Hp, Site, NN_Site);
+                    newE = local_Htheta(NewPsi, ix, iy, iz, alpha, Hp, Site);
                     //t_localHtheta.toc();
                     minus_deltaE = h3*(oldE - newE);
                     if (minus_deltaE > 0) {
@@ -81,12 +81,12 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
                     //Update of A
                     OldA=Site[i].A[vec];
                     //t_localHA.tic();
-                    oldE = local_HA(OldA, ix, iy, iz, vec, Hp, Site, NN_Site);
+                    oldE = local_HA(OldA, ix, iy, iz, vec, Hp, Site);
                     //t_localHA.toc();
                     d_A=rn::uniform_real_box(-MCp.lbox_A, MCp.lbox_A);
                     NewA= OldA + d_A;
                     //t_localHA.tic();
-                    newE = local_HA(NewA, ix, iy, iz, vec, Hp, Site, NN_Site);
+                    newE = local_HA(NewA, ix, iy, iz, vec, Hp, Site);
                     //t_localHA.toc();
                     minus_deltaE=h3*(oldE -newE);
                     if(minus_deltaE>0.){
@@ -117,7 +117,7 @@ void metropolis( struct Node* Site, struct NN_Node* NN_Site, struct MC_parameter
 }
 
 
-double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int iz, unsigned int alpha,  struct H_parameters &Hp, struct Node* Site, struct NN_Node* NN_Site){
+double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int iz, unsigned int alpha,  struct H_parameters &Hp, struct Node* Site){
 
     double h_Potential, h_Kinetic=0., h_Josephson=0., h_AB=0., h_tot;
     double h2=(Hp.h*Hp.h);
@@ -169,7 +169,7 @@ double local_HPsi(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int 
     return h_tot;
 }
 
-double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int iz, unsigned int alpha,  struct H_parameters &Hp, struct Node* Site, struct NN_Node* NN_Site){
+double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned int iz, unsigned int alpha,  struct H_parameters &Hp, struct Node* Site){
 
     double h_Kinetic=0., h_Josephson=0., h_AB=0., h_tot;
     double h2=(Hp.h*Hp.h);
@@ -217,7 +217,7 @@ double local_Htheta(struct O2 Psi, unsigned int ix, unsigned int iy, unsigned in
     return h_tot;
 }
 
-double local_HA(double A, unsigned int ix, unsigned int iy, unsigned int iz,  unsigned int vec,  struct H_parameters &Hp, struct Node* Site, struct NN_Node* NN_Site){
+double local_HA(double A, unsigned int ix, unsigned int iy, unsigned int iz,  unsigned int vec,  struct H_parameters &Hp, struct Node* Site){
 
     double h_Kinetic=0., h_B, h_AB=0., h_tot=0.;
     double h2=(Hp.h*Hp.h);

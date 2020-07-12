@@ -154,19 +154,7 @@ int main(int argc, char *argv[]){
     directory_read=directory_parameters+"/beta_"+std::to_string(my_ind);
 
     initialize_lattice(Lattice, directory_read, RESTART);
-    //Initialize the auxiliary lattice
-    for(i=0; i<N; i++){
-        for(alpha=0; alpha<3; alpha++){
-            for(vec=0; vec<3; vec++) {
-                Neighbours[i].Psi_plusk[alpha + 3 * vec].r = Lattice[nn(i, vec, 1)].Psi[alpha].r;
-                Neighbours[i].Psi_plusk[alpha + 3 * vec].t = Lattice[nn(i, vec, 1)].Psi[alpha].t + Hp.e*Hp.h*Lattice[i].A[vec];
-                Neighbours[i].Psi_minusk[alpha + 3 * vec].r = Lattice[nn(i, vec, -1)].Psi[alpha].r;
-                Neighbours[i].Psi_minusk[alpha + 3 * vec].t = Lattice[nn(i, vec, -1)].Psi[alpha].t - Hp.e*Hp.h*Lattice[nn(i, vec, -1)].A[vec];
-                polar_to_cartesian(Neighbours[i].Psi_plusk[alpha + 3 * vec]);
-                polar_to_cartesian(Neighbours[i].Psi_minusk[alpha + 3 * vec]);
-            }
-        }
-    }
+
     if(RESTART==1){
         std::fstream restart_file(directory_parameters+"/restart-0", std::ios::in);
         restart_file >> NSTART;
@@ -175,7 +163,7 @@ int main(int argc, char *argv[]){
     }
 
     //Mainloop
-    mainloop(Lattice, Neighbours, MCp, Hp, my_beta, my_ind, PTp, PTroot, directory_parameters_temp, NSTART);
+    mainloop(Lattice, MCp, Hp, my_beta, my_ind, PTp, PTroot, directory_parameters_temp, NSTART);
 
     t_tot.toc();
 
@@ -191,7 +179,7 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &MCp, struct H_parameters &Hp, double &my_beta, int &my_ind, struct PT_parameters PTp, struct PTroot_parameters PTroot, std::string directory_parameters_temp, int NSTART) {
+void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp, double &my_beta, int &my_ind, struct PT_parameters PTp, struct PTroot_parameters PTroot, std::string directory_parameters_temp, int NSTART) {
 
     int n = NSTART, t = 0;
     class_tic_toc t_h5pp(true,5,"Benchmark h5pp");
@@ -240,15 +228,15 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
     for (n = 0; n<MCp.nmisu; n++) {
         for (t = 0; t < MCp.tau; t++) {
             t_metropolis.tic();
-            metropolis(Site, NN_Site, MCp, Hp,  my_beta);
+            metropolis(Site, MCp, Hp,  my_beta);
             t_metropolis.toc();
         }
         //Measures
         t_measures.tic();
         mis.reset();
-    	energy(mis, Hp, my_beta, Site, NN_Site);
+    	energy(mis, Hp, my_beta, Site);
         dual_stiffness(mis, Hp, Site);
-        helicity_modulus(mis, Hp, Site, NN_Site);
+        helicity_modulus(mis, Hp, Site);
         magnetization(mis, Site);
         density_psi(mis, Site);
         mis.my_rank=PTp.rank;
@@ -257,6 +245,7 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
         t_h5pp.tic();
         file.appendTableEntries(mis, "Measurements");
         t_h5pp.toc();
+        MPI_Barrier(MPI_COMM_WORLD);
 
         std::ofstream restart_file(directory_write_temp+"/restart-0");
         restart_file << n <<std::endl;
