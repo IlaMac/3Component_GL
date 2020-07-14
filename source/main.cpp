@@ -10,9 +10,19 @@
 #include <iostream>
 #include <csignal>
 
-
 void clean_up() {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::string src_file= h5pp::format("{}/beta_{}/Output.h5",paths_dir::TEMP_DIROUT,  rank);
+    std::string tgt_file= h5pp::format("{}/beta_{}/Output.h5",paths_dir::DIROUT,  rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Finalize();
+    
+    if(src_file == tgt_file) return;
+
     fs::copy(paths_dir::TEMP_DIROUT, paths_dir::DIROUT , fs::copy_options::overwrite_existing | fs::copy_options::recursive );
+    h5pp::hdf5::moveFile(src_file, tgt_file, h5pp::FilePermission::REPLACE);
     std::cout<<"Exit"<<std::endl;
 }
 
@@ -185,9 +195,7 @@ int main(int argc, char *argv[]){
     MPI_Barrier(MPI_COMM_WORLD);
 
     t_tot.print_measured_time();
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Finalize();
+ 
     return 0;
 }
 
@@ -214,6 +222,8 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
         std::cout <<"NSTART >0"<< std::endl;
         file=h5pp::File(directory_write_temp+"/Output.h5", h5pp::FilePermission::READWRITE);
     }
+
+    std::cout << directory_write_temp << "\t" << NSTART << std::endl;
     // Enable compression
     file.setCompressionLevel(0);
 //    // Register the compound type
@@ -235,6 +245,7 @@ void mainloop(struct Node* Site, struct NN_Node* NN_Site, struct MC_parameters &
     H5Tinsert(MY_HDF5_MEASURES_TYPE, "rank", HOFFSET(Measures, my_rank), H5T_NATIVE_INT);
 
     file.createTable(MY_HDF5_MEASURES_TYPE, "Measurements", "Measures");
+
     //std::vector<double> testvec (1000000,3.14);
     //file.writeDataset(testvec,"testgroup/hugevector", H5D_layout_t::H5D_CHUNKED);
     for (n = 0; n<MCp.nmisu; n++) {

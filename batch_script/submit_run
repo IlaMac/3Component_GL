@@ -1,14 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=L16_a0_b1_eta1_e0_h0.2_nu0.01_bmin10.7_bmax11.1          # Name of the job
+#SBATCH --job-name=L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265          # Name of the job
 #SBATCH --time=7-00:00:00               # Allocation time
 #SBATCH --mem-per-cpu=2000              # Memory per allocated cpu
-#SBATCH --nodes=2               # Number of nodes
-#SBATCH --ntasks=64
-#SBATCH --output=/home/x_ilama/MultiComponents_SC/Output_3C/e_0/nu_0.01/L16_a0_b1_eta1_e0_h0.2_nu0.01_bmin10.7_bmax11.1/logs/log_L16_a0_b1_eta1_e0_h0.2_nu0.01_bmin10.7_bmax11.1.o
-#SBATCH --error=/home/x_ilama/MultiComponents_SC/Output_3C/e_0/nu_0.01/L16_a0_b1_eta1_e0_h0.2_nu0.01_bmin10.7_bmax11.1/logs/log_L16_a0_b1_eta1_e0_h0.2_nu0.01_bmin10.7_bmax11.1.e
+#SBATCH --nodes=1               # Number of nodes
+#SBATCH --ntasks=4
+#SBATCH --output=/home/cluster_users/x_ilaria/MultiComponents_SC/Output_3C/e_0.5/nu_0/L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265/logs/log_L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265.o
+#SBATCH --error=/home/cluster_users/x_ilaria/MultiComponents_SC/Output_3C/e_0.5/nu_0/L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265/logs/log_L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265.e
 
-
-srun ../build/Release/GL_3component 16 /home/x_ilama/MultiComponents_SC/Output_3C/e_0/nu_0.01/L16_a0_b1_eta1_e0_h0.2_nu0.01_bmin10.7_bmax11.1 &> /home/x_ilama/MultiComponents_SC/Output_3C/e_0/nu_0.01/L16_a0_b1_eta1_e0_h0.2_nu0.01_bmin10.7_bmax11.1/logs/log_L16_a0_b1_eta1_e0_h0.2_nu0.01_bmin10.7_bmax11.1.o
-
+srun ../build/Release/GL_3component 6 /home/cluster_users/x_ilaria/MultiComponents_SC/Output_3C/e_0.5/nu_0/L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265 /tmp/Output_x_ilaria/e_0.5/nu_0/L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265 0 &> /home/cluster_users/x_ilaria/MultiComponents_SC/Output_3C/e_0.5/nu_0/L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265/logs/log_L6_a0_b1_eta1_e0.5_h5.4_nu0_bmin0.2245_bmax0.2265.o
 
 
