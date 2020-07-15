@@ -77,10 +77,15 @@ include(cmake/PrintHostInfo.cmake)
 include(cmake/PrintOptionInfo.cmake)
 
 
-
 ### Print compiler details
 message("Compiling with: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 
+
+
+###########################################
+###  Apply RELEASE/DEBUG compile flags  ###
+###########################################
+include(cmake/CompilerFlags.cmake)
 
 ### Create a helper target with all the options you need to compile
 ### This one is useful to pass to tests and examples so that they compile
@@ -190,34 +195,18 @@ endif()
 
 
 
-############################################################
-### Set  the same microarchitecture for c++ and OpenBLAS ###
-############################################################
 
 
-if(GL_MARCH)
-    if (GL_MARCH MATCHES "zen")
-        set(CXX_MARCH znver1)
-    else()
-        string(TOLOWER ${GL_MARCH} CXX_MARCH)
-    endif()
-    message(STATUS "CPU optimizations: ${CXX_MARCH}")
-else()
-    set(GL_MARCH "native")
-    set(CXX_MARCH "native")
-endif()
-
-
-###########################################
-###  Apply RELEASE/DEBUG compile flags  ###
-###########################################
-# Segfault from -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC when using ceres, but -D_GLIBCXX_DEBUG fixes gdb incomplete types
-target_compile_options(project-settings INTERFACE $<$<COMPILE_LANGUAGE:CXX>: -Wall -march=${CXX_MARCH} -mtune=${CXX_MARCH}>)
-target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELEASE>>:          -O3 -g -DNDEBUG>)
-target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:DEBUG>>:            -O0 -g3 -Wpedantic -Wextra -fstack-protector -D_FORTIFY_SOURCE=2>)
-target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELWITHDEBINFO>>:   -O1 -g3 -Wpedantic -Wextra -fstack-protector -D_FORTIFY_SOURCE=2>)
-target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:PROFILE>>:          -O3 -g  -DNDEBUG  -lprofiler  -ftime-report>)
-
+##################################################
+###  Add optional RELEASE/DEBUG compile flags  ###
+##################################################
+# -fsanitize=leak -fsanitize=undefined -fsanitize=alignment  -fsanitize=leak -fsanitize=undefined -fsanitize=alignment
+target_compile_options(project-settings INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wall>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELEASE>>:-g>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:DEBUG>>: -Wpedantic -Wextra>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELWITHDEBINFO>>:>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:MINSIZEREL>>:>)
+target_compile_features(project-settings INTERFACE cxx_std_17)
 
 
 ### CTest testing
