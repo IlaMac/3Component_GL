@@ -24,9 +24,11 @@ option(GL_ENABLE_SPDLOG      "Spdlog is a fast logging library"                 
 option(GL_ENABLE_OPENMP      "Enable OpenMP flags such as -fopenmp"                     ON)
 option(GL_ENABLE_MPI         "Enable MPI parallelization"                               ON)
 option(GL_ENABLE_LTO         "Enable link time optimization"                            OFF)
+option(GL_ENABLE_ASAN        "Enable runtime address sanitizer -fsanitize=address"      OFF)
 option(GL_AS_SUBPROJECT      "Try using this as a subproject with add_subdirectory()"   OFF)
 option(GL_DEPS_IN_SUBDIR     "Install dependencies into CMAKE_INSTALL_PREFIX/<libname>" ON)
 option(GL_PRINT_INFO         "Prints additional information during CMake configure"     ON)
+
 
 if(NOT GL_ENABLE_MPI)
     message(FATAL_ERROR "This project uses MPI and should be enabled by default.")
@@ -75,10 +77,15 @@ include(cmake/PrintHostInfo.cmake)
 include(cmake/PrintOptionInfo.cmake)
 
 
-
 ### Print compiler details
 message("Compiling with: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 
+
+
+###########################################
+###  Apply RELEASE/DEBUG compile flags  ###
+###########################################
+include(cmake/CompilerFlags.cmake)
 
 ### Create a helper target with all the options you need to compile
 ### This one is useful to pass to tests and examples so that they compile
@@ -132,6 +139,14 @@ if(NOT TARGET Threads::Threads)
 endif()
 
 
+#######################################
+# Settings for sanitizers           ###
+#######################################
+if(GL_ENABLE_ASAN)
+    target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:DEBUG>>: -fsanitize=address -fno-omit-frame-pointer>)
+    target_link_options(project-settings INTERFACE -fsanitize=address)
+endif()
+
 
 
 
@@ -156,6 +171,7 @@ if (GL_PRINT_INFO)
     expand_target_all_targets(project-settings GL_TARGETS_EXPANDED)
     message(STATUS "| GL TARGET SUMMARY")
     message(STATUS "|--------------------")
+    print_compiler_info("| ")
     foreach(tgt ${GL_TARGETS_EXPANDED})
         print_target_info(${tgt} "| ")
     endforeach()
@@ -180,34 +196,18 @@ endif()
 
 
 
-############################################################
-### Set  the same microarchitecture for c++ and OpenBLAS ###
-############################################################
 
 
-if(GL_MARCH)
-    if (GL_MARCH MATCHES "zen")
-        set(CXX_MARCH znver1)
-    else()
-        string(TOLOWER ${GL_MARCH} CXX_MARCH)
-    endif()
-    message(STATUS "CPU optimizations: ${CXX_MARCH}")
-else()
-    set(GL_MARCH "native")
-    set(CXX_MARCH "native")
-endif()
-
-
-###########################################
-###  Apply RELEASE/DEBUG compile flags  ###
-###########################################
-# Segfault from -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC when using ceres, but -D_GLIBCXX_DEBUG fixes gdb incomplete types
-target_compile_options(project-settings INTERFACE $<$<COMPILE_LANGUAGE:CXX>: -Wall -march=${CXX_MARCH} -mtune=${CXX_MARCH}>)
-target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELEASE>>:          -O3 -g -DNDEBUG>)
-target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:DEBUG>>:            -O0 -g3 -Wpedantic -Wextra -fstack-protector -D_FORTIFY_SOURCE=2>)
-target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELWITHDEBINFO>>:   -O1 -g3 -Wpedantic -Wextra -fstack-protector -D_FORTIFY_SOURCE=2>)
-target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:PROFILE>>:          -O3 -g  -DNDEBUG  -lprofiler  -ftime-report>)
-
+##################################################
+###  Add optional RELEASE/DEBUG compile flags  ###
+##################################################
+# -fsanitize=leak -fsanitize=undefined -fsanitize=alignment  -fsanitize=leak -fsanitize=undefined -fsanitize=alignment
+target_compile_options(project-settings INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wall>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELEASE>>:-g>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:DEBUG>>: -Wpedantic -Wextra>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:RELWITHDEBINFO>>:>)
+target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:MINSIZEREL>>:>)
+target_compile_features(project-settings INTERFACE cxx_std_17)
 
 
 ### CTest testing

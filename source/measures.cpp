@@ -4,7 +4,7 @@
 
 #include "measures.h"
 
-void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struct Node* Site, struct NN_Node* NN_Site){
+void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struct Node* Site){
 
     unsigned int i, ix, iy, iz, alpha, vec;
     double h_Potential=0., h_Kinetic=0., h_Josephson=0., h_B=0., h_AB=0.;
@@ -62,7 +62,7 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
 }
 
 
-void helicity_modulus(struct Measures &mis, struct H_parameters &Hp, struct Node* Site, struct NN_Node* NN_Site){
+void helicity_modulus(struct Measures &mis, struct H_parameters &Hp, struct Node* Site){
 
     double J_alpha=0., J_beta=0., DJ_alpha_Dd=0., DJ_beta_Dd=0.;
     unsigned int i, ix, iy, iz, alpha, beta, vec;
