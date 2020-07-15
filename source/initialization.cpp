@@ -50,7 +50,7 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
             fclose(fin);
         }
     }else{
-        MCp.nmisu=200;
+        MCp.nmisu=20;
         MCp.tau=32;
         MCp.n_autosave=20000; //not used now
         MCp.lbox_l=1.0;
