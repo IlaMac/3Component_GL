@@ -13,9 +13,9 @@ fi
 #RESTART=1-> Restart from interrupted run
 #RESTART=2-> Restart from the previois final scenario
 
-RESTART=0
+RESTART=1
 
-LLIST="6"
+LLIST="12"
 #LLIST="8 10 12"
 ############ Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
 H_a=0
@@ -23,13 +23,13 @@ H_b=1
 H_eta=1 
 H_e=0.5
 H_h=5.4
-H_nu=0
-H_blow=0.2245
-H_bhigh=0.2265
+H_nu=0.1
+H_blow=0.2165
+H_bhigh=0.2195
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
-Nmisu=20
+Nmisu=200000
 ntau=32
 nautosave=100000
 l_box=1.0
@@ -106,7 +106,7 @@ echo $A_box >> MC_init.txt
 
 jobname="L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}"
 nnodes=1
-ntasks=4 #parallel tempering over ntasks temperatures
+ntasks=32 #parallel tempering over ntasks temperatures
 
 #I create ntasks folder: one for each rank.
 
@@ -149,7 +149,7 @@ echo "#!/bin/bash
 #SBATCH --output=${DIR_PAR}/logs/log_${jobname}.o
 #SBATCH --error=${DIR_PAR}/logs/log_${jobname}.e
 
-srun ${EXECUTE_DIR}/GL_3component ${L} ${DIR_PAR} ${DIR_PAR_TEMP} ${RESTART} &> ${DIR_PAR}/logs/log_${jobname}.o
+srun ${EXECUTE_DIR}/GL_3component ${L} ${DIR_PAR} ${DIR_PAR} ${RESTART} &> ${DIR_PAR}/logs/log_${jobname}.o
 
 " >  submit_run
 
