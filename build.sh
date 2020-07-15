@@ -23,6 +23,8 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
    | --enable-spdlog            : Enable Spdlog
    | --enable-openmp            : Enable OpenMP
    | --enable-mpi               : Enable MPI
+   | --enable-lto               : Enable Link Time Optimization
+   | --enable-asan              : Enable runtime sanitizers, i.e. -fsanitize=address
 -t | --target [=args]           : Select build target [ CMakeTemplate | all-tests | test-<name> ]  (default = none)
    | --enable-tests             : Enable CTest tests
    | --prefer-conda             : Prefer libraries from anaconda
@@ -56,6 +58,8 @@ PARSED_OPTIONS=$(getopt -n "$0"   -o ha:b:cl:df:g:G:j:st:v \
                 enable-spdlog\
                 enable-openmp\
                 enable-mpi\
+                enable-lto\
+                enable-asan\
                 no-module\
                 prefer-conda\
                 verbose\
@@ -83,6 +87,8 @@ enable_eigen3="ON"
 enable_spdlog="ON"
 enable_openmp="ON"
 enable_mpi="ON"
+enable_lto="OFF"
+enable_asan="OFF"
 make_threads=8
 prefer_conda="OFF"
 verbose="OFF"
@@ -115,6 +121,8 @@ do
        --enable-spdlog)             enable_spdlog="ON"              ; echo " * Enable spdlog            : ON"      ; shift   ;;
        --enable-openmp)             enable_openmp="ON"              ; echo " * Enable OpenMP            : ON"      ; shift   ;;
        --enable-mpi)                enable_mpi="ON"                 ; echo " * Enable OpenMPI           : ON"      ; shift   ;;
+       --enable-lto)                enable_lto="ON"                 ; echo " * Link Time Optimization  : ON"      ; shift   ;;
+       --enable-asan)               enable_asan="ON"                ; echo " * Runtime sanitizers      : ON"      ; shift   ;;
        --no-module)                 no_module="ON"                  ; echo " * Disable module load      : ON"      ; shift   ;;
        --prefer-conda)              prefer_conda="ON"               ; echo " * Prefer anaconda libs     : ON"      ; shift   ;;
        --quiet)                     print_info="OFF"                ; echo " * Print less CMake info    : ON"      ; shift   ;;
@@ -258,6 +266,8 @@ Running script:
             -DGL_ENABLE_MPI=$enable_h5pp
             -DGL_ENABLE_TESTS=$enable_tests
             -DGL_PREFER_CONDA_LIBS=$prefer_conda
+            -DGL_ENABLE_LTO=$enable_lto
+            -DGL_ENABLE_ASAN=$enable_asan
             $extra_flags
             -G "$generator"
             ../../
@@ -282,6 +292,8 @@ if [ -z "$dry_run" ] ;then
             -DGL_ENABLE_MPI=$enable_mpi \
             -DGL_ENABLE_TESTS=$enable_tests \
             -DGL_PREFER_CONDA_LIBS=$prefer_conda \
+            -DGL_ENABLE_LTO=$enable_lto \
+            -DGL_ENABLE_ASAN=$enable_asan \
             $extra_flags \
             -G "$generator" \
             ../../

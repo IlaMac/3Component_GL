@@ -24,9 +24,11 @@ option(GL_ENABLE_SPDLOG      "Spdlog is a fast logging library"                 
 option(GL_ENABLE_OPENMP      "Enable OpenMP flags such as -fopenmp"                     ON)
 option(GL_ENABLE_MPI         "Enable MPI parallelization"                               ON)
 option(GL_ENABLE_LTO         "Enable link time optimization"                            OFF)
+option(GL_ENABLE_ASAN        "Enable runtime address sanitizer -fsanitize=address"      OFF)
 option(GL_AS_SUBPROJECT      "Try using this as a subproject with add_subdirectory()"   OFF)
 option(GL_DEPS_IN_SUBDIR     "Install dependencies into CMAKE_INSTALL_PREFIX/<libname>" ON)
 option(GL_PRINT_INFO         "Prints additional information during CMake configure"     ON)
+
 
 if(NOT GL_ENABLE_MPI)
     message(FATAL_ERROR "This project uses MPI and should be enabled by default.")
@@ -131,6 +133,14 @@ if(NOT TARGET Threads::Threads)
     set_target_properties(Threads::Threads PROPERTIES INTERFACE_LINK_LIBRARIES pthread)
 endif()
 
+
+#######################################
+# Settings for sanitizers           ###
+#######################################
+if(GL_ENABLE_ASAN)
+    target_compile_options(project-settings INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:DEBUG>>: -fsanitize=address -fno-omit-frame-pointer>)
+    target_link_options(project-settings INTERFACE -fsanitize=address)
+endif()
 
 
 
