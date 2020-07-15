@@ -83,7 +83,7 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read, int 
         if((fPsi=fopen(psi_init_file.c_str(), "r")) and (fA=fopen(a_init_file.c_str(), "r")) ) {
             for (i = 0; i < N; i++) {
                 fread(Site[i].Psi, sizeof(struct O2), NC, fPsi);
-                fread(Site[i].A, sizeof(struct O2), NC, fA);
+                fread(Site[i].A, sizeof(double), 3, fA);
             }
             fclose(fA);
             fclose(fPsi);

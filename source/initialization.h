@@ -18,14 +18,14 @@
 
 //static constexpr double C_TWO_PI = 6.2831853071795864769252867665590058;
 
-struct Node{
-    double* A; /*three spatial dimensions*/
-    struct O2* Psi; /*three SC components*/
-};
 
-struct NN_Node{ /*auxiliary structure to avoid to call too many times cos/sin functions*/
-    struct O2* Psi_plusk; /*three spatial directions*/
-    struct O2* Psi_minusk; /*three spatial directions*/
+struct Node{
+    /*three spatial dimensions*/
+    //std::array<double,3> A;
+    double* A;
+    /*three SC components*/
+    //std::array<O2, NC> Psi; 
+    struct O2* Psi;
 };
 
 struct H_parameters{

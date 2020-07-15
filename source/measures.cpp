@@ -198,9 +198,9 @@ void save_lattice(struct Node* Site, const fs::path & directory_write, std::stri
     }
 
     if((fA=fopen(a_init_file.c_str(), "w"))) {
-        for (i = 0; i < N; i++) {
-            fwrite(Site[i].A, sizeof(struct O2), 3, fA);
-        }
+    	for (i = 0; i < N; i++) {
+            fwrite(Site[i].A, sizeof(double), 3, fA);
+	}
         fclose(fA);
     }
 

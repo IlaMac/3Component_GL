@@ -14,8 +14,8 @@
 #include <mpi.h>
 #include "rng.h"
 
-#define NC 3 /*Number of components*/
-
+/*Number of components*/
+static constexpr int NC = 3;
 
 extern unsigned int Lx, Ly, Lz, N;
 

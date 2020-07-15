@@ -57,9 +57,8 @@ void signal_callback_handler(int signum) {
 unsigned int Lx, Ly, Lz, N;
 
 int main(int argc, char *argv[]){
-
+    //std::vector<Node> Lattice;
     struct Node* Lattice;
-    struct NN_Node* Neighbours;
     struct H_parameters Hp;
     struct MC_parameters MCp;
     struct PT_parameters PTp;
@@ -130,13 +129,10 @@ int main(int argc, char *argv[]){
 
     //Declaration of structure Lattice
     Lattice=(struct Node*)calloc(N,sizeof(struct Node));
-    Neighbours=(struct NN_Node*)calloc(N,sizeof(struct NN_Node));
-
+    // Lattice.resize(N);
     for(i=0; i<N; i++) {
         Lattice[i].A = (double *) calloc(3, sizeof(double));
         Lattice[i].Psi = (struct O2 *) calloc(NC, sizeof(struct O2));
-        Neighbours[i].Psi_plusk= (struct O2 *) calloc(9, sizeof(struct O2)); //3 components x 3 directions [alpha +3*vec] alpha=component, vec=direction
-        Neighbours[i].Psi_minusk= (struct O2 *) calloc(9, sizeof(struct O2)); //3 components x 3 directions
     }
 
     //Initialize H_parameters: file "H_init.txt"
