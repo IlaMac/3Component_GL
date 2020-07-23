@@ -1,7 +1,17 @@
+if(DEFINED ENV{CC})
+    message(STATUS "Detected environment CC: $ENV{CC}")
+endif()
+if(DEFINED ENV{CXX})
+    message(STATUS "Detected environment CXX: $ENV{CXX}")
+endif()
+if(DEFINED ENV{FC})
+    message(STATUS "Detected environment FC: $ENV{FC}")
+endif()
+
 cmake_minimum_required(VERSION 3.12)
 cmake_policy(SET CMP0074 NEW)
+project(external-h5pp CXX)
 
-project(external-h5pp)
 
 option(BUILD_SHARED_LIBS               "Builds shared libraries"                                     OFF)
 option(H5PP_BUILD_EXAMPLES             "Builds examples"                                             OFF)
@@ -27,9 +37,6 @@ ExternalProject_Add(external_h5pp
         CMAKE_ARGS
         # CMake flags
         -DCMAKE_POLICY_DEFAULT_CMP0074=${CMAKE_POLICY_DEFAULT_CMP0074}
-#        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-#        -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}
-#        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_EXE_LINKER_FLAGS_INIT=${CMAKE_EXE_LINKER_FLAGS}
         -DCMAKE_SHARED_LINKER_FLAGS_INIT=${CMAKE_SHARED_LINKER_FLAGS}
         -DCMAKE_STATIC_LINKER_FLAGS_INIT=${CMAKE_STATIC_LINKER_FLAGS}

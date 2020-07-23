@@ -28,15 +28,15 @@ if(NOT TARGET h5pp::h5pp AND GL_DOWNLOAD_METHOD MATCHES "fetch")
     list(APPEND H5PP_CMAKE_OPTIONS  -DH5PP_DOWNLOAD_METHOD:STRING=${GL_DOWNLOAD_METHOD})
     list(APPEND H5PP_CMAKE_OPTIONS  -DH5PP_PRINT_INFO:BOOL=${GL_PRINT_INFO})
     list(APPEND H5PP_CMAKE_OPTIONS  -DH5PP_PREFER_CONDA_LIBS:BOOL=${GL_PREFER_CONDA_LIBS})
+    list(APPEND H5PP_CMAKE_OPTIONS  -DEigen3_ROOT:PATH=${Eigen3_ROOT})
     build_dependency(h5pp "${CMAKE_INSTALL_PREFIX}" "${H5PP_CMAKE_OPTIONS}")
 
     find_package(h5pp 1.7.2 HINTS ${CMAKE_BINARY_DIR}/deps-build
             HINTS ${CMAKE_INSTALL_PREFIX}
             PATH_SUFFIXES h5pp
-            NO_DEFAULT_PATH)
+            NO_DEFAULT_PATH
+            REQUIRED)
     if(h5pp_FOUND AND TARGET h5pp::h5pp)
         message(STATUS "h5pp installed successfully")
-    else()
-        message(FATAL_ERROR "h5pp could not be installed")
     endif()
 endif()
