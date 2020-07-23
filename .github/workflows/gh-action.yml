@@ -30,14 +30,15 @@ jobs:
             version: "8"
             flags:  --download-method=find-or-fetch
             sources: apt
-            apt: gcc-8 g++-8 gfortran-8 libsz2 zlibc libopenblas-dev libarpack2-dev libarpack++2-dev liblapacke-dev libhdf5-dev libspdlog-dev libgflags-dev libgoogle-glog-dev libceres-dev libunwind-dev lzma libaec-dev
+            apt: gcc-8 g++-8 gfortran-8 libsz2 libopenmpi-dev libhdf5-dev libspdlog-dev
           
           - name: ubuntu-18.04-gcc-9-conan
             os: ubuntu-18.04
             compiler: gcc
             version: "9"
-            sources: conda conan
+            sources: conda conan apt
             conda: conan
+            apt: libopenmpi-dev
             flags: --download-method=conan
 
           - name: ubuntu-18.04-clang-8
@@ -50,13 +51,16 @@ jobs:
             os: ubuntu-18.04
             compiler: clang
             version: "9"
+            sources: apt
+            apt: libopenmpi-dev
             flags: --download-method=find-or-fetch
 
           - name: ubuntu-18.04-clang-9-conda
             os: ubuntu-18.04
             compiler: clang
             version: "9"
-            sources: conda
+            sources: conda apt
+            apt: libopenmpi-dev
             conda: spdlog hdf5 hdf5-static eigen arpack arpackpp openblas ceres-solver
             flags: --download-method=find-or-fetch --prefer-conda
 
@@ -64,8 +68,9 @@ jobs:
             os: ubuntu-18.04
             compiler: clang
             version: "9"
-            sources: conda conan
+            sources: conda conan apt
             conda: conan
+            apt: libopenmpi-dev
             flags: --download-method=conan
           #- name: windows-2019-clang
           #  os: windows-2019
