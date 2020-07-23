@@ -17,7 +17,6 @@ project(GL_3component CXX)
 
 ### Set options for compilation
 option(BUILD_SHARED_LIBS     "Enables shared library linking (recommended for MPI)"     ON)
-option(CMAKE_FIND_DEBUG_MODE "Prints debug output for find_package calls"               ON)
 option(GL_ENABLE_TESTS       "Enables CTest testing"                                    ON)
 option(GL_ENABLE_H5PP        "h5pp is a C++ front-end to HDF5"                          ON)
 option(GL_ENABLE_EIGEN3      "Eigen3 is a linear algebra template library"              ON)

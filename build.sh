@@ -282,6 +282,7 @@ if [ -z "$dry_run" ] ;then
     cmake   -DCMAKE_BUILD_TYPE=$build_type \
             -DBUILD_SHARED_LIBS=$enable_shared \
             -DCMAKE_VERBOSE_MAKEFILE=$verbose \
+            -DCMAKE_FIND_DEBUG_MODE=ON \
             -DGL_MARCH=$arch \
             -DGL_PRINT_INFO=$print_info \
             -DGL_DOWNLOAD_METHOD=$download_method \

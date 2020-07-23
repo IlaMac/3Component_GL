@@ -40,7 +40,35 @@ matrix:
       cache:
         pip: true
         directories:
-          - $TRAVIS_BUILD_DIR/build/Debug/dmrg-deps-install
+          - $TRAVIS_BUILD_DIR/build/Debug/deps-install
+
+    - name: "bionic gcc-8 | shared | apt | fetch"
+      dist: bionic
+      os: linux
+      compiler: gcc
+      env:
+        - CACHE_NAME=bionic-gcc-8-shared-apt-fetch
+        - CXX=g++-8
+        - CC=gcc-8
+        - FC=gfortran-8
+        - FLAGS="--download-method=fetch"
+      addons:
+        apt:
+          update: true
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - gcc-8
+            - g++-8
+            - gfortran-8
+            - libsz2
+            - zlibc
+            - libopenmpi-dev
+      cache:
+        pip: true
+        directories:
+          - $TRAVIS_BUILD_DIR/build/Debug/deps-install
+
 
     - name: "bionic gcc-7 | shared | conda-forge | find-or-fetch"
       # Note that xenial gives a TLS error "Bad symbol" when linking openblas from conda-forge
@@ -68,7 +96,7 @@ matrix:
       cache:
         pip: true
         directories:
-          - $TRAVIS_BUILD_DIR/build/Debug/dmrg-deps-install
+          - $TRAVIS_BUILD_DIR/build/Debug/deps-install
           - $HOME/miniconda
 
 
@@ -187,5 +215,5 @@ before_script:
   - cmake --version
 
 script:
-  - ./build.sh --verbose --enable-shared --enable-mpi --enable-h5pp --enable-eigen3 --enable-spdlog --enable-tests --enable-mpi  -a haswell  -j 2 --build-type=Debug ${FLAGS}
+  - ./build.sh --verbose --enable-shared --enable-mpi --enable-h5pp --enable-eigen3 --enable-spdlog --enable-tests -a haswell  -j 2 --build-type=Debug ${FLAGS}
 
