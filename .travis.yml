@@ -166,6 +166,9 @@ before_install:
       fi
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       export PATH=/Users/travis/Library/Python/2.7/bin:$PATH
+      if [[ "$TRAVIS_JOB_NAME" =~ conan ]]; then
+        conan --version
+      fi
     else
       pip install --user --upgrade pip
     fi
