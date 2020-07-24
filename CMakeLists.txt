@@ -148,17 +148,16 @@ if(GL_ENABLE_ASAN)
 endif()
 
 
-
-
 # Fetch or find all the dependencies
 include(cmake/SetupDependenciesFind.cmake)
 include(cmake/SetupDependenciesFetch.cmake)
 include(cmake/SetupDependenciesConan.cmake)
-
 ##################################################################
 ### Link all the things!                                       ###
 ##################################################################
-target_link_libraries(project-settings INTERFACE  stdc++fs)
+find_package(Filesystem COMPONENTS Final Experimental REQUIRED)
+target_link_libraries(project-settings INTERFACE  std::filesystem)
+
 target_link_libraries(project-settings INTERFACE  ${CONAN_TARGETS} ${NATIVE_TARGETS} Threads::Threads) # Order is important here
 target_link_libraries(${PROJECT_NAME} PRIVATE project-settings)  # Link everything to main project
 
