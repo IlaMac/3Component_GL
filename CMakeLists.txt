@@ -15,6 +15,10 @@ cmake_minimum_required(VERSION 3.12)
 ### Setup project name and language
 project(GL_3component CXX)
 
+# Make sure we use GL's own find modules
+list(INSERT CMAKE_MODULE_PATH 0  ${PROJECT_SOURCE_DIR}/cmake)
+
+
 ### Set options for compilation
 option(BUILD_SHARED_LIBS     "Enables shared library linking (recommended for MPI)"     ON)
 option(GL_ENABLE_TESTS       "Enables CTest testing"                                    ON)
@@ -157,7 +161,6 @@ include(cmake/SetupDependenciesConan.cmake)
 ##################################################################
 find_package(Filesystem COMPONENTS Final Experimental REQUIRED)
 target_link_libraries(project-settings INTERFACE  std::filesystem)
-
 target_link_libraries(project-settings INTERFACE  ${CONAN_TARGETS} ${NATIVE_TARGETS} Threads::Threads) # Order is important here
 target_link_libraries(${PROJECT_NAME} PRIVATE project-settings)  # Link everything to main project
 
