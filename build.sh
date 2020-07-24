@@ -260,7 +260,7 @@ Running script:
     cmake   -DCMAKE_BUILD_TYPE=$build_type
             -DBUILD_SHARED_LIBS=$enable_shared
             -DCMAKE_VERBOSE_MAKEFILE=$verbose
-            -DCMAKE_FIND_DEBUG_MODE=$debug_find \
+            -DCMAKE_FIND_DEBUG_MODE=$debug_find
             -DGL_MARCH=$arch
             -DGL_PRINT_INFO=ON
             -DGL_DOWNLOAD_METHOD=$download_method

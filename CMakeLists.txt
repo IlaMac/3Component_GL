@@ -13,7 +13,7 @@ endif()
 
 cmake_minimum_required(VERSION 3.12)
 ### Setup project name and language
-project(GL_3component CXX)
+project(GL_3component C CXX)
 
 ### Set options for compilation
 option(BUILD_SHARED_LIBS     "Enables shared library linking (recommended for MPI)"     ON)
