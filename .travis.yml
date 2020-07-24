@@ -34,6 +34,7 @@ matrix:
             - libsz2
             - zlibc
             - libopenmpi-dev
+            - openmpi-bin
             - libeigen3-dev
             - libhdf5-dev
             - libspdlog-dev
@@ -64,6 +65,7 @@ matrix:
             - libsz2
             - zlibc
             - libopenmpi-dev
+            - openmpi-bin
       cache:
         pip: true
         directories:
@@ -71,7 +73,6 @@ matrix:
 
 
     - name: "bionic gcc-7 | shared | conda-forge | find-or-fetch"
-      # Note that xenial gives a TLS error "Bad symbol" when linking openblas from conda-forge
       dist: bionic
       os: linux
       compiler: gcc
@@ -92,6 +93,7 @@ matrix:
             - g++-7
             - gfortran-7
             - libopenmpi-dev
+            - openmpi-bin
 
       cache:
         pip: true
@@ -101,7 +103,6 @@ matrix:
 
 
     - name: "bionic clang | shared | conda-forge | find-or-fetch"
-      # Note that xenial gives a TLS error "Bad symbol" when linking openblas from conda-forge
       dist: bionic
       os: linux
       compiler: clang
@@ -119,6 +120,7 @@ matrix:
             - libstdc++-8-dev
             - gfortran-8
             - libopenmpi-dev
+            - openmpi-bin
       cache:
         pip: true
         directories:
@@ -143,6 +145,7 @@ matrix:
             - libstdc++-8-dev
             - gfortran-8
             - libopenmpi-dev
+            - openmpi-bin
       cache:
         pip: true
         directories:
