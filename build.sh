@@ -27,6 +27,7 @@ Usage            : $PROGNAME [-option | --option ] <=argument>
    | --enable-asan              : Enable runtime sanitizers, i.e. -fsanitize=address
 -t | --target [=args]           : Select build target [ CMakeTemplate | all-tests | test-<name> ]  (default = none)
    | --enable-tests             : Enable CTest tests
+   | --debug-find               : Enable debugging of find modules
    | --prefer-conda             : Prefer libraries from anaconda
    | --no-module                : Disable use of "module load"
    | --quiet                    : Print less CMake info
@@ -61,6 +62,7 @@ PARSED_OPTIONS=$(getopt -n "$0"   -o ha:b:cl:df:g:G:j:st:v \
                 enable-lto\
                 enable-asan\
                 no-module\
+                debug-find\
                 prefer-conda\
                 verbose\
                 quiet\
@@ -90,6 +92,7 @@ enable_mpi="ON"
 enable_lto="OFF"
 enable_asan="OFF"
 make_threads=8
+debug_find="OFF"
 prefer_conda="OFF"
 verbose="OFF"
 print_info="ON"
@@ -121,9 +124,10 @@ do
        --enable-spdlog)             enable_spdlog="ON"              ; echo " * Enable spdlog            : ON"      ; shift   ;;
        --enable-openmp)             enable_openmp="ON"              ; echo " * Enable OpenMP            : ON"      ; shift   ;;
        --enable-mpi)                enable_mpi="ON"                 ; echo " * Enable OpenMPI           : ON"      ; shift   ;;
-       --enable-lto)                enable_lto="ON"                 ; echo " * Link Time Optimization  : ON"      ; shift   ;;
-       --enable-asan)               enable_asan="ON"                ; echo " * Runtime sanitizers      : ON"      ; shift   ;;
+       --enable-lto)                enable_lto="ON"                 ; echo " * Link Time Optimization   : ON"      ; shift   ;;
+       --enable-asan)               enable_asan="ON"                ; echo " * Runtime sanitizers       : ON"      ; shift   ;;
        --no-module)                 no_module="ON"                  ; echo " * Disable module load      : ON"      ; shift   ;;
+       --debug-find)                debug_find="ON"                 ; echo " * Debug find_package       : ON"      ; shift   ;;
        --prefer-conda)              prefer_conda="ON"               ; echo " * Prefer anaconda libs     : ON"      ; shift   ;;
        --quiet)                     print_info="OFF"                ; echo " * Print less CMake info    : ON"      ; shift   ;;
     -v|--verbose)                   verbose="ON"                    ; echo " * Verbose makefiles        : ON"      ; shift   ;;
@@ -256,6 +260,7 @@ Running script:
     cmake   -DCMAKE_BUILD_TYPE=$build_type
             -DBUILD_SHARED_LIBS=$enable_shared
             -DCMAKE_VERBOSE_MAKEFILE=$verbose
+            -DCMAKE_FIND_DEBUG_MODE=$debug_find
             -DGL_MARCH=$arch
             -DGL_PRINT_INFO=ON
             -DGL_DOWNLOAD_METHOD=$download_method
@@ -282,6 +287,7 @@ if [ -z "$dry_run" ] ;then
     cmake   -DCMAKE_BUILD_TYPE=$build_type \
             -DBUILD_SHARED_LIBS=$enable_shared \
             -DCMAKE_VERBOSE_MAKEFILE=$verbose \
+            -DCMAKE_FIND_DEBUG_MODE=$debug_find \
             -DGL_MARCH=$arch \
             -DGL_PRINT_INFO=$print_info \
             -DGL_DOWNLOAD_METHOD=$download_method \

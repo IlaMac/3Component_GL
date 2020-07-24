@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(tests)
+project(tests CXX)
 add_custom_target(all-tests)
 
 if(TARGET Eigen3::Eigen OR TARGET CONAN_PKG::Eigen3)

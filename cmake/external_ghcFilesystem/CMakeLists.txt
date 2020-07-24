@@ -13,5 +13,5 @@ ExternalProject_Add(external_ghcFilesystem
         -DGHC_FILESYSTEM_BUILD_TESTING:BOOL=OFF
         -DGHC_FILESYSTEM_BUILD_EXAMPLES:BOOL=OFF
         -DGHC_FILESYSTEM_WITH_INSTALL:BOOL=ON
-        -DCMAKE_INSTALL_MESSAGE=NEVER #Avoid unnecessary output to console
+        -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE} #Avoid unnecessary output to console
 )
