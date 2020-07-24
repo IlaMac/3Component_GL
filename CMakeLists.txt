@@ -158,6 +158,7 @@ include(cmake/SetupDependenciesConan.cmake)
 ##################################################################
 ### Link all the things!                                       ###
 ##################################################################
+target_link_libraries(project-settings INTERFACE  stdc++fs)
 target_link_libraries(project-settings INTERFACE  ${CONAN_TARGETS} ${NATIVE_TARGETS} Threads::Threads) # Order is important here
 target_link_libraries(${PROJECT_NAME} PRIVATE project-settings)  # Link everything to main project
 
