@@ -21,27 +21,27 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
     for (ix= 0; ix < Lx; ix++) {
         for (iy = 0; iy < Ly; iy++) {
             for (iz = 0; iz < Lz; iz++) {
-                i=ix + Lx * (iy + iz * Ly);
+                i = ix + Lx * (iy + iz * Ly);
                 /*************PSI UPDATE: move in the plane ImPsi, RePsi**********/
                 for (alpha = 0; alpha < 3; alpha++) {
                     OldPsi = Site[i].Psi[alpha];
                     //t_localHpsi.tic();
                     oldE = local_HPsi(OldPsi, ix, iy, iz, alpha, Hp, Site);
                     //t_localHpsi.toc();
-                    l=rn::uniform_real_box(0, MCp.lbox_l);
-                    phi=rn::uniform_real_box(0, C_TWO_PI);
+                    l = rn::uniform_real_box(0, MCp.lbox_l);
+                    phi = rn::uniform_real_box(0, C_TWO_PI);
                     NewPsi.x = OldPsi.x + (l * cos(phi));
                     NewPsi.y = OldPsi.y + (l * sin(phi));
                     cartesian_to_polar(NewPsi);
                     //t_localHpsi.tic();
                     newE = local_HPsi(NewPsi, ix, iy, iz, alpha, Hp, Site);
                     //t_localHpsi.toc();
-                    minus_deltaE = h3*(oldE - newE);
+                    minus_deltaE = h3 * (oldE - newE);
                     if (minus_deltaE > 0) {
                         Site[i].Psi[alpha] = NewPsi;
                         acc_l++;
                     } else {
-                        rand= rn::uniform_real_box(0,1);
+                        rand = rn::uniform_real_box(0, 1);
                         //Boltzmann weight: exp(-\beta \Delta E) E= h³ \sum_i E(i)
                         if (rand < exp(my_beta * minus_deltaE)) {
                             Site[i].Psi[alpha] = NewPsi;
@@ -56,19 +56,19 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                     //t_localHtheta.tic();
                     oldE = local_Htheta(OldPsi, ix, iy, iz, alpha, Hp, Site);
                     //t_localHtheta.toc();
-                    d_theta=rn::uniform_real_box(-MCp.lbox_theta, MCp.lbox_theta);
+                    d_theta = rn::uniform_real_box(-MCp.lbox_theta, MCp.lbox_theta);
                     NewPsi.t = fmod(OldPsi.t + d_theta, C_TWO_PI);
-                    NewPsi.r= OldPsi.r;
+                    NewPsi.r = OldPsi.r;
                     polar_to_cartesian(NewPsi);
                     //t_localHtheta.tic();
                     newE = local_Htheta(NewPsi, ix, iy, iz, alpha, Hp, Site);
                     //t_localHtheta.toc();
-                    minus_deltaE = h3*(oldE - newE);
+                    minus_deltaE = h3 * (oldE - newE);
                     if (minus_deltaE > 0) {
                         Site[i].Psi[alpha] = NewPsi;
                         acc_theta++;
                     } else {
-                        rand= rn::uniform_real_box(0,1);
+                        rand = rn::uniform_real_box(0, 1);
                         //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
                         if (rand < exp(my_beta * minus_deltaE)) {
                             Site[i].Psi[alpha] = NewPsi;
@@ -76,30 +76,32 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                         }
                     }
                 }
-                /**********VECTOR POTENTIAL UPDATE********/
-                for (vec = 0; vec < 3; vec++) {
-                    //Update of A
-                    OldA=Site[i].A[vec];
-                    //t_localHA.tic();
-                    oldE = local_HA(OldA, ix, iy, iz, vec, Hp, Site);
-                    //t_localHA.toc();
-                    d_A=rn::uniform_real_box(-MCp.lbox_A, MCp.lbox_A);
-                    NewA= OldA + d_A;
-                    //t_localHA.tic();
-                    newE = local_HA(NewA, ix, iy, iz, vec, Hp, Site);
-                    //t_localHA.toc();
-                    minus_deltaE=h3*(oldE -newE);
-                    if(minus_deltaE>0.){
-                        Site[i].A[vec]=NewA;
-                        acc_A++;
-		   }else{
-                        rand= rn::uniform_real_box(0,1);
-                        //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
-                        if( rand < exp(my_beta*minus_deltaE) ) {
+                if (Hp.e != 0) {
+                    /**********VECTOR POTENTIAL UPDATE********/
+                    for (vec = 0; vec < 3; vec++) {
+                        //Update of A
+                        OldA = Site[i].A[vec];
+                        //t_localHA.tic();
+                        oldE = local_HA(OldA, ix, iy, iz, vec, Hp, Site);
+                        //t_localHA.toc();
+                        d_A = rn::uniform_real_box(-MCp.lbox_A, MCp.lbox_A);
+                        NewA = OldA + d_A;
+                        //t_localHA.tic();
+                        newE = local_HA(NewA, ix, iy, iz, vec, Hp, Site);
+                        //t_localHA.toc();
+                        minus_deltaE = h3 * (oldE - newE);
+                        if (minus_deltaE > 0.) {
                             Site[i].A[vec] = NewA;
                             acc_A++;
+                        } else {
+                            rand = rn::uniform_real_box(0, 1);
+                            //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
+                            if (rand < exp(my_beta * minus_deltaE)) {
+                                Site[i].A[vec] = NewA;
+                                acc_A++;
 
-	                   }
+                            }
+                        }
                     }
                 }
             }

@@ -28,11 +28,14 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
                         h_Kinetic -= (1. / h2) * (Site[i].Psi[alpha].r*Site[nn(i, vec, -1)].Psi[alpha].r)*cos(gauge_phase) ;
                     }
                     for (vec = alpha+1; vec < 3; vec++) {
-                            //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beys}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
-                            h_Josephson += (Hp.eta* O2prod(Site[i].Psi[alpha], Site[i].Psi[vec]) );
+                        //Josephson= eta* \sum_beta!=alpha |Psi_{alpha}(r)||Psi_{beys}(r)|* cos(theta_{alpha}(r) - theta_{beta}(r))
+                        h_Josephson += (Hp.eta * O2prod(Site[i].Psi[alpha], Site[i].Psi[vec]));
+                        if (Hp.e != 0) {
                             //F_{alpha,vec}= A_alpha(r_i) + A_vec(ri+alpha) - A_alpha(r_i+vec) - A_vec(ri)
-                            F_A=(Site[i].A[alpha] + Site[nn(i, alpha, 1)].A[vec] - Site[nn(i, vec, 1)].A[alpha] - Site[i].A[vec]);
-                            h_B+=((0.5/h2)*(F_A*F_A));
+                            F_A = (Site[i].A[alpha] + Site[nn(i, alpha, 1)].A[vec] - Site[nn(i, vec, 1)].A[alpha] -
+                                   Site[i].A[vec]);
+                            h_B += ((0.5 / h2) * (F_A * F_A));
+                        }
                     }
                 }
                 //Andreev-Bashkin term = \sum_beta!=alpha \sum_k=1,2,3 nu*(J^k_alpha - J^k_beta)^2;
