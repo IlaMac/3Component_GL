@@ -162,7 +162,7 @@ int main(int argc, char *argv[]){
     initialize_lattice(Lattice, directory_read, RESTART);
 
     if(RESTART==1){
-        std::fstream restart_file(directory_parameters+"/restart-0", std::ios::in);
+        std::fstream restart_file(directory_read+"/restart-0", std::ios::in);
         restart_file >> NSTART;
         std::cout << NSTART << std::endl;
         restart_file.close();
@@ -185,7 +185,7 @@ int main(int argc, char *argv[]){
 
 void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters &Hp, double &my_beta, int &my_ind, struct PT_parameters PTp, struct PTroot_parameters PTroot, std::string directory_parameters_temp, int NSTART) {
 
-    int n = NSTART, t = 0;
+    int n, t = 0;
     class_tic_toc t_h5pp(true,5,"Benchmark h5pp");
     class_tic_toc t_metropolis(true,5,"Benchmark metropolis");
     class_tic_toc t_measures(true,5,"Benchmark measures");
@@ -232,7 +232,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
 
     //std::vector<double> testvec (1000000,3.14);
     //file.writeDataset(testvec,"testgroup/hugevector", H5D_layout_t::H5D_CHUNKED);
-    for (n = 0; n<MCp.nmisu; n++) {
+    for (n = NSTART; n<MCp.nmisu; n++) {
         for (t = 0; t < MCp.tau; t++) {
             t_metropolis.tic();
             metropolis(Site, MCp, Hp,  my_beta);

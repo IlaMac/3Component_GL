@@ -15,17 +15,17 @@ fi
 
 RESTART=1
 
-LLIST="12"
+LLIST="8"
 #LLIST="8 10 12"
 ############ Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
 H_a=0
 H_b=1
 H_eta=1 
-H_e=0.5
-H_h=5.4
-H_nu=0.1
-H_blow=0.2165
-H_bhigh=0.2195
+H_e=0
+H_h=1
+H_nu=0
+H_blow=1.49
+H_bhigh=1.51
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
@@ -55,11 +55,17 @@ fi
 
 cd nu_${H_nu}
 
+if [ ! -d ./Sh_${H_h} ]; then
+   mkdir -p h_${H_h}
+fi
+
+cd h_${H_h}
+
 if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh} ]; then
    mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
 fi
 
-OUTPUT=${BASEDIR}/Output_3C/e_${H_e}/nu_${H_nu}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+OUTPUT=${BASEDIR}/Output_3C/e_${H_e}/nu_${H_nu}/h_${H_h}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
 
 cd /tmp/Output_x_ilaria
 
@@ -75,11 +81,17 @@ fi
 
 cd nu_${H_nu}
 
+if [ ! -d ./Sh_${H_h} ]; then
+   mkdir -p h_${H_h}
+fi
+
+cd h_${H_h}
+
 if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh} ]; then
    mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
 fi
 
-OUTPUT_TEMP=/tmp/Output_x_ilaria/e_${H_e}/nu_${H_nu}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+OUTPUT_TEMP=/tmp/Output_x_ilaria/e_${H_e}/nu_${H_nu}/h_${H_h}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
 
 cd ${OUTPUT}
 
@@ -132,7 +144,7 @@ done
 
 cd ${SCRIPT_DIR}
 DIR_PAR="${OUTPUT}"
-DIR_PAR_TEMP="${OUTPUT_TEMP}"
+DIR_PAR_TEMP="${OUTPUT}"
 
 #SEED= If I want to repeat exactly a simulation I could initialize the random number generator exactly at the same way
 
@@ -159,4 +171,5 @@ mkdir -p ${DIR_PAR}/logs
 
 sbatch submit_run
 
+echo ${L} ${DIR_PAR} ${DIR_PAR} ${RESTART}
 done
