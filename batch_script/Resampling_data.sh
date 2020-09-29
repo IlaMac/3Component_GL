@@ -12,18 +12,18 @@
 H_a=0
 H_b=1
 H_eta=1
-H_e=0
-H_h=1
-H_nu=50
-H_blow=50.0
-H_bhigh=200.0
+H_e=0.5
+H_h=5.4
+H_nu=0.5
+H_blow=0.208
+H_bhigh=0.214
 
 
 nbeta=32
 
 #LList="\"[[8] [10]]\""
 
-LList=("8 10 12")
+LList=("8 10 12 16 20")
 
 BASEDIR="/Users/ilaria/Desktop/MultiComponents_SC/Output_3C/e_${H_e}/nu_${H_nu}/h_${H_h}"
 #BASEDIR="/Users/ilaria/Desktop/New_Test/Output_3C/e_${H_e}/nu_${H_nu}"
