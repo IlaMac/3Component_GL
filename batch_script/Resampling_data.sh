@@ -12,11 +12,11 @@
 H_a=0
 H_b=1
 H_eta=1
-H_e=0.5
-H_h=5.4
-H_nu=0.5
-H_blow=0.208
-H_bhigh=0.214
+H_e=0
+H_h=1
+H_nu=0
+H_blow=1.49
+H_bhigh=1.52
 
 
 nbeta=32
