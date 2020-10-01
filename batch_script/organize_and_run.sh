@@ -13,9 +13,9 @@ fi
 #RESTART=1-> Restart from interrupted run
 #RESTART=2-> Restart from the previois final scenario
 
-RESTART=1
+RESTART=0
 
-LLIST="8"
+LLIST="8 10 12 16 20"
 #LLIST="8 10 12"
 ############ Parameters of the Hamiltonian ---> HP_init.txt in a directory whose name contains the main parameters values##################
 H_a=0
@@ -23,9 +23,9 @@ H_b=1
 H_eta=1 
 H_e=0
 H_h=1
-H_nu=0
-H_blow=1.49
-H_bhigh=1.51
+H_nu=0.1
+H_blow=1.825
+H_bhigh=1.845
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 

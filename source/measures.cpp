@@ -83,14 +83,15 @@ void helicity_modulus(struct Measures &mis, struct H_parameters &Hp, struct Node
                     DJ_alpha_Dd=(1./Hp.h)*(Site[i].Psi[alpha].r*Site[nn(i, vec, 1)].Psi[alpha].r)*cos(gauge_phase1);
 
                     mis.DH_Ddi[alpha] += ((1. / Hp.h) * J_alpha);
-                    mis.D2H_Dd2i[alpha]+= ((1. / Hp.h)*DJ_alpha_Dd ) + 2*Hp.nu*((DJ_alpha_Dd*DJ_alpha_Dd));
+                    mis.D2H_Dd2i[alpha]+= ((1. / Hp.h)*DJ_alpha_Dd );
 
                     for(beta=0; beta<NC; beta++) {
                         if(beta !=alpha ){
                             gauge_phase2=Site[nn(i, vec, 1)].Psi[beta].t - Site[i].Psi[beta].t + Hp.h*Hp.e*Site[i].A[vec];
                             J_beta= (1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*sin(gauge_phase2);
                             mis.DH_Ddi[alpha] += (2 * Hp.nu *(J_alpha - J_beta)*DJ_alpha_Dd );
-                            mis.D2H_Dd2i[alpha]-=(2 * Hp.nu*(J_alpha- J_beta)*J_alpha);
+                    	    mis.D2H_Dd2i[alpha]+= (2*Hp.nu*(DJ_alpha_Dd*DJ_alpha_Dd));
+                            mis.D2H_Dd2i[alpha]-= (2 * Hp.nu*(J_alpha- J_beta)*J_alpha);
                             DJ_beta_Dd=(1./Hp.h)*(Site[i].Psi[beta].r*Site[nn(i, vec, 1)].Psi[beta].r)*cos(gauge_phase2);
                             mis.D2H_Dd2ij[alpha]+= (-2*Hp.nu*(DJ_alpha_Dd*DJ_beta_Dd));
                         }
