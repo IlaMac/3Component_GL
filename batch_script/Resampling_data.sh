@@ -14,12 +14,12 @@ H_b=1
 H_eta=1
 H_e=0
 H_h=1
-H_nu=0
-H_blow=1.49
-H_bhigh=1.52
+H_nu=0.1
+H_blow=1.825
+H_bhigh=1.855
 
 
-nbeta=32
+nbeta=64
 
 #LList="\"[[8] [10]]\""
 

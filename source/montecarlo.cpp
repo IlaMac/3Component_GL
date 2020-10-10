@@ -49,6 +49,14 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                         }
                     }
                 }
+            }
+        }
+    }
+
+    for (ix= 0; ix < Lx; ix++) {
+        for (iy = 0; iy < Ly; iy++) {
+            for (iz = 0; iz < Lz; iz++) {
+                i = ix + Lx * (iy + iz * Ly);
 
                 /*******PHASE ONLY UPDATE**************/
                 for (alpha = 0; alpha < 3; alpha++) {
@@ -76,37 +84,45 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
                         }
                     }
                 }
-                if (Hp.e != 0) {
-                    /**********VECTOR POTENTIAL UPDATE********/
-                    for (vec = 0; vec < 3; vec++) {
-                        //Update of A
-                        OldA = Site[i].A[vec];
-                        //t_localHA.tic();
-                        oldE = local_HA(OldA, ix, iy, iz, vec, Hp, Site);
-                        //t_localHA.toc();
-                        d_A = rn::uniform_real_box(-MCp.lbox_A, MCp.lbox_A);
-                        NewA = OldA + d_A;
-                        //t_localHA.tic();
-                        newE = local_HA(NewA, ix, iy, iz, vec, Hp, Site);
-                        //t_localHA.toc();
-                        minus_deltaE = h3 * (oldE - newE);
-                        if (minus_deltaE > 0.) {
-                            Site[i].A[vec] = NewA;
-                            acc_A++;
-                        } else {
-                            rand = rn::uniform_real_box(0, 1);
-                            //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
-                            if (rand < exp(my_beta * minus_deltaE)) {
-                                Site[i].A[vec] = NewA;
-                                acc_A++;
+            }
+        }
+    }
 
+
+    if (Hp.e != 0) {
+    /**********VECTOR POTENTIAL UPDATE********/
+        for (ix= 0; ix < Lx; ix++) {
+            for (iy = 0; iy < Ly; iy++) {
+                for (iz = 0; iz < Lz; iz++) {
+                    i = ix + Lx * (iy + iz * Ly);
+                        for (vec = 0; vec < 3; vec++) {
+                            //Update of A
+                            OldA = Site[i].A[vec];
+                             //t_localHA.tic();
+                             oldE = local_HA(OldA, ix, iy, iz, vec, Hp, Site);
+                             //t_localHA.toc();
+                             d_A = rn::uniform_real_box(-MCp.lbox_A, MCp.lbox_A);
+                             NewA = OldA + d_A;
+                             //t_localHA.tic();
+                             newE = local_HA(NewA, ix, iy, iz, vec, Hp, Site);
+                             //t_localHA.toc();
+                             minus_deltaE = h3 * (oldE - newE);
+                             if (minus_deltaE > 0.) {
+                                 Site[i].A[vec] = NewA;
+                                 acc_A++;
+                             } else {
+                                 rand = rn::uniform_real_box(0, 1);
+                                 //Boltzmann weight: exp(-\beta E) E= h³ \sum_i E(i)
+                                 if (rand < exp(my_beta * minus_deltaE)) {
+                                     Site[i].A[vec] = NewA;
+                                     acc_A++;
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 //    t_localHA.print_measured_time();
  //   t_localHtheta.print_measured_time();
  //   t_localHpsi.print_measured_time();
