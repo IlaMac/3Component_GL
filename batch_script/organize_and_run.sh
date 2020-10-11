@@ -121,7 +121,7 @@ echo $A_box >> MC_init.txt
 jobname="L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init}"
 nnodes=1
 ntasks=32 #parallel tempering over ntasks temperatures
-time_limit=2-00:00:00
+time_limit=1-00:00:00
 
 #I create ntasks folder: one for each rank.
 
