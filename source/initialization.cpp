@@ -18,6 +18,7 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
             fscanf(fin, "%lf" , &Hp.nu);
             fscanf(fin, "%lf" , &Hp.b_low);
             fscanf(fin, "%lf" , &Hp.b_high);
+            fscanf(fin, "%lf", &Hp.init)
             fclose(fin);
             //With this modification Hp.beta in not anymore part of the Hamiltonian parameters list
         }
@@ -30,6 +31,7 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
         Hp.nu=0.1;
         Hp.b_low=0.244;
         Hp.b_high=0.247;
+        Hp.init=0;
     }
 
 }
@@ -61,7 +63,7 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
 
 }
 
-void initialize_lattice(struct Node* Site, const fs::path & directory_read, int RESTART){
+void initialize_lattice(struct Node* Site, const fs::path & directory_read, int RESTART, struct H_parameters &Hp){
 
     unsigned int i, alpha;
     fs::path psi_init_file = directory_read / "Psi_restart.bin";
@@ -89,11 +91,22 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read, int 
             fclose(fPsi);
         }
     }else{
-        for(i=0; i<N; i++){
-            for(alpha=0; alpha<3; alpha++){
-                Site[i].Psi[alpha].r=(1./2.);
-                Site[i].Psi[alpha].t=0.;
-                polar_to_cartesian(Site[i].Psi[alpha]);
+        if(Hp.init==0) {
+            for (i = 0; i < N; i++) {
+                for (alpha = 0; alpha < 3; alpha++) {
+                    Site[i].Psi[alpha].r = (1. / 2.);
+                    Site[i].Psi[alpha].t = 0.;
+                    polar_to_cartesian(Site[i].Psi[alpha]);
+                }
+            }
+        }
+        else if(Hp.init!=0) {
+            for (i = 0; i < N; i++) {
+                for (alpha = 0; alpha < 3; alpha++) {
+                    Site[i].Psi[alpha].r = (1. / 2.);
+                    Site[i].Psi[alpha].t = rn::uniform_real_box(0, C_TWO_PI);
+                    polar_to_cartesian(Site[i].Psi[alpha]);
+                }
             }
         }
     }

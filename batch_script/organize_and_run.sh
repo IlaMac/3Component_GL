@@ -26,6 +26,7 @@ H_h=1
 H_nu=0.1
 H_blow=1.825
 H_bhigh=1.845
+H_init=0 #If H_init=0: phases initialized to zero; H_init=1: phases initialized randomly
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
@@ -61,11 +62,11 @@ fi
 
 cd h_${H_h}
 
-if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh} ]; then
-   mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init} ]; then
+   mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init}
 fi
 
-OUTPUT=${BASEDIR}/Output_3C/e_${H_e}/nu_${H_nu}/h_${H_h}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+OUTPUT=${BASEDIR}/Output_3C/e_${H_e}/nu_${H_nu}/h_${H_h}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init}
 
 cd /tmp/Output_x_ilaria
 
@@ -87,11 +88,11 @@ fi
 
 cd h_${H_h}
 
-if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh} ]; then
-   mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+if [ ! -d ./SL${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init} ]; then
+   mkdir -p L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init}
 fi
 
-OUTPUT_TEMP=/tmp/Output_x_ilaria/e_${H_e}/nu_${H_nu}/h_${H_h}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}
+OUTPUT_TEMP=/tmp/Output_x_ilaria/e_${H_e}/nu_${H_nu}/h_${H_h}/L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init}
 
 cd ${OUTPUT}
 
@@ -104,6 +105,7 @@ echo $H_h >> HP_init.txt
 echo $H_nu >> HP_init.txt
 echo $H_blow >> HP_init.txt
 echo $H_bhigh >> HP_init.txt
+echo $H_init >> HP_init.txt
 
 #THE ORDER OF WRITING DOES MATTER
 echo $Nmisu > MC_init.txt
@@ -116,7 +118,7 @@ echo $A_box >> MC_init.txt
 
 #################Creation of the submit_runs script#########################
 
-jobname="L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}"
+jobname="L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init}"
 nnodes=1
 ntasks=32 #parallel tempering over ntasks temperatures
 

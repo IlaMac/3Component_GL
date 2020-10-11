@@ -38,7 +38,7 @@ struct H_parameters{
     double nu;
     double b_low; //lowest beta for the parallel tempering procedure
     double b_high; // highest beta for the parallel tempering procedure
-
+    int init; //Initial conditions
 };
 
 struct PT_parameters{
@@ -67,7 +67,7 @@ struct MC_parameters{
     double lbox_A; //length of the box for the uniform distribution of dA (transformation of the vector potential)
 };
 
-void initialize_lattice(struct Node* Site, const fs::path & directory_read, int RESTART);
+void initialize_lattice(struct Node* Site, const fs::path & directory_read, int RESTART, struct H_parameters &Hp);
 void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_parameters);
 void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directory_parameters);
 void initialize_PTarrays(struct PT_parameters &PTp, struct PTroot_parameters &PTroot, struct H_parameters &Hp);
