@@ -18,7 +18,7 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
             fscanf(fin, "%lf" , &Hp.nu);
             fscanf(fin, "%lf" , &Hp.b_low);
             fscanf(fin, "%lf" , &Hp.b_high);
-            fscanf(fin, "%lf", &Hp.init)
+            fscanf(fin, "%lf", &Hp.init);
             fclose(fin);
             //With this modification Hp.beta in not anymore part of the Hamiltonian parameters list
         }
