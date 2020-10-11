@@ -21,11 +21,11 @@ LLIST="8 10 12"
 H_a=0
 H_b=1
 H_eta=1 
-H_e=0.5
+H_e=0.2
 H_h=5.4
-H_nu=0
-H_blow=0.2245
-H_bhigh=0.2265
+H_nu=0.5
+H_blow=0.15
+H_bhigh=0.5
 H_init=1 #If H_init=0: phases initialized to zero; H_init=1: phases initialized randomly
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################

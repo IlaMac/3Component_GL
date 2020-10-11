@@ -18,9 +18,9 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
     class_tic_toc t_localHA(true,5,"local_HA");
 
 
-    for (ix= 0; ix < Lx; ix++) {
+    for (iz= 0; iz < Lz; iz++) {
         for (iy = 0; iy < Ly; iy++) {
-            for (iz = 0; iz < Lz; iz++) {
+            for (ix = 0; ix < Lx; ix++) {
                 i = ix + Lx * (iy + iz * Ly);
                 /*************PSI UPDATE: move in the plane ImPsi, RePsi**********/
                 for (alpha = 0; alpha < 3; alpha++) {
@@ -53,9 +53,9 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
         }
     }
 
-    for (ix= 0; ix < Lx; ix++) {
+    for (iz= 0; iz < Lz; iz++) {
         for (iy = 0; iy < Ly; iy++) {
-            for (iz = 0; iz < Lz; iz++) {
+            for (ix = 0; ix < Lx; ix++) {
                 i = ix + Lx * (iy + iz * Ly);
 
                 /*******PHASE ONLY UPDATE**************/
@@ -91,9 +91,9 @@ void metropolis( struct Node* Site, struct MC_parameters &MCp, struct H_paramete
 
     if (Hp.e != 0) {
     /**********VECTOR POTENTIAL UPDATE********/
-        for (ix= 0; ix < Lx; ix++) {
+        for (iz= 0; iz < Lz; iz++) {
             for (iy = 0; iy < Ly; iy++) {
-                for (iz = 0; iz < Lz; iz++) {
+                for (ix = 0; ix < Lx; ix++) {
                     i = ix + Lx * (iy + iz * Ly);
                         for (vec = 0; vec < 3; vec++) {
                             //Update of A
