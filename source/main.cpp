@@ -159,7 +159,7 @@ int main(int argc, char *argv[]){
 
     directory_read=directory_parameters+"/beta_"+std::to_string(my_ind);
 
-    initialize_lattice(Lattice, directory_read, RESTART);
+    initialize_lattice(Lattice, directory_read, RESTART, Hp);
 
     if(RESTART==1){
         std::fstream restart_file(directory_read+"/restart-0", std::ios::in);
