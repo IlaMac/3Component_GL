@@ -130,25 +130,31 @@ void dual_stiffness(struct Measures &mis, struct H_parameters &Hp, struct Node* 
 
 void magnetization(struct Measures &mis, struct Node* Site){
     //The Ising parameter m(x,y)=+/-1 indicates the chirality of the three phases. If the phases are ordered as: phi_1, phi_2, phi_3 then m=1; otherwise if the order is phi_1, phi_3, phi_2 then m=-1.
-    unsigned ix, iy, iz, i, alpha;
+    unsigned ix, iy, iz, i;
 
-    std::vector <double> phi_shifted;
-    phi_shifted.resize(3,0.);
+    double phi_shifted_1=0.;
+    double phi_shifted_2=0.;
 
     for(iz=0; iz<Lz;iz++) {
         for (iy = 0; iy < Ly; iy++) {
             for (ix = 0; ix < Lx; ix++) {
                 i=ix +Lx*(iy+Ly*iz);
-                for(alpha=1; alpha<3; alpha++){
-                    phi_shifted[alpha]=Site[i].Psi[alpha].t - Site[i].Psi[0].t;
-                    while(phi_shifted[alpha] >= C_TWO_PI){
-                        phi_shifted[alpha]-= C_TWO_PI;}
-                    while(phi_shifted[alpha]< 0){
-                        phi_shifted[alpha]+=C_TWO_PI;}
-                }
-                if(phi_shifted[1]>=phi_shifted[2]){
+		
+		phi_shifted_1= Site[i].Psi[1].t - Site[i].Psi[0].t;
+		while(phi_shifted_1 >= C_TWO_PI){
+			phi_shifted_1-= C_TWO_PI;}
+                while(phi_shifted_1< 0){
+                	phi_shifted_1+=C_TWO_PI;}
+                
+		phi_shifted_2= Site[i].Psi[2].t - Site[i].Psi[0].t;
+                while(phi_shifted_2 >= C_TWO_PI){
+                        phi_shifted_2-= C_TWO_PI;}
+                while(phi_shifted_2< 0){
+                        phi_shifted_2+=C_TWO_PI;}
+
+                if(phi_shifted_1>phi_shifted_2){
                     mis.m+=1;
-		        }else if(phi_shifted[1]<phi_shifted[2]){
+		        }else if(phi_shifted_1<phi_shifted_2){
                     mis.m+=(-1);
                 }
             }
