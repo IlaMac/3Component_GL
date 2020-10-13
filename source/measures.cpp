@@ -14,9 +14,9 @@ void energy(struct Measures &mis, struct H_parameters &Hp, double my_beta, struc
     double h2=(Hp.h*Hp.h);
     double h3=(Hp.h*Hp.h*Hp.h);
 
-    for(ix=0; ix<Lx; ix++){
+    for(iz=0; iz<Lz; iz++){
         for(iy=0; iy<Ly; iy++){
-            for(iz=0; iz<Lz; iz++){
+            for(ix=0; ix<Lx; ix++){
                 i=ix + Lx * (iy + iz * Ly);
                 for(alpha=0; alpha<3; alpha++) {
                     //Potential= (a+ 3/h²)*|Psi_{alpha}(r)|² + b/2*|Psi_{alpha}(r)|⁴
@@ -72,9 +72,9 @@ void helicity_modulus(struct Measures &mis, struct H_parameters &Hp, struct Node
     vec=0; //helicity modulus computed along the x direction
     double gauge_phase1, gauge_phase2;
 
-    for(ix=0; ix<Lx;ix++){
+    for(iz=0; iz<Lz;iz++){
         for(iy=0; iy<Ly;iy++){
-            for(iz=0; iz<Lz;iz++){
+            for(ix=0; ix<Lx;ix++){
                 i=ix +Lx*(iy+Ly*iz);
                 for(alpha=0; alpha<NC; alpha++){
                     gauge_phase1=Site[nn(i, vec, 1)].Psi[alpha].t - Site[i].Psi[alpha].t + Hp.h*Hp.e*Site[i].A[vec];
@@ -135,9 +135,9 @@ void magnetization(struct Measures &mis, struct Node* Site){
     std::vector <double> phi_shifted;
     phi_shifted.resize(2,0.);
 
-    for(ix=0; ix<Lx;ix++) {
+    for(iz=0; iz<Lz;iz++) {
         for (iy = 0; iy < Ly; iy++) {
-            for (iz = 0; iz < Lx; iz++) {
+            for (ix = 0; ix < Lx; ix++) {
                 i=ix +Lx*(iy+Ly*iz);
                 for(alpha=1; alpha<3; alpha++){
                     phi_shifted[alpha]=Site[i].Psi[alpha].t - Site[i].Psi[0].t;
@@ -161,9 +161,9 @@ void density_psi(struct Measures &mis, struct Node* Site){
 
     unsigned ix, iy, iz, alpha;
 
-    for(ix=0; ix<Lx;ix++) {
+    for(iz=0; iz<Lz;iz++) {
         for (iy = 0; iy < Ly; iy++) {
-            for (iz = 0; iz < Lx; iz++) {
+            for (ix = 0; ix < Lx; ix++) {
                 for (alpha = 0; alpha < 3; alpha++) {
                     mis.density_psi[alpha]+=(Site[ix+Lx*(iy +Ly*iz)].Psi[alpha].r*Site[ix+Lx*(iy +Ly*iz)].Psi[alpha].r);
                 }
