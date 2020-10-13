@@ -133,7 +133,7 @@ void magnetization(struct Measures &mis, struct Node* Site){
     unsigned ix, iy, iz, i, alpha;
 
     std::vector <double> phi_shifted;
-    phi_shifted.resize(2,0.);
+    phi_shifted.resize(3,0.);
 
     for(iz=0; iz<Lz;iz++) {
         for (iy = 0; iy < Ly; iy++) {
