@@ -336,26 +336,35 @@ unsigned int nn(unsigned int i, unsigned int coord, int dir){
     iy=(i/Lx)%Ly;
     iz=(i/(Lx*Ly));
 
-    if(coord==0){
-        ix_new= ix + (int)dir/sqrt(dir*dir);
-        if(ix_new==Lx){ ix_new=0;}
-        if(ix_new < 0){ ix_new=(Lx-1);}
+    if(dir!=0){
+
+        if(coord==0){
+            ix_new= ix + dir/sqrt(dir*dir);
+            if(ix_new==Lx){ ix_new=0;}
+            if(ix_new < 0){ ix_new=(Lx-1);}
+            iy_new=iy;
+            iz_new=iz;
+        }
+        if(coord==1){
+            iy_new= iy + dir/sqrt(dir*dir);
+            if(iy_new==Ly){ iy_new=0;}
+            if(iy_new<0){ iy_new=(Ly-1);}
+            ix_new=ix;
+            iz_new=iz;
+        }
+        if(coord==2){
+            iz_new= iz + dir/sqrt(dir*dir);
+            if(iz_new==Lz){ iz_new=0;}
+            if(iz_new<0){ iz_new=(Lz-1);}
+            ix_new=ix;
+            iy_new=iy;
+        }
+
+    }
+    else{
+        ix_new=ix;
         iy_new=iy;
         iz_new=iz;
-    }
-    if(coord==1){
-        iy_new= iy + dir/sqrt(dir*dir);
-        if(iy_new==Ly){ iy_new=0;}
-        if(iy_new<0){ iy_new=(Ly-1);}
-        ix_new=ix;
-        iz_new=iz;
-    }
-    if(coord==2){
-        iz_new= iz + dir/sqrt(dir*dir);
-        if(iz_new==Lz){ iz_new=0;}
-        if(iz_new<0){ iz_new=(Lz-1);}
-        ix_new=ix;
-        iy_new=iy;
     }
     return (ix_new+ Lx*(iy_new+ iz_new*Ly));
 }
