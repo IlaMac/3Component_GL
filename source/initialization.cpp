@@ -7,6 +7,16 @@
 void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_parameters){
 
     fs::path hp_init_file = directory_parameters / "HP_init.txt";
+    Hp.a=0;
+    Hp.b=1;
+    Hp.eta=1;
+    Hp.e=0.5;
+    Hp.h= 5.4;
+    Hp.nu=0;
+    Hp.b_low=0.2245;
+    Hp.b_high=0.2265;
+    Hp.init=0;
+
     if(fs::exists(hp_init_file)){
         FILE *fin= nullptr;
         if((fin=fopen(hp_init_file.c_str(), "r"))) {
@@ -29,9 +39,9 @@ void initialize_Hparameters(struct H_parameters &Hp, const fs::path & directory_
         Hp.e=0.5;
         Hp.h= 5.0;
         Hp.nu=0.1;
-        Hp.b_low=0.244;
-        Hp.b_high=0.247;
-        Hp.init=0;
+        Hp.b_low=0.2245;
+        Hp.b_high=0.2265;
+        Hp.init=1;
     }
 
 }
@@ -52,12 +62,12 @@ void initialize_MCparameters(struct MC_parameters &MCp, const fs::path & directo
             fclose(fin);
         }
     }else{
-        MCp.nmisu=20;
-        MCp.tau=32;
+        MCp.nmisu=1000;
+        MCp.tau=1;
         MCp.n_autosave=20000; //not used now
         MCp.lbox_l=1.0;
         MCp.lbox_rho=0.5;
-        MCp.lbox_theta=C_PI;
+        MCp.lbox_theta=C_PI*0.25;
         MCp.lbox_A=0.1;
     }
 
@@ -94,13 +104,24 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read, int 
         if(Hp.init==0) {
             for (i = 0; i < N; i++) {
                 for (alpha = 0; alpha < 3; alpha++) {
+                    Site[i].Psi[0].t = 0.;
                     Site[i].Psi[alpha].r =sqrt(1. / 2.);
-                    Site[i].Psi[alpha].t = 0.;
                     polar_to_cartesian(Site[i].Psi[alpha]);
                 }
             }
         }
-        else if(Hp.init!=0) {
+        else if(Hp.init==1) {
+            for (i = 0; i < N; i++) {
+                Site[i].Psi[0].t = 0.;
+                Site[i].Psi[1].t = -2.*C_PI/3;
+                Site[i].Psi[2].t = -4.*C_PI/3;
+                for (alpha = 0; alpha < 3; alpha++) {
+                    Site[i].Psi[alpha].r =sqrt(1. / 2.);
+                    polar_to_cartesian(Site[i].Psi[alpha]);
+                }
+            }
+        }
+        else if((Hp.init!=0) && (Hp.init!=1)) {
             for (i = 0; i < N; i++) {
                 for (alpha = 0; alpha < 3; alpha++) {
                     Site[i].Psi[alpha].r = sqrt(rn::uniform_real_box(0, 1));
@@ -109,6 +130,7 @@ void initialize_lattice(struct Node* Site, const fs::path & directory_read, int 
                 }
             }
         }
+
     }
 
 }

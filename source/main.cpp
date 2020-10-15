@@ -173,9 +173,9 @@ int main(int argc, char *argv[]){
 
     t_tot.toc();
 
-    std::cout << "Proccess current resident ram usage: " << process_memory_in_mb("VmRSS") << " MB" << std::endl;
-    std::cout << "Proccess maximum resident ram usage: " << process_memory_in_mb("VmHWM") << " MB" << std::endl;
-    std::cout << "Proccess maximum virtual  ram usage: " << process_memory_in_mb("VmPeak") << " MB" << std::endl;
+    //std::cout << "Proccess current resident ram usage: " << process_memory_in_mb("VmRSS") << " MB" << std::endl;
+    //std::cout << "Proccess maximum resident ram usage: " << process_memory_in_mb("VmHWM") << " MB" << std::endl;
+    //std::cout << "Proccess maximum virtual  ram usage: " << process_memory_in_mb("VmPeak") << " MB" << std::endl;
     MPI_Barrier(MPI_COMM_WORLD);
 
     t_tot.print_measured_time();
@@ -233,6 +233,7 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
     //std::vector<double> testvec (1000000,3.14);
     //file.writeDataset(testvec,"testgroup/hugevector", H5D_layout_t::H5D_CHUNKED);
     for (n = NSTART; n<MCp.nmisu; n++) {
+
         for (t = 0; t < MCp.tau; t++) {
             t_metropolis.tic();
             metropolis(Site, MCp, Hp,  my_beta);
