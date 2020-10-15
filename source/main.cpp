@@ -246,7 +246,9 @@ void mainloop(struct Node* Site, struct MC_parameters &MCp, struct H_parameters 
         dual_stiffness(mis, Hp, Site);
         helicity_modulus(mis, Hp, Site);
         magnetization(mis, Site);
-        density_psi(mis, Site);
+        if(Hp.e !=0) {
+            density_psi(mis, Site);
+        }
         mis.my_rank=PTp.rank;
         t_measures.toc();
 
