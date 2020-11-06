@@ -22,11 +22,11 @@ H_a=0
 H_b=1
 H_eta=1 
 H_e=0
-H_h=4
-H_nu=0.5
-H_blow=0.1
-H_bhigh=100.0
-H_init=0 #If H_init=0: phases initialized to zero; H_init=1: phases initialized randomly
+H_h=1
+H_nu=5
+H_blow=10.5
+H_bhigh=13.5
+H_init=0 #If H_init=0: phases initialized to zero; H_init=1: phase initialized to m=1; H_init=2: phases initialized randomly
 
 ############ Parameters for the Monte Carlo simulations --> MC_init.txt#####################
 
@@ -119,8 +119,8 @@ echo $A_box >> MC_init.txt
 #################Creation of the submit_runs script#########################
 
 jobname="L${L}_a${H_a}_b${H_b}_eta${H_eta}_e${H_e}_h${H_h}_nu${H_nu}_bmin${H_blow}_bmax${H_bhigh}_init${H_init}"
-nnodes=1
-ntasks=32 #parallel tempering over ntasks temperatures
+nnodes=2
+ntasks=64 #parallel tempering over ntasks temperatures
 time_limit=7-00:00:00
 
 #I create ntasks folder: one for each rank.

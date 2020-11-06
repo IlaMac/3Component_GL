@@ -96,13 +96,14 @@ void helicity_modulus(struct Measures &mis, struct H_parameters &Hp, struct Node
     double inv_h=1./(Hp.h);
     unsigned int nn_ip, ip;
 
-    ip=(ix == Lx-1 ? 0: ix+1);
-    nn_ip=ip+Lx*(iy+Ly*iz);
-
     for(iz=0; iz<Lz;iz++){
         for(iy=0; iy<Ly;iy++){
             for(ix=0; ix<Lx;ix++){
-                i=ix +Lx*(iy+Ly*iz);
+
+		i=ix +Lx*(iy+Ly*iz);
+    		ip=(ix == Lx-1 ? 0: ix+1);
+    		nn_ip=ip+Lx*(iy+Ly*iz);
+
                 for(alpha=0; alpha<NC; alpha++){
                     gauge_phase1=Site[nn_ip].Psi[alpha].t - Site[i].Psi[alpha].t + Hp.h*Hp.e*Site[i].A[vec];
 
